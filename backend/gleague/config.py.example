@@ -1,0 +1,22 @@
+# coding: utf-8
+
+class BaseConfig(object):
+    DEBUG = True
+    PROPAGATE_EXCEPTIONS = False
+    TRAP_HTTP_EXCEPTIONS = True
+    SQLALCHEMY_DATABASE_URI = 'postgresql://genksta:1@localhost/gleague'
+    STEAM_API_KEY = 'YOUR STEAM WEB API KEY'
+    SECRET_KEY = 'SAK_KOK'
+    LOGFILE = '/tmp/gleague_log.txt'
+
+
+class gleague_api(BaseConfig):
+    pass
+
+
+class gleague_auth(BaseConfig):
+    pass
+
+
+class gleague_api_tests(BaseConfig):
+    pass
