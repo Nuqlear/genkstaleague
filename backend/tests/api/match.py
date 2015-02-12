@@ -2,16 +2,21 @@ import os
 import json
 import mock
 
-from gleague import models
 from gleague.core import db
+from gleague import models
 from . import GleagueApiTestCase
+from ..factories import PlayerMatchStatsFactory, MatchFactory, SeasonFactory
 
 
 class MatchTestCase(GleagueApiTestCase):
     base_url = '/matches/'
+    maxDiff = None
 
     def add_match(self, match_json):
         self.jpost(self.base_url, data=match_json)
+
+    def get_match(self, match_id):
+        return self.jget(self.base_url + '%i/' % match_id)
 
     @mock.patch('gleague.models.match.db.session.commit', side_effect=db.session.flush)
     def test_add_match(self, mocked):
@@ -49,6 +54,10 @@ class MatchTestCase(GleagueApiTestCase):
             self.assertEqual(player_stats.level, player_data['level'])
 
     def test_get_match(self):
-        # TODO
-        pass
+        s = SeasonFactory()
+        m = MatchFactory.generate_with_all_stats(season_id=s.id)
+        self.db_flush()
+        response = self.get_match(m.id)
+        data = json.loads(response.data.decode())
+        self.assertEqual(data, m.to_dict())
             

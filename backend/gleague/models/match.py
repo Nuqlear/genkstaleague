@@ -32,7 +32,6 @@ class PlayerMatchStats(db.Model):
     def to_dict(self):
         d = {
             'id': self.id,
-            'season_number': self.season.number
             'old_pts': self.old_pts,
             'kills': self.kills,
             'assists': self.assists,
@@ -70,7 +69,6 @@ class Match(db.Model):
             'season_id': self.season.number,
             'season_number': self.season.number,
             'start_time': self.start_time,
-            'end_time': self.end_time,
             'game_mode': self.game_mode,
             'duration': self.duration,
             'radiant_win': self.radiant_win,
