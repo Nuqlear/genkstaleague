@@ -5,15 +5,18 @@ import mock
 from gleague.core import db
 from gleague import models
 from . import GleagueApiTestCase
-from ..factories import PlayerMatchStatsFactory, MatchFactory, SeasonFactory
+from ..factories import PlayerMatchStatsFactory, MatchFactory, SeasonFactory, PlayerFactory, PlayerMatchRatingFactory
 
 
 class MatchTestCase(GleagueApiTestCase):
     base_url = '/matches/'
     maxDiff = None
 
+    def _create_fixtures(self):
+        self.season = SeasonFactory()
+
     def add_match(self, match_json):
-        self.jpost(self.base_url, data=match_json)
+        return self.jpost(self.base_url, data=match_json)
 
     def get_match(self, match_id):
         return self.jget(self.base_url + '%i/' % match_id)
@@ -21,11 +24,29 @@ class MatchTestCase(GleagueApiTestCase):
     def get_matches(self, amount, offset):
         return self.jget(self.base_url + '?amount=%s&offset=%s' % (amount, offset))
 
-    @mock.patch('gleague.models.match.db.session.commit', side_effect=db.session.flush)
-    def test_add_match(self, mocked):
+    def rate_player(self, match_id, player_match_stats_id, rating):
+        return self.post(self.base_url + '%i/ratings/%i/?rating=%i' % (match_id, player_match_stats_id, rating))
+
+    def get_ratings(self, match_id):
+        return self.get(self.base_url + '%i/ratings/' % (match_id))
+
+    def test_add_match(self):
+        c = db.session.commit
+        db.session.commit = mock.Mock(side_effect=db.session.flush)
         json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fixtures/test_create_match.json')
         _f = open(json_path).read()
-        self.add_match(_f)
+
+        user = PlayerFactory()
+        self.set_user(user.steam_id)
+        response = self.add_match(_f)
+        self.assertEqual(403, response.status_code)
+
+        user = PlayerFactory(steam_id=self.app.config['ADMINS_STEAM_ID'][0])
+        self.set_user(user.steam_id)
+        response = self.add_match(None)
+        self.assertEqual(400, response.status_code)
+        response = self.add_match(_f)
+        self.assertEqual(201, response.status_code)
         data = json.loads(_f)['result']
         match = models.Match.query.first()
         self.assertEqual(match.id, data['match_id'])
@@ -55,32 +76,81 @@ class MatchTestCase(GleagueApiTestCase):
             self.assertEqual(player_stats.hero, player_data['hero'])
             self.assertEqual(player_stats.hero_healing, player_data['hero_healing'])
             self.assertEqual(player_stats.level, player_data['level'])
+        db.session.commit = c
 
     def test_get_match(self):
-        s = SeasonFactory()
-        m = MatchFactory.generate_with_all_stats(season_id=s.id)
-        self.db_flush()
+        response = self.get_match(1)
+        self.assertEqual(404, response.status_code)
+        m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
         response = self.get_match(m.id)
+        self.assertEqual(200, response.status_code)
         data = json.loads(response.data.decode())
         self.assertEqual(data, m.to_dict())
             
     def test_get_matches(self):
-        s = SeasonFactory()
-        matches = MatchFactory.generate_batch_with_all_stats(10, season_id=s.id)
-        self.db_flush()
+        matches = MatchFactory.generate_batch_with_all_stats(10, season_id=self.season.id)
+
+        response = self.get_matches('test', 0)
+        self.assertEqual(406, response.status_code)
+
+        response = self.get_matches(4, 'test')
+        self.assertEqual(406, response.status_code)
 
         response = self.get_matches(4, 0)
         data = json.loads(response.data.decode())
         self.assertEqual(data, {'matches':[m.to_dict(False) for m in matches[:4]]})
-
-        response = self.get_matches(4, 1)
-        data = json.loads(response.data.decode())
-        self.assertEqual(data, {'matches':[m.to_dict(False) for m in matches[4:8]]})
+        self.assertEqual(200, response.status_code)
 
         response = self.get_matches(3, 2)
         data = json.loads(response.data.decode())
         self.assertEqual(data, {'matches':[m.to_dict(False) for m in matches[6:9]]})
+        self.assertEqual(200, response.status_code)
 
-        response = self.get_matches(8, 0)
+    def test_rate_player(self):
+        c = db.session.commit
+        db.session.commit = mock.Mock(side_effect=db.session.flush)
+
+        user = PlayerFactory()
+        self.set_user(user.steam_id)
+        response = self.rate_player(1, 0, 4)
+        self.assertEqual(404, response.status_code)
+
+        m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
+        ps = m.players_stats[0]
+        print(type(ps.season_stats))
+        print(dir(ps.season_stats))
+        user_id = ps.season_stats.steam_id
+        self.set_user(user_id)
+        rating = 4
+        response = self.rate_player(m.id, ps.id, rating)
+        self.assertEqual(200, response.status_code)
+        self.assertEqual(ps.player_match_ratings[0].rating, rating)
+        self.assertEqual(user_id, ps.player_match_ratings[0].rated_by_steam_id)
+
+        response = self.rate_player(m.id, ps.id, 6)
+        self.assertEqual(406, response.status_code)
+
+        response = self.rate_player(m.id, ps.id, 0)
+        self.assertEqual(406, response.status_code)
+
+        m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
+        ps = m.players_stats[0]
+        rating = 4
+        response = self.rate_player(m.id, ps.id, rating)
+        self.assertEqual(403, response.status_code)
+        db.session.commit = c
+
+    def test_get_ratings(self):
+        m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
+        ps = m.players_stats[0]
+        players_id = [ps.season_stats.steam_id for ps in m.players_stats[1:10]]
+        match_ratings = []
+        for pl_id in players_id:
+            match_ratings.append(PlayerMatchRatingFactory(rated_by_steam_id=pl_id, player_match_stats_id=ps.id))
+
+        response = self.get_ratings(m.id)
         data = json.loads(response.data.decode())
-        self.assertEqual(data, {'matches':[m.to_dict(False) for m in matches[:8]]})
+
+        self.set_user(m.players_stats[5].season_stats.steam_id)
+        response = self.get_ratings(m.id)
+        data = json.loads(response.data.decode())

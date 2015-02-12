@@ -37,13 +37,13 @@ def reg_gl_vars(app):
     @app.before_request
     def guser():
         g.user = None
-        if 'user_id' in session:
-            if session['user_id']:
-                user = Player.query.get(session['user_id'])
+        if 'steam_id' in session:
+            if session['steam_id']:
+                user = Player.query.get(session['steam_id'])
                 if user:
                     g.user = user
                 else:
-                    session.pop('user_id')
+                    session.pop('steam_id')
 
 def create_app(name):
     app = FlaskApp(name, instance_relative_config=True)

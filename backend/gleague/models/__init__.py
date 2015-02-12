@@ -1,3 +1,3 @@
 from .player import Player
 from .season import Season, SeasonStats
-from .match import Match, PlayerMatchStats
+from .match import Match, PlayerMatchStats, PlayerMatchRating

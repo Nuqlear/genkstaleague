@@ -3,7 +3,4 @@
 *.db
 config.py
 bower_components
-*.json
-!test_create_match.json
-!bower.json
 __pycache__

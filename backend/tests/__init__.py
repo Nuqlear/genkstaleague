@@ -12,7 +12,7 @@ class GleagueTestCase(TestCase):
         super(GleagueTestCase, self).setUp()
         db.session.rollback()
         self._create_fixtures()
-        self.db_flush()
+        db.session.flush()
 
     def tearDown(self):
         super(GleagueTestCase, self).tearDown()
@@ -24,8 +24,6 @@ class GleagueTestCase(TestCase):
         db.session.rollback()
         db.drop_all()
         db.create_all()
-        season = models.Season()
-        db.session.add(season)
         db.session.commit()
 
     @classmethod
@@ -38,8 +36,9 @@ class GleagueTestCase(TestCase):
     def _create_fixtures(self):
         pass
 
-    def db_flush(self):
-        db.session.flush()
+    def set_user(self, steam_id):
+        with self.client.session_transaction() as session:
+            session['steam_id'] = steam_id
 
 
 class GleagueAppTestCase(FlaskTestCaseMixin, GleagueTestCase):

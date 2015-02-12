@@ -1,6 +1,8 @@
 import json
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, BigInteger, desc
+from sqlalchemy import (Column, String, Integer, ForeignKey, Boolean, BigInteger, SmallInteger, desc, func, 
+    and_, or_)
+from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.orm import relationship
 from flask import current_app
 
@@ -13,8 +15,10 @@ class PlayerMatchStats(db.Model):
     __tablename__ = 'player_match_stats'
 
     id = Column(Integer, primary_key=True)
-    season_stats_id = Column(Integer, ForeignKey('season_stats.id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
-    match_id = Column(BigInteger, ForeignKey('match.id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    season_stats_id = Column(Integer, ForeignKey('season_stats.id', onupdate="CASCADE", 
+                                                    ondelete="CASCADE"), nullable=False)
+    match_id = Column(BigInteger, ForeignKey('match.id', onupdate="CASCADE", 
+                                                    ondelete="CASCADE"), nullable=False)
     old_pts = Column(Integer, nullable=False)
     pts_diff = Column(Integer, nullable=False)
     kills = Column(Integer, nullable=False)
@@ -28,6 +32,8 @@ class PlayerMatchStats(db.Model):
     hero = Column(String(255), nullable=False)
     hero_healing = Column(Integer)
     level = Column(Integer, nullable=False)
+    player_match_ratings = relationship('PlayerMatchRating', cascade="all, delete", 
+                                                            backref="player_match_stats")
 
     def to_dict(self, extensive=True, **kwargs):
         with_season_stats = kwargs.get('with_season_stats', False)
@@ -57,11 +63,54 @@ class PlayerMatchStats(db.Model):
         return d
 
 
+class PlayerMatchRating(db.Model):
+    __tablename__ = 'player_match_rating'
+
+    id = Column(Integer, primary_key=True)
+    rated_by_steam_id = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", 
+                                                                ondelete="CASCADE"), nullable=False)
+    rating = Column(SmallInteger, default=5)
+    player_match_stats_id = Column(Integer, ForeignKey('player_match_stats.id', onupdate="CASCADE", 
+                                                                ondelete="CASCADE"), nullable=False)
+
+    __table_args__ = (
+        CheckConstraint('player_match_rating.rating >= 1'),
+        CheckConstraint('player_match_rating.rating <= 5')
+    )
+
+    @staticmethod
+    def get_match_ratings(match_id, user_id=None):
+        played = base = rated_even_player_stats = None
+        if user_id:
+            ps = PlayerMatchStats.query.filter(and_(PlayerMatchStats.match_id==match_id, 
+                SeasonStats.steam_id==user_id)).first()
+            played = (ps is not None)
+            base = PlayerMatchStats.query.filter(PlayerMatchStats.match_id==match_id).with_entities(PlayerMatchStats.id, 
+                '0', and_(Player.steam_id!=user_id, played)).all()
+            rated_even_player_stats = PlayerMatchStats.query.filter(PlayerMatchStats.match_id==match_id)\
+                .with_entities(PlayerMatchStats.id, func.avg(PlayerMatchRating.rating), \
+                                PlayerMatchRating.rated_by_steam_id!=user_id).all()
+        else:
+            # DIRTY HACKS '1' & '0':(
+            base = PlayerMatchStats.query.filter(PlayerMatchStats.match_id==match_id).with_entities(PlayerMatchStats.id, 
+                '0', '1').all() 
+            rated_even_player_stats = PlayerMatchStats.query.filter(PlayerMatchStats.match_id==match_id)\
+                .with_entities(PlayerMatchStats.id, func.avg(PlayerMatchRating.rating), '0').all() 
+        base = [list(elem) for elem in base]    
+        for rated_even in list(rated_even_player_stats):
+            for i in range(10):
+                if base[i][0] == rated_even[0]:
+                    base[i][1] = rated_even[1]
+                    base[i][2] = base[i][2] and rated_even[2]
+        return [{'player_match_stats_id':e[0], 'avg_rating':e[1], 'availiable_to_rate':e[2]} for e in base]
+
+
 class Match(db.Model):
     __tablename__ = 'match'
 
     id = Column(BigInteger, primary_key=True)
-    season_id = Column(Integer, ForeignKey('season.id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    season_id = Column(Integer, ForeignKey('season.id', onupdate="CASCADE", ondelete="CASCADE"),
+                                                                                nullable=False)
     players_stats = relationship('PlayerMatchStats', cascade="all,delete", backref="match", 
          order_by=PlayerMatchStats.player_slot)
     radiant_win = Column(Boolean)
@@ -84,6 +133,13 @@ class Match(db.Model):
             'players_stats': [ps.to_dict(extensive) for ps in self.players_stats]
         }
         return d
+
+    @staticmethod
+    def is_exists(id):
+        return bool(Match.query.get(id))
+
+    def is_played(self, steam_id):
+        return steam_id in (ps.season_stats.steam_id for ps in self.players_stats)
 
     @staticmethod
     def get_batch(amount, offset):

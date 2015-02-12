@@ -55,6 +55,7 @@ class MatchFactory(Factory):
                 pts_diff = pts_diff*(-1)
             pms.append(PlayerMatchStatsFactory(match_id=match.id, hero=hero, pts_diff=pts_diff, 
                 season_stats_id=season_stats.id, player_slot=slot))
+            db.session.flush()
         match.players_stats = pms
         return match
 
@@ -77,3 +78,10 @@ class PlayerMatchStatsFactory(Factory):
     tower_damage = randrange(1, 25)*100
     hero_healing = randrange(1, 25)*100
     level = randrange(6, 26)
+
+
+class PlayerMatchRatingFactory(Factory):
+    FACTORY_FOR = models.PlayerMatchRating
+
+    id = Sequence(lambda n: n)
+    rating = randrange(1, 6)
