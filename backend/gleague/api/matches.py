@@ -28,3 +28,16 @@ def get_match(match_id):
     if not m:
         return Response(status=404)
     return jsonify(m.to_dict()), 200
+
+
+@matches_bp.route('/matches/', methods=['GET'])
+def get_matches_preview():
+    amount = request.args.get('amount', 4)
+    offs = request.args.get('offset', 0)
+    try:
+        amount = int(amount)
+        offs = int(offs)
+    except Exception:
+        return Response(status=400)
+    matches = Match.get_batch(amount, offs)
+    return jsonify({'matches':[m.to_dict(False) for m in matches]}), 200

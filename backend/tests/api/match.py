@@ -18,6 +18,9 @@ class MatchTestCase(GleagueApiTestCase):
     def get_match(self, match_id):
         return self.jget(self.base_url + '%i/' % match_id)
 
+    def get_matches(self, amount, offset):
+        return self.jget(self.base_url + '?amount=%s&offset=%s' % (amount, offset))
+
     @mock.patch('gleague.models.match.db.session.commit', side_effect=db.session.flush)
     def test_add_match(self, mocked):
         json_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fixtures/test_create_match.json')
@@ -61,3 +64,23 @@ class MatchTestCase(GleagueApiTestCase):
         data = json.loads(response.data.decode())
         self.assertEqual(data, m.to_dict())
             
+    def test_get_matches(self):
+        s = SeasonFactory()
+        matches = MatchFactory.generate_batch_with_all_stats(10, season_id=s.id)
+        self.db_flush()
+
+        response = self.get_matches(4, 0)
+        data = json.loads(response.data.decode())
+        self.assertEqual(data, {'matches':[m.to_dict(False) for m in matches[:4]]})
+
+        response = self.get_matches(4, 1)
+        data = json.loads(response.data.decode())
+        self.assertEqual(data, {'matches':[m.to_dict(False) for m in matches[4:8]]})
+
+        response = self.get_matches(3, 2)
+        data = json.loads(response.data.decode())
+        self.assertEqual(data, {'matches':[m.to_dict(False) for m in matches[6:9]]})
+
+        response = self.get_matches(8, 0)
+        data = json.loads(response.data.decode())
+        self.assertEqual(data, {'matches':[m.to_dict(False) for m in matches[:8]]})

@@ -58,6 +58,10 @@ class MatchFactory(Factory):
         match.players_stats = pms
         return match
 
+    @staticmethod
+    def generate_batch_with_all_stats(amount, *args, **kwargs):
+        return [MatchFactory.generate_with_all_stats(*args, **kwargs) for i in range(amount)]
+
 
 class PlayerMatchStatsFactory(Factory):
     FACTORY_FOR = models.PlayerMatchStats

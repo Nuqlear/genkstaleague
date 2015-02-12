@@ -27,7 +27,6 @@ class GleagueTestCase(TestCase):
         season = models.Season()
         db.session.add(season)
         db.session.commit()
-        db.session.commit()
 
     @classmethod
     def tearDownClass(cls):

@@ -22,6 +22,10 @@ class Season(db.Model):
             kwargs['number'] = 1 + x
         super(Season, self).__init__(*args, **kwargs)
 
+
+    def __repr__(self):
+        return '{} ({}-{})'.format(self.id, self.started, self.ended or '...')
+
     def to_dict(self):
         d = {
             'id': self.id,
@@ -46,9 +50,6 @@ class Season(db.Model):
         db.session.commit()
         return ns
 
-    def __repr__(self):
-        return '{} ({}-{})'.format(self.id, self.started, self.ended or '...')
-
 
 class SeasonStats(db.Model):
     __tablename__ = 'season_stats'
@@ -66,13 +67,18 @@ class SeasonStats(db.Model):
     def __repr__(self):
         return '{} ({})'.format(self.player.__repr__(), self.season.__repr__())
 
-    def to_dict(self, deep=False):
+    def to_dict(self, extensive=False):
         d = {
             'id': self.id,
-            'season_id': self.season_id,
-            'season_number': self.season.number,
-            'wins': self.wins,
-            'loss': self.loss,
-            'pts': self.pts
+            'player': self.player.to_dict(extensive),
+            'season_number': self.season.number
         }
+        if extensive:
+            d.update({
+                'wins': self.wins,
+                'loss': self.loss,
+                'pts': self.pts,
+                'streak': self.streak,
+                'longest_streak': self.longest_streak 
+            })
         return d

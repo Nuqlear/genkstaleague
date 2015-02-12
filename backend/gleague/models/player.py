@@ -26,14 +26,18 @@ class Player(db.Model):
     def __repr__(self):
         return '{} ({})'.format(self.nickname, self.steam_id)
 
-    def to_dict(self):
+    def to_dict(self, extensive=True):
         d = {
             'steam_id': self.steam_id,
             'nickname': self.nickname,
-            'avatar': self.avatar,
-            'avatar_medium': self.avatar_medium,
-            'season_stats': [ss.to_dict() for ss in self.season_stats]
         }
+        if extensive:
+            d.update({
+                'avatar': self.avatar,
+                'avatar_medium': self.avatar_medium,
+                'season_stats': [ss.to_dict() for ss in self.season_stats]
+            })
+        return d
 
     @staticmethod
     def get_or_create(steam_id):

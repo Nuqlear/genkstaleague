@@ -1,6 +1,6 @@
 import json
 
-from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, BigInteger
+from sqlalchemy import Column, String, Integer, ForeignKey, Boolean, BigInteger, desc
 from sqlalchemy.orm import relationship
 from flask import current_app
 
@@ -29,21 +29,31 @@ class PlayerMatchStats(db.Model):
     hero_healing = Column(Integer)
     level = Column(Integer, nullable=False)
 
-    def to_dict(self):
+    def to_dict(self, extensive=True, **kwargs):
+        with_season_stats = kwargs.get('with_season_stats', False)
         d = {
             'id': self.id,
-            'old_pts': self.old_pts,
-            'kills': self.kills,
-            'assists': self.assists,
-            'deaths': self.deaths,
-            'hero_damage': self.hero_damage,
             'player_slot': self.player_slot,
-            'denies': self.denies,
-            'tower_damage': self.tower_damage,
-            'self.hero': self.hero,
-            'self.hero_healing': self.hero_healing,
-            'self.level': self.level
+            'self.hero': self.hero
         }
+        if extensive:
+            d.update({
+                'old_pts': self.old_pts,
+                'kills': self.kills,
+                'assists': self.assists,
+                'deaths': self.deaths,
+                'hero_damage': self.hero_damage,
+                'denies': self.denies,
+                'tower_damage': self.tower_damage,
+                'self.hero_healing': self.hero_healing,
+                'self.level': self.level
+            })
+            if with_season_stats:
+                d['season_stats'] = self.season_stats.to_dict(True)
+        else:
+            d.update({
+                'player_nickname': self.season_stats.player.nickname
+            })
         return d
 
 
@@ -63,18 +73,22 @@ class Match(db.Model):
     def __repr__(self):
         return "%s" % self.id
 
-    def to_dict(self):
+    def to_dict(self, extensive=True):
         d = {
             'id': self.id,
-            'season_id': self.season.number,
             'season_number': self.season.number,
             'start_time': self.start_time,
             'game_mode': self.game_mode,
             'duration': self.duration,
             'radiant_win': self.radiant_win,
-            'players_stats':[ps.to_dict() for ps in self.players_stats]
+            'players_stats': [ps.to_dict(extensive) for ps in self.players_stats]
         }
         return d
+
+    @staticmethod
+    def get_batch(amount, offset):
+        q = Match.query.order_by(desc(Match.start_time)).limit(amount).offset(amount*offset)
+        return q
 
     @staticmethod
     def create_from_dict(steamdata):
