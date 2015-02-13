@@ -15,8 +15,8 @@ matches_bp = Blueprint('matches', __name__)
 def create_match():
     data = request.get_json()
     if data:
-        dictionary = json.loads(data)['result']
-        m = Match.create_from_dict(dictionary)
+        data = data['result']
+        m = Match.create_from_dict(data)
         if m is None:
             return Response(status=500)
         return Response(status=201)

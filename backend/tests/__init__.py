@@ -10,18 +10,17 @@ from .mixin import FlaskTestCaseMixin
 class GleagueTestCase(TestCase):
     def setUp(self):
         super(GleagueTestCase, self).setUp()
-        db.session.rollback()
         self._create_fixtures()
         db.session.flush()
 
     def tearDown(self):
         super(GleagueTestCase, self).tearDown()
         db.session.rollback()
+        db.session.expunge_all()
 
     @classmethod
     def setUpClass(cls):
         super(GleagueTestCase, cls).setUpClass()
-        db.session.rollback()
         db.drop_all()
         db.create_all()
         db.session.commit()

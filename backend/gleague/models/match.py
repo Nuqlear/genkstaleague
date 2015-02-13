@@ -151,7 +151,7 @@ class Match(db.Model):
         m = Match()
         m.season_id = Season.current().id
         m.id = steamdata['match_id']
-        m.radiant_win = steamdata['radiant_win']
+        m.radiant_win = bool(steamdata['radiant_win'])
         m.duration = steamdata['duration']
         m.game_mode = steamdata['game_mode']
         m.start_time = steamdata['start_time']

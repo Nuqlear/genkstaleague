@@ -1,0 +1,70 @@
+{% extends 'admin/master.html' %}
+
+{% block head %}
+<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+{% endblock %}
+
+{% block body %}
+<div id="error" class="alert alert-danger alert-dismissable" hidden=true>
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <strong>Error!</strong> Something goes wrong.
+</div>
+    <form id="upload_file_form">
+        <div class="form-group add_match">
+        <h2>Add match:</h2>
+        <input type="file" id="json_file" name="json_file">
+        <p class="help-block">
+        <button type="button" id="upload_file_btn" data-loading-text="Loading..."
+        class="btn btn-xs btn-default">
+            Upload
+        </button>
+        It should be json.</p>
+        </div>
+    </form>
+<script>
+$(document).ready(function() {
+    var json_obj;
+    function handleFileSelect(evt) {
+        var files = evt.target.files; // FileList object
+        f = files[0];
+        var reader = new FileReader();
+        alert('koki')
+        // Closure to capture the file information.
+        reader.onload = (function (theFile) {
+            return function (e) { 
+                json_obj = e.target.result
+                console.log(json_obj);
+            };
+        })(f);
+
+        // Read in JSON as a data URL.
+        reader.readAsText(f, 'UTF-8');
+    }
+    $('#json_file').change(handleFileSelect);
+
+    $('#upload_file_btn').click(function () {
+        var btn = $(this);
+        btn.button('loading');
+        $.ajax({
+            type: 'POST',
+            url: '/api/matches/',
+            data: json_obj,
+            contentType: 'application/json',
+            dataType: 'json',
+            cache: false,
+            processData: false,
+            async: true,
+            success: function(data) {
+                btn.button('reset');
+                location.reload(false);
+            },
+            error: function(data) {
+                $('#error').show();
+                btn.button('reset')
+            }
+        })
+    });
+});
+</script>
+{% endblock %}

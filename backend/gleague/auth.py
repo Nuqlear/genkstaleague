@@ -4,6 +4,7 @@ from flask_openid import OpenID
 
 from . import core
 from .models import Player
+from .admin import init_admin
 
 
 _steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
@@ -16,7 +17,7 @@ def create_app():
 
     @app.route('/logout')
     def logout():
-        session.pop('user_id')
+        session.pop('steam_id')
         return redirect(oid.get_next_url())
 
 
@@ -32,7 +33,9 @@ def create_app():
     def create_or_login(resp):
         match = _steam_id_re.search(resp.identity_url)
         g.user = Player.get_or_create(match.group(1))
-        session['user_id'] = g.user.steam_id
+        session['steam_id'] = g.user.steam_id
         return redirect(oid.get_next_url())
+
+    init_admin(app)
 
     return app

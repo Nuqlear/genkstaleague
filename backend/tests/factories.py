@@ -9,34 +9,44 @@ from gleague.utils.steam_api import get_dota2_heroes
 
 
 class Factory(SQLAlchemyModelFactory):
-    FACTORY_SESSION = db.session
+
+    class Meta:
+        sqlalchemy_session = db.session
 
 
 class SeasonFactory(Factory):
-    FACTORY_FOR = models.Season
+    
+    class Meta:
+        model = models.Season
 
     id = Sequence(lambda n: n)
     number = Sequence(lambda n: n)
 
 
 class SeasonStatsFactory(Factory):
-    FACTORY_FOR = models.SeasonStats
+    
+    class Meta:
+        model = models.SeasonStats
 
     id = Sequence(lambda n: n)
 
 
 class PlayerFactory(Factory):
-    FACTORY_FOR = models.Player
+    
+    class Meta:
+        model = models.Player
 
     steam_id = Sequence(lambda n: n)
     nickname = Sequence(lambda n: 'Player #%s' % n)
 
 
 class MatchFactory(Factory):
-    FACTORY_FOR = models.Match
+
+    class Meta:
+        model = models.Match
 
     id = Sequence(lambda n: n)
-    radiant_win = randrange(0, 2)
+    radiant_win = bool(randrange(0, 2))
     duration = randrange(1500, 3500)
     game_mode = 1
     start_time = randrange(1423, 1752)*100000
@@ -55,8 +65,9 @@ class MatchFactory(Factory):
                 pts_diff = pts_diff*(-1)
             pms.append(PlayerMatchStatsFactory(match_id=match.id, hero=hero, pts_diff=pts_diff, 
                 season_stats_id=season_stats.id, player_slot=slot))
-            db.session.flush()
         match.players_stats = pms
+        db.session.add(match)
+        db.session.flush()
         return match
 
     @staticmethod
@@ -65,7 +76,9 @@ class MatchFactory(Factory):
 
 
 class PlayerMatchStatsFactory(Factory):
-    FACTORY_FOR = models.PlayerMatchStats
+
+    class Meta:
+        model = models.PlayerMatchStats
 
     id = Sequence(lambda n: n)
     old_pts = 1000
@@ -81,7 +94,9 @@ class PlayerMatchStatsFactory(Factory):
 
 
 class PlayerMatchRatingFactory(Factory):
-    FACTORY_FOR = models.PlayerMatchRating
+
+    class Meta:
+        model = models.PlayerMatchRating
 
     id = Sequence(lambda n: n)
     rating = randrange(1, 6)
