@@ -1,7 +1,12 @@
 from flask import jsonify, g, Response, current_app
 from functools import wraps
+from flask_openid import OpenID
 
 from .. import core
+from .. import admin
+
+
+oid = OpenID()
 
 
 def create_app(settings_override=None):
@@ -13,10 +18,13 @@ def create_app(settings_override=None):
     for e in [401, 403, 404, 500]:
         app.errorhandler(e)(handle_error)
 
+    oid.init_app(app)
+    admin.init_admin(app)
+
     from .players import players_bp
+    app.register_blueprint(players_bp, url_prefix="/players")
     from .matches import matches_bp
-    app.register_blueprint(players_bp)
-    app.register_blueprint(matches_bp)
+    app.register_blueprint(matches_bp, url_prefix="/matches")
 
     return app
 

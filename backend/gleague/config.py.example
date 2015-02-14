@@ -15,10 +15,10 @@ class gleague_api(BaseConfig):
     pass
 
 
-class gleague_auth(BaseConfig):
-    pass
+class gleague_admin(BaseConfig):
+    TEMPLATE_FOLDER = path.join(path.dirname(__file__), 'templates')
 
 
-class gleague_api_tests(BaseConfig):
+class gleague_api_tests(gleague_api):
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
     ADMINS_STEAM_ID = [12345, ]

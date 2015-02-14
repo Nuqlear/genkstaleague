@@ -3,8 +3,8 @@ from flask.ext.admin import Admin, BaseView, expose, AdminIndexView
 from flask import g
 from flask import redirect, current_app
 
-from gleague.core import db
-from gleague.models import Player, Match, PlayerMatchRating, PlayerMatchStats, Season, SeasonStats
+from ..core import db
+from ..models import Player, Match, PlayerMatchRating, PlayerMatchStats, Season, SeasonStats
 
 
 class AdminAccessMixin(object):

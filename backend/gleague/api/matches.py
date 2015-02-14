@@ -10,7 +10,7 @@ from . import login_required, admin_required
 matches_bp = Blueprint('matches', __name__)
 
 
-@matches_bp.route('/matches/', methods=['POST'])
+@matches_bp.route('/', methods=['POST'])
 @admin_required
 def create_match():
     data = request.get_json()
@@ -23,7 +23,7 @@ def create_match():
     return Response(status=400)
 
 
-@matches_bp.route('/matches/<int:match_id>', methods=['GET'])
+@matches_bp.route('/<int:match_id>', methods=['GET'])
 def get_match(match_id):
     m = Match.query.get(match_id)
     if not m:
@@ -31,7 +31,7 @@ def get_match(match_id):
     return jsonify(m.to_dict()), 200
 
 
-@matches_bp.route('/matches/', methods=['GET'])
+@matches_bp.route('/', methods=['GET'])
 def get_matches_preview():
     amount = request.args.get('amount', 4)
     offs = request.args.get('offset', 0)
@@ -44,7 +44,7 @@ def get_matches_preview():
     return jsonify({'matches':[m.to_dict(False) for m in matches]}), 200
 
 
-@matches_bp.route('/matches/<int:match_id>/ratings/<int:player_match_stats_id>', methods=['POST'])
+@matches_bp.route('/<int:match_id>/ratings/<int:player_match_stats_id>', methods=['POST'])
 @login_required
 def rate_player(match_id, player_match_stats_id):
     rating = request.args.get('rating', None)
@@ -65,7 +65,7 @@ def rate_player(match_id, player_match_stats_id):
     return Response(status=200)
 
 
-@matches_bp.route('/matches/<int:match_id>/ratings/', methods=['GET'])
+@matches_bp.route('/<int:match_id>/ratings/', methods=['GET'])
 def get_rates(match_id):
     if not Match.is_exists(match_id):
         return Response(status=404)
