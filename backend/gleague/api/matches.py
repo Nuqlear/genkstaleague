@@ -23,7 +23,7 @@ def create_match():
     return Response(status=400)
 
 
-@matches_bp.route('/matches/<int:match_id>/', methods=['GET'])
+@matches_bp.route('/matches/<int:match_id>', methods=['GET'])
 def get_match(match_id):
     m = Match.query.get(match_id)
     if not m:
@@ -44,7 +44,7 @@ def get_matches_preview():
     return jsonify({'matches':[m.to_dict(False) for m in matches]}), 200
 
 
-@matches_bp.route('/matches/<int:match_id>/ratings/<int:player_match_stats_id>/', methods=['POST'])
+@matches_bp.route('/matches/<int:match_id>/ratings/<int:player_match_stats_id>', methods=['POST'])
 @login_required
 def rate_player(match_id, player_match_stats_id):
     rating = request.args.get('rating', None)
@@ -63,6 +63,7 @@ def rate_player(match_id, player_match_stats_id):
     db.session.add(pmr)
     db.session.commit()
     return Response(status=200)
+
 
 @matches_bp.route('/matches/<int:match_id>/ratings/', methods=['GET'])
 def get_rates(match_id):
