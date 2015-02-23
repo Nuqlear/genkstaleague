@@ -37,6 +37,7 @@ def reg_gl_vars(app):
     @app.before_request
     def guser():
         g.user = None
+        session.permanent = True
         if 'steam_id' in session:
             if session['steam_id']:
                 user = Player.query.get(session['steam_id'])

@@ -35,6 +35,9 @@ class PlayerMatchStats(db.Model):
     player_match_ratings = relationship('PlayerMatchRating', cascade="all, delete", 
                                                             backref="player_match_stats")
 
+    def __repr__(self):
+        return '%s (%s) -- Match %s' % (self.season_stats.player.nickname, self.season_stats.steam_id, self.match_id)
+
     def to_dict(self, extensive=True, **kwargs):
         with_season_stats = kwargs.get('with_season_stats', False)
         d = {

@@ -48,6 +48,9 @@ class MatchView(BaseModelView):
 
 class PlayerMatchRatingView(BaseModelView):
     can_edit = False
+    column_list = ['rated_by', 'rating', 'player_match_stats']
+
+    column_formatters = dict(rated_by=lambda v, c, m, p: Player.query.get(m.rated_by_steam_id))
 
     def __init__(self, *args, **kwargs):
         super(PlayerMatchRatingView, self).__init__(PlayerMatchRating, *args, **kwargs)
