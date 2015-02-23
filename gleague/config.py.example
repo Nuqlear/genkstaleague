@@ -1,14 +1,15 @@
-# coding: utf-8
+from os import path
 
 class BaseConfig(object):
     DEBUG = True
     PROPAGATE_EXCEPTIONS = False
     TRAP_HTTP_EXCEPTIONS = True
     SQLALCHEMY_DATABASE_URI = 'postgresql://genksta:1@localhost/gleague'
-    STEAM_API_KEY = 'YOUR STEAM WEB API KEY'
+    STEAM_API_KEY = 'YOUR STEAM API KEY'
     SECRET_KEY = 'SAK_KOK'
     LOGFILE = '/tmp/gleague_log.txt'
-    ADMINS_STEAM_ID = []
+    ADMINS_STEAM_ID = [,]
+    MATCH_BASE_PTS_DIFF = 10
 
 
 class gleague_api(BaseConfig):
@@ -18,8 +19,10 @@ class gleague_api(BaseConfig):
 class gleague_frontend(BaseConfig):
     TEMPLATE_FOLDER = path.join(path.dirname(__file__), 'templates')
     STATIC_FOLDER = path.join(path.dirname(__file__), 'static')
+    HISTORY_MATCHES_PER_PAGE = 5
+    TOP_PLAYERS_PER_PAGE = 20
 
 
 class gleague_api_tests(gleague_api):
     SQLALCHEMY_DATABASE_URI = 'sqlite://'
-    ADMINS_STEAM_ID = [12345, ]
+    ADMINS_STEAM_ID = [123456789, ]

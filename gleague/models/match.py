@@ -18,7 +18,6 @@ class PlayerMatchStats(db.Model):
                                                     ondelete="CASCADE"), nullable=False)
     match_id = Column(BigInteger, ForeignKey('match.id', onupdate="CASCADE", 
                                                     ondelete="CASCADE"), nullable=False)
-    winner = Column(Boolean, nullable=False, default=False)
     old_pts = Column(Integer, nullable=False)
     pts_diff = Column(Integer, nullable=False)
     kills = Column(Integer, nullable=False)
@@ -238,13 +237,11 @@ class Match(db.Model):
             if stats.pts_diff > 0:
                 season_stats.wins += 1
                 season_stats.streak += 1
-                stats.winner = True
                 if season_stats.streak > season_stats.longest_streak:
                     season_stats.longest_streak = season_stats.streak
             else:
                 season_stats.streak = 0 
                 season_stats.losses += 1
-                stats.winner = False
         db.session.add(m)
         db.session.commit()
         return m
