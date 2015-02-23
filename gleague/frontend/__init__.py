@@ -28,7 +28,7 @@ def create_app(settings_override=None):
 
     @app.route('/')
     def redirect_to_matches():
-        return redirect(url_for('matches.matches_preview'))
+        return redirect(url_for('players.players'))
 
     return app
 

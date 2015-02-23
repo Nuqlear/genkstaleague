@@ -94,7 +94,9 @@
                         </td>
                         <td style="text-align:left">
                             {% if i.season_stats.player.nickname %}
-                                <a class="player" href="/players/{{i.season_stats.player.steam_id }}/">{{ i.season_stats.player.nickname }}</a>
+                                <a class="player" href="{{ url_for('players.player_overview', 
+                                    steam_id=i.season_stats.player.steam_id) }}">
+                                {{ i.season_stats.player.nickname }}</a>
                             {% else %}
                                 <span style="color: gray;">Anonymous</span>
                             {% endif %}

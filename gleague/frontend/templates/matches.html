@@ -72,7 +72,9 @@
                         <p>
                         <img width=35px height=20px class="steam_img" 
                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
-                        <a class="player" href="/players/{{ p.season_stats.steam_id }}/">{{ p.season_stats.player.nickname }} </a>
+                        <a class="player" href="{{ url_for('players.player_overview', steam_id=p.season_stats.steam_id) }}">
+                        {{ p.season_stats.player.nickname }} 
+                        </a>
                         </p>
                         {% endif %}
                     {% endfor %}
@@ -83,7 +85,9 @@
                         <p>
                         <img width=35px height=20px class="steam_img" 
                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
-                        <a class="player" href="/players/{{ p.season_stats.steam_id }}/">{{ p.season_stats.player.nickname }} </a>
+                        <a class="player" href="{{ url_for('players.player_overview', steam_id=p.season_stats.steam_id) }}">
+                        {{ p.season_stats.player.nickname }}
+                        </a>
                         </p>
                         {% endif %}
                     {% endfor %}
