@@ -1,0 +1,168 @@
+{% import 'macro.html' as macro with context %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    {{ macro.load_js_lib([
+        'bootstrap/dist/js/bootstrap.js',
+        'raty/lib/jquery.raty.js',
+        'moment/moment.js'
+    ]) }}
+    {{ macro.load_css_lib([
+        'bootstrap/dist/css/bootstrap.css',
+        'bootstrap/dist/css/bootstrap-theme.css',
+    ]) }}
+    {{ macro.load_css([
+        'font.css',
+        'main.css',
+        'player.css'
+    ])}}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>genkstaleague</title>
+</head>
+<body>
+<a href='/'>
+<div id="home">
+    <span class="glyphicon glyphicon-home"></span>
+</div>
+</a>
+<div id="container">
+    <div style="padding:20px">
+        <div class="row">
+            <div class="col-md-8" style="padding:20px">
+                <h1>
+                    <img style="border: 3px solid white" src={{ player.avatar_medium }}>
+                    <a class="player" style="cursor:default">{{player.nickname}}</a>
+                    <span id="avg_rating"></span> <span style="font-size:12pt">({{ rating_amount }} votes)</span>
+                </h1>
+            </div>
+            <div class="col-md-4" style="padding:20px; text-align:right;">
+                <h2 style="padding-top:15px">
+                    <span style="color:#009900">{{ player.season_stats[-1].wins }}</span> 
+                    / 
+                    <span style="color:#550000">{{ player.season_stats[-1].losses }}</span>
+                    <span style="padding-left:10px">{{ player.season_stats[-1].pts }} pts</span>
+                </h2>
+            </div>
+        </div>
+        <div class="row" style="padding: 20px; color:black">
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Signature heroes</div>
+                    <table class="table">
+                       <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Matches</th>
+                            <th>Winrate</th>
+                            <th>Earned pts</th>
+                            <th>KDA</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                        {% for s in signature_heroes %}
+                            <td><img class="steam_img" 
+                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s[0] }}_sb.png></td>
+                            <td>{{ s[1] }}</td>
+                            <td>{{ (s[2] / s[1])*100 | round }}%</td>
+                            <td>{{ s[3] }}</td>
+                            <td>{{ '%0.2f' % ((s[4]+s[5])/(s[6] + 1)) }}</td>
+                            </td>
+                        {% endfor %}
+                        </tr>
+                        </tbody>
+                    </table>
+                </div> 
+            </div>
+            <div class="col-md-6">
+                <div class="panel panel-default">
+                    <div class="panel-heading">Seasons played</div>
+                    <table class="table">
+                       <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Wins/Losses</th>
+                            <th>PTS</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for ss in player.season_stats %}
+                        <tr>
+                            <td>{{ ss.season.number }}</td>
+                            <td>{{ ss.wins }} / {{ ss.losses }}</td>
+                            <td>{{ ss.pts }}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div> 
+            </div>
+        </div>
+        <div class="match_players_table table-responsive">
+            <table class="table">
+                <thead>
+                    <tr class="header_table">
+                        <th>Match id</th>
+                        <th>Hero</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                        <th>PTS</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Level">L</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Kills">K</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Deaths">D</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Assists">A</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Last Hits">LH</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Hero Damage">HD</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Tower Damage">TD</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for s in matches_stats %}
+                        {% if s.player_slot < 5 %}
+                            {% if s.match.radiant_win %}
+                            <tr class="win_row" match_id={{ s.match_id }}>
+                            {% else %}
+                            <tr class="loss_row" match_id={{ s.match_id }}>
+                            {% endif %}
+                        {% else%}
+                            {% if s.match.radiant_win %}
+                            <tr class="loss_row" match_id={{ s.match_id }}>
+                            {% else %}
+                            <tr class="win_row" match_id={{ s.match_id }}>
+                            {% endif %}
+                        {% endif %}
+                            <td>{{ s.match_id }}</td>
+                            <td class="avatar_table">
+                                <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png>
+                            </td>
+                            <td class="start_time">{{ s.match.start_time }}</td>
+                            <td>{{ s.match.duration//60 }}:{{ s.match.duration % 60 }}</td>
+                            <td>{% if s.pts_diff > 0 %}+{% endif %}{{ s.pts_diff }}</td>
+                            <td>{{ s.level }}</td>
+                            <td>{{ s.kills }}</td>
+                            <td>{{ s.deaths }}</td>
+                            <td>{{ s.assists }}</td>
+                            <td>{{ s.last_hits }}</td>
+                            <td>{{ s.hero_damage }}</td>
+                            <td>{{ s.tower_damage }}</td>
+                        </tr>
+                    {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+$(document).ready(function() {
+    $('#avg_rating').raty({ readOnly: true, path: '/static/lib/bower_components/raty/lib/img', score: parseFloat("{{ avg_rating }}")});
+    $("[data-toggle=tooltip]").tooltip({container:'body'});
+    $('.start_time').each(function() {
+        $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
+    });
+});
+</script>

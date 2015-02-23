@@ -7,7 +7,6 @@ from sqlalchemy.orm import relationship
 from flask import current_app
 
 from gleague.core import db
-from gleague.models import SeasonStats, Player, Season
 from ..utils.steam_api import get_dota2_heroes
 
 
@@ -19,6 +18,7 @@ class PlayerMatchStats(db.Model):
                                                     ondelete="CASCADE"), nullable=False)
     match_id = Column(BigInteger, ForeignKey('match.id', onupdate="CASCADE", 
                                                     ondelete="CASCADE"), nullable=False)
+    winner = Column(Boolean, nullable=False, default=False)
     old_pts = Column(Integer, nullable=False)
     pts_diff = Column(Integer, nullable=False)
     kills = Column(Integer, nullable=False)
@@ -81,6 +81,7 @@ class PlayerMatchRating(db.Model):
 
     @staticmethod
     def get_match_ratings(match_id, user_id=None):
+        from .season import SeasonStats
         # TODO: pure sqlalchemy
         rated_by_ps = played = None
         if user_id:
@@ -110,7 +111,8 @@ class Match(db.Model):
     duration = Column(Integer)
     game_mode = Column(Integer)
     start_time = Column(Integer)
-    base_pts_diff = 20
+
+    game_modes_dict = {1:'All Pick', 2:'Captains Mode'}
 
     def __repr__(self):
         return "%s" % self.id
@@ -127,6 +129,9 @@ class Match(db.Model):
         }
         return d
 
+    def game_mode_repr(self):
+        return self.game_modes_dict.get(self.game_mode, 'unknown')
+
     @staticmethod
     def is_exists(id):
         return bool(Match.query.get(id))
@@ -141,6 +146,11 @@ class Match(db.Model):
 
     @staticmethod
     def create_from_dict(steamdata):
+        from .player import Player
+        from .season import Season
+
+        base_pts_diff = current_app.config.get('MATCH_BASE_PTS_DIFF', 20)
+        
         m = Match()
         m.season_id = Season.current().id
         m.id = steamdata['match_id']
@@ -183,41 +193,41 @@ class Match(db.Model):
                 pts['radiant'] += j.season_stats.pts
             else: pts['dire'] += j.season_stats.pts
         pts_diff = abs(pts['radiant'] - pts['dire'])/20
-        if pts_diff > m.base_pts_diff-5: pts_diff = m.base_pts_diff-5
+        if pts_diff > base_pts_diff-5: pts_diff = base_pts_diff-5
         # VERY OLD CODE; NEED REWORK
         if pts['radiant'] > pts['dire']:
             if m.radiant_win:
                 for i in range(len(m.players_stats)):
                     j = m.players_stats[i]
                     if j.player_slot < 5:
-                        j.pts_diff = int(m.base_pts_diff - pts_diff)
+                        j.pts_diff = int(base_pts_diff - pts_diff)
                     else:
-                        j.pts_diff = -int(m.base_pts_diff - pts_diff)
+                        j.pts_diff = -int(base_pts_diff - pts_diff)
                     j.season_stats.pts += j.pts_diff
             else:
                 for i in range(len(m.players_stats)):
                     j = m.players_stats[i]
                     if j.player_slot < 5:
-                        j.pts_diff = -int(m.base_pts_diff + pts_diff)
+                        j.pts_diff = -int(base_pts_diff + pts_diff)
                     else:
-                        j.pts_diff = int(m.base_pts_diff + pts_diff)
+                        j.pts_diff = int(base_pts_diff + pts_diff)
                     j.season_stats.pts += j.pts_diff
         else:
             if m.radiant_win:
                 for i in range(len(m.players_stats)):
                     j = m.players_stats[i]
                     if j.player_slot < 5:
-                        j.pts_diff = int(m.base_pts_diff + pts_diff)
+                        j.pts_diff = int(base_pts_diff + pts_diff)
                     else: 
-                        j.pts_diff = -int(m.base_pts_diff + pts_diff)
+                        j.pts_diff = -int(base_pts_diff + pts_diff)
                     j.season_stats.pts += j.pts_diff
             else:
                 for i in range(len(m.players_stats)):
                     j = m.players_stats[i]
                     if j.player_slot < 5:
-                        j.pts_diff = -int(m.base_pts_diff - pts_diff)
+                        j.pts_diff = -int(base_pts_diff - pts_diff)
                     else: 
-                        j.pts_diff = int(m.base_pts_diff - pts_diff)
+                        j.pts_diff = int(base_pts_diff - pts_diff)
                     j.season_stats.pts += j.pts_diff
         for i in range(len(m.players_stats)):
             stats = m.players_stats[i]
@@ -225,11 +235,13 @@ class Match(db.Model):
             if stats.pts_diff > 0:
                 season_stats.wins += 1
                 season_stats.streak += 1
+                stats.winner = True
                 if season_stats.streak > season_stats.longest_streak:
                     season_stats.longest_streak = season_stats.streak
             else:
                 season_stats.streak = 0 
                 season_stats.losses += 1
+                stats.winner = False
         db.session.add(m)
         db.session.commit()
         return m

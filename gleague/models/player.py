@@ -2,12 +2,14 @@ import json
 import socket
 import io
 
-from sqlalchemy import Column, String, Integer, ForeignKey, BigInteger
+from sqlalchemy import Column, String, Integer, ForeignKey, BigInteger, func
 from sqlalchemy.orm import relationship
 from flask import current_app
 
 from ..core import db
 from .season import Season, SeasonStats
+from .match import PlayerMatchStats
+
 from ..utils.steam_api import get_steam_user_info
 
 
@@ -38,6 +40,26 @@ class Player(db.Model):
                 'season_stats': [ss.to_dict() for ss in self.season_stats]
             })
         return d
+
+    def is_admin(self):
+        return self.steam_id in current_app.config.get('ADMINS_STEAM_ID', [])
+
+    def get_avg_rating(self):
+        from .match import PlayerMatchRating
+        q_res = PlayerMatchRating.query.join(PlayerMatchStats).join(SeasonStats).filter(
+            SeasonStats.steam_id==self.steam_id).with_entities(func.avg(PlayerMatchRating.rating), 
+            func.count(PlayerMatchRating.id)).all()
+        return q_res
+        
+    def get_signature_heroes(self):
+        q_res = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.steam_id==self.steam_id)\
+            .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id), 
+                func.sum(PlayerMatchStats.winner),
+                func.sum(PlayerMatchStats.pts_diff),
+                func.avg(PlayerMatchStats.kills), func.avg(PlayerMatchStats.assists), 
+                func.avg(PlayerMatchStats.deaths)
+            ).group_by(PlayerMatchStats.hero).limit(3).all()
+        return q_res       
 
 
     @staticmethod

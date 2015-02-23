@@ -1,4 +1,4 @@
-from flask import jsonify, g, Response, current_app
+from flask import jsonify, g, Response, current_app, url_for, redirect
 from functools import wraps
 from flask_openid import OpenID
 
@@ -20,9 +20,15 @@ def create_app(settings_override=None):
     # from .players import players_bp
     # app.register_blueprint(players_bp, url_prefix="/players")
     from .matches import matches_bp
-    from .auth import auth_bp
     app.register_blueprint(matches_bp, url_prefix="/matches")
+    from .players import players_bp
+    app.register_blueprint(players_bp, url_prefix="/players")
+    from .auth import auth_bp
     app.register_blueprint(auth_bp)
+
+    @app.route('/')
+    def redirect_to_matches():
+        return redirect(url_for('matches.matches_preview'))
 
     return app
 

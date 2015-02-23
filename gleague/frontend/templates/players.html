@@ -1,0 +1,103 @@
+{% import 'macro.html' as macro with context %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    {{ macro.load_js_lib([
+        'bootstrap/dist/js/bootstrap.js'
+    ]) }}
+    {{ macro.load_css_lib([
+        'bootstrap/dist/css/bootstrap.css',
+        'bootstrap/dist/css/bootstrap-theme.css',
+    ]) }}
+    {{ macro.load_css([
+        'font.css',
+        'main.css',
+        'matches.css',
+        'players.css'
+    ])}}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>genkstaleague</title>
+</head>
+<body>
+{% if g.user %}
+    {% if g.user.is_admin %}
+    <a href='/admin/'>
+    <div id="home">
+        <span class="glyphicon glyphicon-wrench"></span>
+    </div>
+    </a>
+    {% endif %}
+{% else %}
+    <div id="error" class="alert alert-warning alert-dismissable text-center">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      <a href="/login"><img stlyle="height: 50px;" 
+      src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
+      to rate players.
+    </div>
+{% endif %}
+<div id="container">
+    <div style="padding:20px">
+        <ul class="nav nav-tabs">
+            {% if g.user %}
+                <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
+            {% endif %}
+            <li class="active" ><a href="{{ url_for('players.players') }}">Top players</a></li>
+            <li ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
+        </ul>
+        <form action="{{ url_for('players.players') }}">
+        <div class="input-group row" style="width: 512px; margin:0 auto; padding: 20px">
+            <input type="text" name='q' placeholder="nickname" class="form-control" value={{q}}>
+            <span class="input-group-btn">
+                <button type=submit class="btn btn-default" type="button">
+                    <span class="glyphicon glyphicon-search" style="color:black"></span>
+                </button>
+            </span>
+        <input type="hidden" name="sort" value={{ sort }} />
+        </div>
+        </form>
+        <table id="top_players" class="span5 center-table">
+            <thead>
+                <tr>
+                <td>Nickname</td>
+                <td>pts</td>
+                </tr>
+            </thead>
+            {% for s in stats.items %}
+            <tbody>
+                <td>
+                    <a class="player" href="{{ url_for('players.player_overview', steam_id=s.steam_id)}}">
+                    {{ s.player.nickname }} 
+                    </a>
+                </td>
+                <td> {{ s.pts }} pts</td>
+            </tbody>
+            {% endfor %}
+        </table>
+        <div id="pagination">
+            <ul class="pagination">
+            {% if stats.has_prev %}
+                <li><a href="{{ url_for('players.players', page=stats.prev_num, q=q)}}"><</a></li>
+            {% endif %}
+            {%- for _page in stats.iter_pages() %}
+                {% if _page %}
+                  {% if _page != stats.page %}
+                    <li><a href="{{ url_for('players.players', page=_page) }}">{{ _page }}</a></li>
+                  {% else %}
+                    <li class="active"><a>{{ _page }}</strong></a></li>
+                  {% endif %}
+                {% else %}
+                  <li><span class=ellipsis>¦</span></li>
+                {% endif %}
+              {%- endfor %}
+              {% if stats.has_next %}
+                <li><a href="{{ url_for('players.players', page=stats.next_num, q=q)}}">></a></li>
+              {% endif %}
+            </ul>
+        </div>
+    </div>
+</div>
+</body>

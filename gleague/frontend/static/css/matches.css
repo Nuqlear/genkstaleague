@@ -1,0 +1,25 @@
+a.start_time {
+    color: #003300;
+    background-color:#CCCCCC;
+}
+
+.match_start_time {
+    text-align: center;    
+}
+
+.add_match {
+    border-top: 2px dashed white;
+    border-bottom: 2px dashed white;
+    padding-left: 400px;
+    margin: 0 auto;
+    float: none;
+}
+
+#top_players {
+    font-size: 15pt;
+    text-align: center;
+}
+
+.match {
+    padding: 20px;
+}

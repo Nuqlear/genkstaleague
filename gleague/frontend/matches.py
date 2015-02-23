@@ -1,7 +1,7 @@
-import sqlalchemy
 import json
 
-from flask import Blueprint, request, g, abort, jsonify, Response, render_template
+from flask import Blueprint, g, abort, current_app, render_template
+from sqlalchemy import desc
 
 from ..models import Match, PlayerMatchRating
 from ..core import db
@@ -12,21 +12,16 @@ matches_bp = Blueprint('matches', __name__)
 
 
 @matches_bp.route('/<int:match_id>', methods=['GET'])
-def get_match(match_id):
+def match(match_id):
     m = Match.query.get(match_id)
     if not m:
-        return abort(status=404)
+        return abort(404)
     return render_template('match.html', match = m)
 
 
-# @matches_bp.route('/', methods=['GET'])
-# def get_matches_preview():
-#     amount = request.args.get('amount', 4)
-#     offs = request.args.get('offset', 0)
-#     try:
-#         amount = int(amount)
-#         offs = int(offs)
-#     except Exception:
-#         return abort(status=406)
-#     matches = Match.get_batch(amount, offs)
-#     return jsonify({'matches':[m.to_dict(False) for m in matches]}), 200
+@matches_bp.route('/', methods=['GET'])
+@matches_bp.route('/<int:page>', methods=['GET'])
+def matches_preview(page=1):
+    m = Match.query.order_by(desc(Match.id)).paginate(page,
+        current_app.config.get('TOP_PLAYERS_PER_PAGE', 6), True)
+    return render_template('matches.html', matches=m)

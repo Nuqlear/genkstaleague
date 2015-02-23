@@ -1,0 +1,106 @@
+{% import 'macro.html' as macro with context %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    {{ macro.load_js_lib([
+        'bootstrap/dist/js/bootstrap.js',
+        'moment/moment.js'
+    ]) }}
+    {{ macro.load_css_lib([
+        'bootstrap/dist/css/bootstrap.css',
+        'bootstrap/dist/css/bootstrap-theme.css',
+    ]) }}
+    {{ macro.load_css([
+        'font.css',
+        'main.css',
+        'matches.css'
+    ])}}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>genkstaleague</title>
+</head>
+<body>
+<div id="error" class="alert alert-danger alert-dismissable" hidden=true>
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <strong>Error!</strong> Something goes wrong.
+</div>
+{% if g.user %}
+    {% if g.user.is_admin %}
+    <a href='/admin/'>
+    <div id="home">
+        <span class="glyphicon glyphicon-wrench"></span>
+    </div>
+    </a>
+    {% endif %}
+{% else %}
+    <div id="error" class="alert alert-warning alert-dismissable text-center">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      <a href="/login"><img stlyle="height: 50px;" 
+      src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
+      to rate players.
+    </div>
+{% endif %}
+<div id="container">
+    <div style="padding:20px">
+        <ul class="nav nav-tabs">
+            {% if g.user %}
+                <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
+            {% endif %}
+            <li ><a href="{{ url_for('players.players') }}">Top players</a></li>
+            <li class="active" ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
+        </ul>
+        {% for m in matches.items %}
+        <div class="match">
+            <div class="match_start_time">
+            <a href="{{ url_for('matches.match', match_id=m.id) }}" class="start_time">{{ m.start_time }}</a>
+            </div>
+            <table class="span5 center-table">
+                <thead>
+                    <tr>
+                    <td></td>
+                    <td></td>
+                    </tr>
+                </thead>
+                <tbody>
+                    <tr>
+                    <td>
+                    {% for p in m.players_stats %}
+                        {% if loop.index < 6 %}
+                        <p>
+                        <img width=35px height=20px class="steam_img" 
+                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
+                        <a class="player" href="/players/{{ p.season_stats.steam_id }}/">{{ p.season_stats.player.nickname }} </a>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                    </td>
+                    <td>
+                    {% for p in m.players_stats %}
+                        {% if loop.index > 5 %}
+                        <p>
+                        <img width=35px height=20px class="steam_img" 
+                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
+                        <a class="player" href="/players/{{ p.season_stats.steam_id }}/">{{ p.season_stats.player.nickname }} </a>
+                        </p>
+                        {% endif %}
+                    {% endfor %}
+                    </td>
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+        {% endfor %}
+        {{ macro.render_pagination(matches, 'matches')}}
+    </div>
+</div>
+</body>
+<script>
+$(document).ready(function() {
+    $('.start_time').each(function() {
+        $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
+    });
+});
+</script>

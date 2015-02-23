@@ -10,6 +10,15 @@ body {
     color: green;
 }
 
+#footer {
+    text-align: left;
+    background-color: #3d594d;
+    color: #2a514d;
+    width: 1024px;
+    margin: 0 auto;
+    padding: 0 auto;
+}
+
 #container {
     color: white;
     font-family: 'Gafata', sans-serif;
