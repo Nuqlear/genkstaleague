@@ -1,0 +1,48 @@
+.header_table {
+    font-size: 13pt;
+}
+
+.match_winner {
+    margin: 0 auto;
+    padding: 20px;
+    text-align: center;
+}
+
+.match_players_table {
+    padding: 0 25px 25px 25px;
+    font-size: 12pt;
+    /*filter:progid:DXImageTransform.Microsoft.Alpha(opacity=93); /* IE 5.5+*/
+    /*-moz-opacity: 0.93;  Mozilla 1.6 и ниже */
+    /*-khtml-opacity: 0.93;  Konqueror 3.1, Safari 1.1 */
+    /*opacity: 0.93;  CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
+}
+
+.match_players_table td {
+    text-align: center;
+}
+
+.match_players_table th {
+    text-align: center;
+    cursor: default;
+}
+
+.match_info_table td {
+    padding: 0 20px 0 20px;
+}
+
+.radiant_table {
+    background-color: #263d26;
+}
+
+.dire_table {
+    background-color: #2e2020;
+}
+
+.back {
+    background-color: #eaeaea;
+    height:100%;
+}
+
+.steam_img {
+    border: 1px solid white;
+}

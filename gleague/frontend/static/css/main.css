@@ -1,0 +1,115 @@
+body, html {
+    height: 100%;
+}
+
+body {
+    background-color: #223a34;
+}
+
+#error {
+    color: green;
+}
+
+#container {
+    color: white;
+    font-family: 'Gafata', sans-serif;
+    width: 1024px;
+    min-height: 100%;
+    margin: 0 auto;
+    padding: 0 auto;
+    background-color: #3d594d;
+    -moz-box-shadow: 0 0 2px #555;
+    -webkit-box-shadow: 0 0 2px #555;
+    box-shadow: 0 0 2px #555;
+}
+
+a.player {
+    color: #61ff68;
+    border-bottom: 1px dashed #ffffff;
+    text-decoration: none; 
+}
+
+div#home{
+    margin: 0 auto;
+    padding: 0 auto;
+    background-color: #2d493d;
+    width: 1024px;
+    text-align: center;
+    padding: 10px;
+    color: gray;
+}
+
+.center-table
+{
+    margin: 0 auto !important;
+    float: none !important;
+}
+
+div#home:hover {
+    color: white;
+    background-color: #3d594d;
+    cursor: pointer;
+}
+
+#pagination {
+    text-align:center;
+}
+
+/* bootstrap changes */
+.nav-tabs > li > a {
+  color: #00AA00;
+  margin-right: 2px;
+  line-height: 1.42857143;
+  border: 1px solid transparent;
+  border-radius: 4px 4px 0 0;
+}
+
+.nav-tabs > li.active > a,
+.nav-tabs > li.active > a:hover,
+.nav-tabs > li.active > a:focus {
+  color: #AAFFAA;
+  cursor: default;
+  background-color: grey;
+  border: 1px solid #ddd;
+}
+
+.pagination > li > a:hover,
+.pagination > li > span:hover,
+.pagination > li > a:focus,
+.pagination > li > span:focus {
+  color: green;
+  background-color: #eee;
+  border-color: #ddd;
+}
+.pagination > .active > a,
+.pagination > .active > span,
+.pagination > .active > a:hover,
+.pagination > .active > span:hover,
+.pagination > .active > a:focus,
+.pagination > .active > span:focus {
+  z-index: 2;
+  color: #fff;
+  cursor: default;
+  background-color: green;
+  border-color: green;
+}
+
+.pagination > li > a,
+.pagination > li > span {
+  position: relative;
+  float: left;
+  padding: 6px 12px;
+  margin-left: -1px;
+  line-height: 1.42857143;
+  color: green;
+  text-decoration: none;
+  background-color: #fff;
+  border: 1px solid #ddd;
+}
+
+.form-control:focus {
+  border-color: #00FF00;
+  outline: 0;
+  -webkit-box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+          box-shadow: inset 0 1px 1px rgba(0,0,0,.075), 0 0 8px rgba(102, 175, 233, .6);
+}

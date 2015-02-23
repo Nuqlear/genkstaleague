@@ -1,0 +1,151 @@
+{% import 'macro.html' as macro with context %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    {{ macro.load_js_lib([
+        'bootstrap/dist/js/bootstrap.js',
+        'raty/lib/jquery.raty.js',
+        'moment/moment.js'
+    ]) }}
+    {{ macro.load_css_lib([
+        'bootstrap/dist/css/bootstrap.css',
+        'bootstrap/dist/css/bootstrap-theme.css',
+    ]) }}
+    {{ macro.load_css([
+        'font.css',
+        'main.css',
+        'match_table.css'
+    ]) }}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>gleague</title>
+</head>
+<body>
+{% if not g.user %}
+    <div id="error" class="alert alert-warning alert-dismissable text-center">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      <a href="/login"><img stlyle="height: 50px;" 
+      src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
+      to rate players.
+    </div>
+{% endif %}
+<a href='/'>
+<div id="home">
+    <span class="glyphicon glyphicon-home"></span>
+</div>
+</a>
+<div id="container">
+    <table class="match_info_table">
+        <thead>
+            <tr>
+            <td>Match id</td>
+            <td>Game Mode</td>
+            <td>Duration</td>
+            <td>Date</td>
+            </tr>
+        </thead>
+        <tbody>
+            <td>{{ match.id }}</td>
+            <td>{{ match.game_mode }}</td>
+            <td>{{ match.duration//60 }}:{{match.duration % 60}}</td>
+            <td id="start_time">{{ match.start_time }}</td>
+        </tbody>
+    </table>
+    <h2 class="match_winner"> 
+        {% if match.radiant_win == 1 %}
+            <span style="color: #263d26; text-decoration: underline;">Radiant</span> won
+        {% else %}
+            <span style="color: #2e2020; text-decoration: underline;">
+            Dire</span> won
+        {% endif %}
+    </h2>
+    <div class="match_players_table table-responsive">
+        <table class="table">
+            <thead>
+                <tr class="header_table">
+                    <th></th>
+                    <th style="text-align:left">Player</th>
+                    <th style="text-align:left">Hero</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Level">L</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Kills">K</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Deaths">D</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Assists">A</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Last Hits">LH</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Hero Damage">HD</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Tower Damage">TD</th>
+                    <th>PTS</th>
+                    <th>Rating</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for i in match.players_stats %}
+                    {% if i.player_slot < 5 %}
+                        <tr class="radiant_table">
+                    {% else %}
+                        <tr class="dire_table">
+                    {% endif %}
+                        <td>
+                            {% if i.season_stats.player.avatar %}
+                                <img class="steam_img" src={{ i.season_stats.player.avatar }}>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:left">
+                            {% if i.season_stats.player.nickname %}
+                                <a class="player" href="/player/{{i.season_stats.player.steam_id }}">{{ i.season_stats.player.nickname }}</a>
+                            {% else %}
+                                <span style="color: gray;">Anonymous</span>
+                            {% endif %}
+                        </td>
+                        <td style="text-align:left" class="avatar_table">
+                            <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ i.hero }}_sb.png>
+                        </td>
+                        <td>{{ i.level }}</td>
+                        <td>{{ i.kills }}</td>
+                        <td>{{ i.deaths }}</td>
+                        <td>{{ i.assists }}</td>
+                        <td>{{ i.last_hits }}</td>
+                        <td>{{ i.hero_damage }}</td>
+                        <td>{{ i.tower_damage }}</td>
+                        <td>
+                        {{ i.pts }}
+                        {% if i.pts_diff > 0 %}<span style="color:green">+{% else %}
+                        <span style="color:red">{% endif %}{{ i.pts_diff }}</span>
+                        </td>
+                        <td style="cursor:default"> 
+                            <div class="rating" match_player_stats_id="{{i.id}}">
+                            </div>
+                        </td>
+                    </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+</body>
+<script>
+$(document).ready(function() {
+    $("[data-toggle=tooltip]").tooltip({container:'body'});
+    function update_rating() {
+        var url = '/api/matches/{{match.id}}/ratings/';
+        $.getJSON(url, function(data) {
+            $('.rating').each(function(){
+                var d = data['ratings'][$(this).attr('match_player_stats_id')]
+                console.log(d['allowed_rate']);
+                $(this).raty({ readOnly: !d['allowed_rate'],
+                    path: '/static/lib/bower_components/raty/lib/img', score: d['avg_rating'], 
+                    click: function(score, evt) {
+                        $.post('/api/matches/{{match.id}}/ratings/'+$(this).parent().find('.rating').attr('match_player_stats_id')
+                            +'?rating='+score);
+                        update_rating();
+                    }
+                });
+            });
+        });
+    }
+    update_rating();
+    $('#start_time').html(moment(moment.unix("{{ match.start_time }}")).format('MMMM Do YYYY, h:mm:ss a'));
+});
+</script>

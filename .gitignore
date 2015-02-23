@@ -30,8 +30,3 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
-# App specific
-node_modules/
-.tmp
-dist
-/src/scripts/main.js
