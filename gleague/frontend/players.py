@@ -33,7 +33,7 @@ def player_overview(steam_id):
 def players():
     q = request.args.get('q')
     sort = request.args.get('sort', 'pts')
-    sort_dict = {'pts':desc(SeasonStats.pts), 'nickname':desc(Player.nickname),
+    sort_dict = {'pts':desc(SeasonStats.pts), 'nickname':func.lower(Player.nickname),
         'wins':desc(SeasonStats.wins), 'losses':desc(SeasonStats.losses)}
     page = request.args.get('page', 1)
     page = int(page)
@@ -43,4 +43,4 @@ def players():
     if q:
         ss = ss.filter(func.lower(Player.nickname).startswith(func.lower(q)))
     ss = ss.paginate(page, current_app.config.get('TOP_PLAYERS_PER_PAGE', 15), True)
-    return render_template('players.html', stats=ss)
+    return render_template('players.html', stats=ss, sort=sort)

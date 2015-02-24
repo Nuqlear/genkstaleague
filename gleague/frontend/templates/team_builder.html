@@ -1,0 +1,96 @@
+{% import 'macro.html' as macro with context %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    {{ macro.load_js_lib([
+        'bootstrap/dist/js/bootstrap.js',
+        'moment/moment.js',
+        'select2/select2.min.js'
+    ]) }}
+    {{ macro.load_css_lib([
+        'bootstrap/dist/css/bootstrap.css',
+        'bootstrap/dist/css/bootstrap-theme.css',
+        'select2/select2.css',
+        'select2-bootstrap-css/select2-bootstrap.min.css'
+    ]) }}
+    {{ macro.load_css([
+        'font.css',
+        'main.css',
+        'matches.css',
+        'team_builder.css'
+    ])}}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    <title>genkstaleague</title>
+</head>
+<body>
+<div id="error" class="alert alert-danger alert-dismissable" hidden=true>
+  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+  <strong>Error!</strong> Something goes wrong.
+</div>
+{% if g.user %}
+    {% if g.user.is_admin %}
+    <a href='/admin/'>
+    <div id="home">
+        <span class="glyphicon glyphicon-wrench"></span>
+    </div>
+    </a>
+    {% endif %}
+{% else %}
+    <div id="error" class="alert alert-warning alert-dismissable text-center">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      <a href="/login"><img stlyle="height: 50px;" 
+      src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
+      to rate players.
+    </div>
+{% endif %}
+<div id="container">
+    <div style="padding:20px">
+        <ul class="nav nav-tabs">
+            {% if g.user %}
+                <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
+            {% endif %}
+            <li ><a href="{{ url_for('players.players') }}">Top players</a></li>
+            <li ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
+            <li class="active" ><a href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
+        </ul>
+       <form method="POST" action="" class="team_builder_row">
+            {% for i in range(1, 11) %}
+            <div class="team_builder_row">
+                <label for="select2-input-sm" class="control-label">Player {{ i }}</label>
+                <select name="player-{{i}}" class="form-control input-sm select2-multiple">
+                <option value="None">NOT REGISTERED PLAYER</option>
+                {% for ss in season_stats %}
+                    <option value={{ ss.steam_id }}>{{ ss.player.nickname }}</option>
+                {% endfor %}
+                </select>
+            </div>
+            {% endfor %}
+            <p><input type="submit" value="Get teams" class="btn btn-default" style="margin:20px"></p>
+            <textarea disabled class="random_result" rows="12">
+                {% if players %}
+                Radinat:
+                    {% for p in players[0] %}
+                        {{ p[0] }}
+                    {% endfor %}
+
+                Dire:
+                    {% for p in players[1] %}
+                        {{ p[0] }}
+                    {% endfor %}
+                {% endif %}
+            </textarea>
+        </form>
+    </div>
+</div>
+</body>
+<script>
+$(document).ready(function() {
+    $('.select2-multiple').each(function() {
+        $(this).select2({});
+    });
+});
+</script>

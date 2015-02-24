@@ -51,6 +51,7 @@
             {% endif %}
             <li ><a href="{{ url_for('players.players') }}">Top players</a></li>
             <li class="active" ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
+            <li ><a href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
         </ul>
         {% for m in matches.items %}
         <div class="match">
@@ -97,7 +98,7 @@
             </table>
         </div>
         {% endfor %}
-        {{ macro.render_pagination(matches, 'matches')}}
+        {{ macro.render_pagination(matches, 'matches.matches_preview')}}
     </div>
 </div>
 </body>

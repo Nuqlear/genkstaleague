@@ -46,6 +46,7 @@
             {% endif %}
             <li class="active" ><a href="{{ url_for('players.players') }}">Top players</a></li>
             <li ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
+            <li ><a href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
         </ul>
         <form action="{{ url_for('players.players') }}">
         <div class="input-group row" style="width: 512px; margin:0 auto; padding: 20px">
@@ -64,25 +65,25 @@
                 <td><a class="order" href={% if q %}"{{ url_for('players.players', page=stats.page, q=q, sort='nickname') }}"
                     {% else %}"{{ url_for('players.players', page=stats.page, sort='nickname') }}"{% endif %}>Nickname</a>
                     {% if sort == 'nickname' %}
-                        <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                        <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
                     {% endif %}
                 </td>
                 <td><a class="order" href={% if q %}"{{ url_for('players.players', page=stats.page, q=q, sort='pts') }}"
                     {% else %}"{{ url_for('players.players', page=stats.page, sort='pts') }}"{% endif %}>PTS</a>
                     {% if sort == 'pts' %}
-                        <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                        <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                     {% endif %}
                 </td>
                 <td><a class="order" href={% if q %}"{{ url_for('players.players', page=stats.page, q=q, sort='wins') }}"
                     {% else %}"{{ url_for('players.players', page=stats.page, sort='wins') }}"{% endif %}>Wins</a>
                     {% if sort == 'wins' %}
-                        <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                        <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                     {% endif %}
                 </td>
                 <td><a class="order" href={% if q %}"{{ url_for('players.players', page=stats.page, q=q, sort='losses') }}"
                     {% else %}"{{ url_for('players.players', page=stats.page, sort='losses') }}"{% endif %}>Losses</a>
                     {% if sort == 'losses' %}
-                        <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                        <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                     {% endif %}
                 </td>
                 </tr>
@@ -103,12 +104,12 @@
         <div id="pagination">
             <ul class="pagination">
             {% if stats.has_prev %}
-                <li><a href="{{ url_for('players.players', page=stats.prev_num, q=q)}}"><</a></li>
+                <li><a href="{{ url_for('players.players', page=stats.prev_num, q=q, sort=sort)}}"><</a></li>
             {% endif %}
             {%- for _page in stats.iter_pages() %}
                 {% if _page %}
                   {% if _page != stats.page %}
-                    <li><a href="{{ url_for('players.players', page=_page) }}">{{ _page }}</a></li>
+                    <li><a href="{{ url_for('players.players', page=_page, sort=sort) }}">{{ _page }}</a></li>
                   {% else %}
                     <li class="active"><a>{{ _page }}</strong></a></li>
                   {% endif %}
@@ -117,7 +118,7 @@
                 {% endif %}
               {%- endfor %}
               {% if stats.has_next %}
-                <li><a href="{{ url_for('players.players', page=stats.next_num, q=q)}}">></a></li>
+                <li><a href="{{ url_for('players.players', page=stats.next_num, q=q, sort=sort)}}">></a></li>
               {% endif %}
             </ul>
         </div>
