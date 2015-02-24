@@ -61,8 +61,30 @@
         <table id="top_players" class="span5 center-table">
             <thead>
                 <tr>
-                <td>Nickname</td>
-                <td>pts</td>
+                <td><a class="order" href={% if q %}"{{ url_for('players.players', page=stats.page, q=q, sort='nickname') }}"
+                    {% else %}"{{ url_for('players.players', page=stats.page, sort='nickname') }}"{% endif %}>Nickname</a>
+                    {% if sort == 'nickname' %}
+                        <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                    {% endif %}
+                </td>
+                <td><a class="order" href={% if q %}"{{ url_for('players.players', page=stats.page, q=q, sort='pts') }}"
+                    {% else %}"{{ url_for('players.players', page=stats.page, sort='pts') }}"{% endif %}>PTS</a>
+                    {% if sort == 'pts' %}
+                        <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                    {% endif %}
+                </td>
+                <td><a class="order" href={% if q %}"{{ url_for('players.players', page=stats.page, q=q, sort='wins') }}"
+                    {% else %}"{{ url_for('players.players', page=stats.page, sort='wins') }}"{% endif %}>Wins</a>
+                    {% if sort == 'wins' %}
+                        <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                    {% endif %}
+                </td>
+                <td><a class="order" href={% if q %}"{{ url_for('players.players', page=stats.page, q=q, sort='losses') }}"
+                    {% else %}"{{ url_for('players.players', page=stats.page, sort='losses') }}"{% endif %}>Losses</a>
+                    {% if sort == 'losses' %}
+                        <span class="glyphicon glyphicon-sort-by-attributes"></span>
+                    {% endif %}
+                </td>
                 </tr>
             </thead>
             {% for s in stats.items %}
@@ -72,7 +94,9 @@
                     {{ s.player.nickname }} 
                     </a>
                 </td>
-                <td> {{ s.pts }} pts</td>
+                <td> {{ s.pts }} </td>
+                <td> {{ s.wins }} </td>
+                <td> {{ s.losses }} </td>
             </tbody>
             {% endfor %}
         </table>

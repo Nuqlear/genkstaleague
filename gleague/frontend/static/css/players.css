@@ -1,0 +1,9 @@
+#top_players td, #top_players tr {
+    padding: 0 10px 0 10px;
+    min-width: 120px;
+}
+
+a.order {
+    color: white;
+    text-decoration: underline;
+}

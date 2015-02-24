@@ -32,10 +32,14 @@ def player_overview(steam_id):
 @players_bp.route('/', methods=['GET'])
 def players():
     q = request.args.get('q')
+    sort = request.args.get('sort', 'pts')
+    sort_dict = {'pts':desc(SeasonStats.pts), 'nickname':desc(Player.nickname),
+        'wins':desc(SeasonStats.wins), 'losses':desc(SeasonStats.losses)}
     page = request.args.get('page', 1)
     page = int(page)
     cs_id = Season.current().id
-    ss = SeasonStats.query.join(Player).filter(SeasonStats.season_id==cs_id).order_by(desc(SeasonStats.pts))
+    ss = SeasonStats.query.join(Player).filter(SeasonStats.season_id==cs_id)\
+        .order_by(sort_dict.get(sort, desc(SeasonStats.pts)))
     if q:
         ss = ss.filter(func.lower(Player.nickname).startswith(func.lower(q)))
     ss = ss.paginate(page, current_app.config.get('TOP_PLAYERS_PER_PAGE', 15), True)
