@@ -40,10 +40,9 @@ def team_builder():
             if player_id == 'None':
                 players.append(['NOT REGISTERED PLAYER', SeasonStats.pts.default.arg])
             else:
-                p = Player.query.get()
+                p = Player.query.get(player_id)
                 players.append([p.nickname, p.season_stats[-1].pts])
         players = sort_by_pts(players)
-        print(players)
         return render_template('team_builder.html', season_stats=season_stats, players=players)
     return render_template('team_builder.html', season_stats=season_stats)
 
