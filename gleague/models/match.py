@@ -93,11 +93,14 @@ class PlayerMatchRating(db.Model):
         ratings = {}
         m = Match.query.get(match_id)
         for ps in m.players_stats:
+            avg_rating = PlayerMatchRating.query.join(PlayerMatchStats).filter(PlayerMatchStats.id==ps.id)\
+                .value(func.avg(PlayerMatchRating.rating))
+            if avg_rating:
+                avg_rating = float(avg_rating) or 0.0
             ratings[ps.id] = {'allowed_rate':played and ps.id != rated_by_ps.id and not(
                     PlayerMatchRating.query.filter(and_(PlayerMatchRating.rated_by_steam_id==user_id, 
                     PlayerMatchRating.player_match_stats_id==ps.id)).first()),
-                'avg_rating':PlayerMatchRating.query.join(PlayerMatchStats).filter(PlayerMatchStats.id==ps.id)\
-                .value(func.avg(PlayerMatchRating.rating))}
+                'avg_rating':avg_rating}
         return ratings
 
 

@@ -26,6 +26,10 @@
     cursor: default;
 }
 
+.match_info_table {
+    margin: 20px 0 0 0;
+}
+
 .match_info_table td {
     padding: 0 20px 0 20px;
 }

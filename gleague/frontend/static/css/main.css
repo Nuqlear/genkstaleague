@@ -10,6 +10,14 @@ body {
     color: green;
 }
 
+#line_after_logo {
+    height:1px; 
+    border:none; 
+    color:#223a34; 
+    background-color:#223a34;
+    margin: 20 auto 0 0;
+}
+
 #footer {
     text-align: left;
     background-color: #3d594d;

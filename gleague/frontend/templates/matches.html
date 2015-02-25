@@ -28,7 +28,7 @@
   <strong>Error!</strong> Something goes wrong.
 </div>
 {% if g.user %}
-    {% if g.user.is_admin %}
+    {% if g.user.is_admin() %}
     <a href='/admin/'>
     <div id="home">
         <span class="glyphicon glyphicon-wrench"></span>
@@ -44,6 +44,7 @@
     </div>
 {% endif %}
 <div id="container">
+    {{ macro.render_logo() }}
     <div style="padding:20px">
         <ul class="nav nav-tabs">
             {% if g.user %}

@@ -23,6 +23,10 @@
     {% endfor %}
 {%- endmacro %}
 
+{% macro render_logo() -%}
+    <img style="width:1024px; padding-top: 20px;" src='/static/img/logo.png'>
+{%- endmacro %}
+
 {% macro render_pagination(pagination, url, arg, argval) %}
 <div id="pagination">
     <ul class="pagination">
