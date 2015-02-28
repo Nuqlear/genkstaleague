@@ -117,7 +117,8 @@ class Match(db.Model):
     game_mode = Column(Integer)
     start_time = Column(Integer)
 
-    game_modes_dict = {1:'All Pick', 2:'Captains Mode'}
+    game_modes_dict = {1:'All Pick', 2:'Captains Mode', 3:'Random Draft', 4:'Single Draft',
+        5:'All Random', 8:'Reverse Captain Mode', 16:'Captains Draft'}
 
     def __repr__(self):
         return "%s" % self.id
