@@ -113,6 +113,7 @@
                         <th>Date</th>
                         <th>Duration</th>
                         <th>PTS</th>
+                        <th>Earned pts</th>
                         <th data-toggle="tooltip" data-placement="top" title="Level">L</th>
                         <th data-toggle="tooltip" data-placement="top" title="Kills">K</th>
                         <th data-toggle="tooltip" data-placement="top" title="Deaths">D</th>
@@ -143,6 +144,7 @@
                             </td>
                             <td class="start_time">{{ s.match.start_time }}</td>
                             <td>{{ s.match.duration//60 }}:{{ s.match.duration % 60 }}</td>
+                            <td>{{ s.old_pts }}</td>
                             <td>{% if s.pts_diff > 0 %}+{% endif %}{{ s.pts_diff }}</td>
                             <td>{{ s.level }}</td>
                             <td>{{ s.kills }}</td>
