@@ -27,6 +27,14 @@
     <img style="width:1024px; padding-top: 20px;" src='/static/img/logo.png'>
 {%- endmacro %}
 
+{% macro render_google_meta() -%}
+  <meta name="google-site-verification" content={{ GOOGLE_SITE_VERIFICATION_CODE }} />
+{%- endmacro %}
+
+{% macro render_site_title(page) -%}
+  <title>{{ SITE_TITLE }} | {{ page }}</title>
+{%- endmacro %}
+
 {% macro render_pagination(pagination, url, arg, argval) %}
 <div id="pagination">
     <ul class="pagination">

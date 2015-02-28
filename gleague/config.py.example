@@ -21,6 +21,8 @@ class gleague_frontend(BaseConfig):
     STATIC_FOLDER = path.join(path.dirname(__file__), 'static')
     HISTORY_MATCHES_PER_PAGE = 5
     TOP_PLAYERS_PER_PAGE = 20
+    GOOGLE_SITE_VERIFICATION_CODE = 'YOUR_CODE'
+    SITE_NAME = 'GENKSTAleague'
 
 
 class gleague_api_tests(gleague_api):

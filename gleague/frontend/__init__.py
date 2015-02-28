@@ -30,6 +30,13 @@ def create_app(settings_override=None):
     def redirect_to_matches():
         return redirect(url_for('players.players'))
 
+    @app.context_processor
+    def inject_globals():
+        return {
+            'GOOGLE_SITE_VERIFICATION_CODE': app.config.get('GOOGLE_SITE_VERIFICATION_CODE', None),
+            'SITE_TITLE': app.config.get('SITE_TITLE', 'gleague')
+        }
+
     return app
 
 

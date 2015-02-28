@@ -19,7 +19,8 @@
     ])}}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>genkstaleague</title>
+    {{ macro.render_google_meta() }}
+    {{ macro.render_site_title('PLAYERS') }}
 </head>
 <body>
 {% if g.user %}

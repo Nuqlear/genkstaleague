@@ -21,7 +21,7 @@
     ]) }}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    <title>gleague</title>
+    {{ macro.render_site_title(match.id ~ ' match') }}
 </head>
 <body>
 {% if not g.user %}
