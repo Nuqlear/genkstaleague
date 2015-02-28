@@ -4,7 +4,7 @@ a.start_time {
 }
 
 .match_start_time {
-    text-align: center;    
+    text-align: center;
 }
 
 .add_match {
@@ -22,4 +22,16 @@ a.start_time {
 
 .match {
     padding: 20px;
+}
+
+.matches_history_table {
+    margin: 0 172px 0 172px;
+    border: 1px solid grey;
+}
+
+.matches_history_table td {
+    min-width: 300px;
+    text-align: left;
+    padding: 2px 0 0 10px;
+    border-right: 1px solid black;
 }

@@ -150,6 +150,6 @@ $(document).ready(function() {
         });
     }
     update_rating();
-    $('#start_time').html(moment(moment.unix("{{ match.start_time }}")).format('MMMM Do YYYY, h:mm:ss a'));
+    $('#start_time').html(moment(moment.unix("{{ match.start_time }}")).format('MMMM Do YYYY, HH:mm'));
 });
 </script>

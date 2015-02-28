@@ -1,0 +1,12 @@
+.player_matches .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    background-color: #223a34;
+    cursor: pointer;
+}
+
+tr.win_row {
+    background-color: #263d26;
+}
+
+tr.loss_row {
+    background-color: #2e2020;
+}

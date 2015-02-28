@@ -60,7 +60,7 @@
             <div class="match_start_time">
             <a href="{{ url_for('matches.match', match_id=m.id) }}" class="start_time">{{ m.start_time }}</a>
             </div>
-            <table class="span5 center-table">
+            <table class="span5  matches_history_table">
                 <thead>
                     <tr>
                     <td></td>
@@ -107,7 +107,7 @@
 <script>
 $(document).ready(function() {
     $('.start_time').each(function() {
-        $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
+        $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
     });
 });
 </script>

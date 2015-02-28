@@ -104,8 +104,8 @@
                 </div> 
             </div>
         </div>
-        <div class="match_players_table table-responsive">
-            <table class="table">
+        <div class="player_matches table-responsive">
+            <table class="table table table-hover">
                 <thead>
                     <tr class="header_table">
                         <th>Match id</th>
@@ -167,6 +167,11 @@ $(document).ready(function() {
     $("[data-toggle=tooltip]").tooltip({container:'body'});
     $('.start_time').each(function() {
         $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
+    });
+    $('.player_matches tr').each(function() {
+        $(this).click(function() {
+            window.location.href = '/matches/' + $(this).attr('match_id');
+        });
     });
 });
 </script>
