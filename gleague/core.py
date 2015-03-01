@@ -46,6 +46,15 @@ def reg_gl_vars(app):
                 else:
                     session.pop('steam_id')
 
+
+def reg_rollback_on_exc(app):
+    @app.teardown_request
+    def _manage_transaction(exception):
+        if not exception:
+            db.session.commit()
+        db.session.remove()
+
+
 def create_app(name):
     app = FlaskApp(name, instance_relative_config=True)
     cfg_class = name.replace('.', '_')
@@ -53,4 +62,6 @@ def create_app(name):
     setup_logging(app)
     reg_gl_vars(app)
     db.init_app(app)
+    reg_rollback_on_exc(app)
+
     return app

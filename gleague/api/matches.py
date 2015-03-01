@@ -70,5 +70,5 @@ def rate_player(match_id, player_match_stats_id):
         return abort(403)
     pmr = PlayerMatchRating(player_match_stats_id=player_match_stats_id, rating=rating, rated_by_steam_id=g.user.steam_id)
     db.session.add(pmr)
-    db.session.commit()
+    db.session.flush()
     return Response(status=200)

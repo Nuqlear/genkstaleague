@@ -247,6 +247,6 @@ class Match(db.Model):
                 season_stats.streak = 0 
                 season_stats.losses += 1
         db.session.add(m)
-        db.session.commit()
+        db.session.flush()
         return m
         

@@ -47,7 +47,7 @@ class Season(db.Model):
         os.ended = ns.started
         db.session.add(ns)
         db.session.add(os)
-        db.session.commit()
+        db.session.flush()
         return ns
 
 

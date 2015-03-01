@@ -83,7 +83,7 @@ class Player(db.Model):
             p.update_from_steam()
             if p.season_stats[-1].season_id != cs.id:
                 db.session.add(SeasonStats(season_id=cs.id, steam_id=p.steam_id))
-        db.session.commit()
+        db.session.flush()
         return p
 
     def update_from_steam(self):
