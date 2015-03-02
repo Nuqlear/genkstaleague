@@ -1,4 +1,5 @@
-from flask import jsonify, g, Response, current_app, url_for, redirect, render_template, make_response, send_from_directory
+from flask import (jsonify, g, Response, current_app, url_for, redirect, render_template, make_response, 
+    send_from_directory, request)
 from functools import wraps
 from flask_openid import OpenID
 from datetime import datetime, timedelta
@@ -29,8 +30,9 @@ def create_app(settings_override=None):
     app.register_blueprint(auth_bp)
 
     @app.route('/favicon.ico')
+    @app.route('/robots.txt')
     def favicon():
-        return send_from_directory(app.static_folder, 'favicon.ico')
+        return send_from_directory(app.static_folder, request.path[1:])
 
     @app.route('/')
     def redirect_to_matches():
@@ -38,33 +40,38 @@ def create_app(settings_override=None):
 
     @app.route('/sitemap.xml', methods=['GET'])
     def sitemap():
-          """Generate sitemap.xml. Makes a list of urls and date modified."""
-          pages=[]
-          ten_days_ago=datetime.now() - timedelta(days=10)
-          # static pages
-          for rule in app.url_map.iter_rules():
-            print(dir(rule))
-            if "GET" in rule.methods and len(rule.arguments)==0:
-                pages.append(
-                    [rule.rule,ten_days_ago]
-                )
-          
-          players = Player.query.order_by(Player.steam_id).all()
-          for player in players:
-              url=url_for('players.player_overview', steam_id=player.steam_id)
-              pages.append([url,ten_days_ago])
+        base_url = app.config.get('SITE_ADDRESS', None)
+            if not base_url:
+                raise Exception('You should set SITE_ADDRESS const to generate sitemap.xml')
+        base_url = 'http://' + base_url
+        pages = []
+        ten_days_ago = datetime.now() - timedelta(days=10)
+        ten_days_ago = ten_days_ago.date().isoformat()
 
-          matches = Match.query.order_by(Match.id).all()
-          for match in matches:
-              url=url_for('matches.match', match_id=match.id)
-              modified_time=datetime.fromtimestamp(match.start_time).date().isoformat()
-              pages.append([url,modified_time]) 
+        # static pages
+        for rule in app.url_map.iter_rules():
+            if "GET" in rule.methods and len(rule.arguments) == 0:
+                if not 'admin' in rule.rule and not 'ajax' in rule.rule:
+                    pages.append(
+                        [base_url+rule.rule,ten_days_ago]
+                    )
 
-          sitemap_xml = render_template('sitemap_template.xml', pages=pages)
-          response= make_response(sitemap_xml)
-          response.headers["Content-Type"] = "application/xml"    
-        
-          return response
+        players = Player.query.order_by(Player.steam_id).all()
+        for player in players:
+            url = url_for('players.player_overview', steam_id=player.steam_id)
+            pages.append([base_url+url, ten_days_ago])
+
+        matches = Match.query.order_by(Match.id).all()
+        for match in matches:
+            url = url_for('matches.match', match_id=match.id)
+            modified_time = datetime.fromtimestamp(match.start_time).date().isoformat()
+            pages.append([base_url+url, modified_time]) 
+
+        sitemap_xml = render_template('sitemap_template.xml', pages=pages)
+        response = make_response(sitemap_xml)
+        response.headers["Content-Type"] = "application/xml"    
+
+        return response
 
     @app.context_processor
     def inject_globals():
