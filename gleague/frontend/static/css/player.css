@@ -10,3 +10,8 @@ tr.win_row {
 tr.loss_row {
     background-color: #2e2020;
 }
+
+#pts_history_plot {
+    margin: 20px;
+}
+

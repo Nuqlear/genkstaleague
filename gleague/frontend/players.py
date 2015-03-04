@@ -1,7 +1,7 @@
 import json
 
 from flask import Blueprint, g, abort, current_app, render_template, request, current_app
-from sqlalchemy import desc, func
+from sqlalchemy import desc, func, and_
 
 from ..models import Player, PlayerMatchStats, SeasonStats, Season
 from ..core import db
@@ -17,15 +17,23 @@ def player_overview(steam_id):
     p = Player.query.get(steam_id)
     if not p:
         return abort(404)
+    cs_id = Season.current().id
     stats = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.steam_id==steam_id)\
         .order_by(desc(PlayerMatchStats.match_id)).limit(8)
+    pts_seq = PlayerMatchStats.query.join(SeasonStats).filter(and_(SeasonStats.season_id==cs_id,
+        SeasonStats.steam_id==steam_id)).order_by(PlayerMatchStats.match_id)\
+        .values(PlayerMatchStats.old_pts+PlayerMatchStats.pts_diff)
+    pts_hist = [[0, 1000]]
+    for index, el in enumerate(pts_seq):
+        pts_hist.append([index+1, el[0]])
     rating_info = p.get_avg_rating()[0]
     avg_rating = rating_info[0] or 0
     rating_amount = rating_info[1]
     signature_heroes = p.get_signature_heroes()
     matches_stats = stats.all()
     return render_template('player_overview.html', player = p, avg_rating=avg_rating,
-        rating_amount=rating_amount, signature_heroes=signature_heroes, matches_stats=matches_stats)
+        rating_amount=rating_amount, signature_heroes=signature_heroes, matches_stats=matches_stats,
+        pts_history=json.dumps(pts_hist))
 
 
 
