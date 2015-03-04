@@ -41,8 +41,8 @@ def create_app(settings_override=None):
     @app.route('/sitemap.xml', methods=['GET'])
     def sitemap():
         base_url = app.config.get('SITE_ADDRESS', None)
-            if not base_url:
-                raise Exception('You should set SITE_ADDRESS const to generate sitemap.xml')
+        if not base_url:
+            raise Exception('You should set SITE_ADDRESS const to generate sitemap.xml')
         base_url = 'http://' + base_url
         pages = []
         ten_days_ago = datetime.now() - timedelta(days=10)

@@ -8,7 +8,7 @@ class BaseConfig(object):
     STEAM_API_KEY = 'YOUR STEAM API KEY'
     SECRET_KEY = 'YOUR SECRET KEY'
     LOGFILE = '/tmp/gleague_log.txt'
-    ADMINS_STEAM_ID = [,]
+    ADMINS_STEAM_ID = []
     MATCH_BASE_PTS_DIFF = 10
     PRESERVE_CONTEXT_ON_EXCEPTION = False
 
