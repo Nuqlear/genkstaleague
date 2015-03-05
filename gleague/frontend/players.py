@@ -10,6 +10,57 @@ from . import login_required, admin_required
 players_bp = Blueprint('players', __name__)
 
 
+@players_bp.route('/records', methods=['GET'])
+def records():
+    cs_id = Season.current().id
+    win_streak_ss = db.session.query(SeasonStats).filter(and_(SeasonStats.season_id==cs_id, 
+        SeasonStats.longest_streak==func.max(SeasonStats.longest_streak).select())).first()
+    min_pts_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
+            .filter(and_(SeasonStats.season_id==cs_id, 
+            (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == 
+            func.min((PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)).select())).first()
+    max_pts_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
+            .filter(and_(SeasonStats.season_id==cs_id, 
+            (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == 
+            func.max((PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)).select())).first()
+    max_kda_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
+            .filter(and_(SeasonStats.season_id==cs_id, 
+            ((PlayerMatchStats.kills + PlayerMatchStats.assists)/(PlayerMatchStats.deaths+1)) == 
+            func.max((PlayerMatchStats.kills + PlayerMatchStats.assists)/(PlayerMatchStats.deaths+1)).select())).first()
+    max_kills_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
+            .filter(and_(SeasonStats.season_id==cs_id, 
+            PlayerMatchStats.kills == func.max(PlayerMatchStats.kills).select())).first()
+    max_deaths_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
+            .filter(and_(SeasonStats.season_id==cs_id, 
+            PlayerMatchStats.deaths == func.max(PlayerMatchStats.deaths).select())).first()
+    most_lasthits_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
+            .filter(and_(SeasonStats.season_id==cs_id, 
+            PlayerMatchStats.last_hits == func.max(PlayerMatchStats.last_hits).select())).first()
+    most_herodamage_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
+            .filter(and_(SeasonStats.season_id==cs_id, 
+            PlayerMatchStats.hero_damage == func.max(PlayerMatchStats.hero_damage).select())).first()
+    
+    in_season_records = []
+    in_season_records.append(['Longest winstreak', win_streak_ss.player, win_streak_ss.longest_streak])
+    in_season_records.append(['Max pts ever', max_pts_pms.season_stats.player, 
+        max_pts_pms.old_pts + max_pts_pms.pts_diff])
+    in_season_records.append(['Min pts ever', min_pts_pms.season_stats.player, 
+        min_pts_pms.old_pts + min_pts_pms.pts_diff])
+
+    in_match_records = []
+    in_match_records.append([max_kda_pms.match_id, 'Best KDA', max_kda_pms.season_stats.player, 
+        max_kda_pms.hero, (max_kda_pms.kills + max_kda_pms.assists)/(max_kda_pms.deaths+1)])
+    in_match_records.append([max_kills_pms.match_id, 'Max kills', max_kills_pms.season_stats.player, 
+        max_kills_pms.hero, max_kills_pms.kills])
+    in_match_records.append([max_deaths_pms.match_id, 'Max deaths', max_deaths_pms.season_stats.player, 
+        max_deaths_pms.hero, max_deaths_pms.deaths])
+    in_match_records.append([most_lasthits_pms.match_id, 'Most last hits', most_lasthits_pms.season_stats.player, 
+        most_lasthits_pms.hero, most_lasthits_pms.last_hits])
+    in_match_records.append([most_herodamage_pms.match_id, 'Most hero damage', most_herodamage_pms.season_stats.player, 
+        most_herodamage_pms.hero, most_herodamage_pms.hero_damage])
+
+    return render_template('records.html', in_season_records=in_season_records, in_match_records=in_match_records)
+
 
 @players_bp.route('/<int:steam_id>/', methods=['GET'])
 @players_bp.route('/<int:steam_id>/overview', methods=['GET'])

@@ -46,6 +46,12 @@ a.player {
     text-decoration: none; 
 }
 
+.player_alt {
+    color: #4d795d;
+    border-bottom: 1px dashed #4d795d;
+    text-decoration: none;  
+}
+
 div#home{
     margin: 0 auto;
     padding: 0 auto;
@@ -54,6 +60,11 @@ div#home{
     text-align: center;
     padding: 10px;
     color: gray;
+}
+
+.white_table_hover .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
+    background-color: #BBCCBB;
+    cursor: pointer;
 }
 
 .center-table
