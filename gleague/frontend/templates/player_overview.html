@@ -179,13 +179,19 @@ $(document).ready(function() {
             window.location.href = '/matches/' + $(this).attr('match_id');
         });
     });
-    $.jqplot('pts_history_plot', [{{ pts_history | safe}}], {  
+    var pts_array = {{ pts_history | safe}};
+    var tick = 1;
+    if (pts_array.length >= 18) {
+        tick = parseInt(pts_array.length/8);
+    }
+    console.log(tick);
+    $.jqplot('pts_history_plot', [pts_array], {  
         series:[{showMarker:false}],
         axes:{
             xaxis:{
                 labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
                 min: 0,  
-                tickInterval: 1, 
+                tickInterval: tick, 
                 tickOptions: { 
                     formatString: '%d' 
                 },
