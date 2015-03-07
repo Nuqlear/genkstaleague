@@ -8,6 +8,7 @@ sys.path.append(os.getcwd())
 
 from gleague.core import db
 from gleague.config import BaseConfig
+from gleague.models import *
 
 # this is the Alembic Config object, which provides
 # access to the values within the .ini file in use.
@@ -50,6 +51,7 @@ def run_migrations_online():
     and associate a connection with the context.
 
     """
+    print()
     engine = engine_from_config(
         config.get_section(config.config_ini_section),
         prefix='sqlalchemy.',

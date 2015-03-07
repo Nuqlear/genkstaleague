@@ -60,7 +60,8 @@ class SeasonStats(db.Model):
     wins = Column(Integer, default=0, nullable=False)
     losses = Column(Integer, default=0, nullable=False)
     pts = Column(Integer, default=1000, nullable=False)
-    longest_streak = Column(Integer, default=0, nullable=False)
+    longest_winstreak = Column(Integer, default=0, nullable=False)
+    longest_losestreak = Column(Integer, default=0, nullable=False)
     streak = Column(Integer, default=0, nullable=False)
     player_matches_stats = relationship('PlayerMatchStats', lazy='dynamic', backref='season_stats')
 
@@ -79,6 +80,6 @@ class SeasonStats(db.Model):
                 'loss': self.loss,
                 'pts': self.pts,
                 'streak': self.streak,
-                'longest_streak': self.longest_streak 
+                'longest_streak': self.longest_winstreak 
             })
         return d

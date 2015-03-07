@@ -14,7 +14,9 @@ players_bp = Blueprint('players', __name__)
 def records():
     cs_id = Season.current().id
     win_streak_ss = db.session.query(SeasonStats).filter(and_(SeasonStats.season_id==cs_id, 
-        SeasonStats.longest_streak==func.max(SeasonStats.longest_streak).select())).first()
+        SeasonStats.longest_winstreak==func.max(SeasonStats.longest_winstreak).select())).first()
+    lose_streak_ss = db.session.query(SeasonStats).filter(and_(SeasonStats.season_id==cs_id, 
+        SeasonStats.longest_losestreak==func.max(SeasonStats.longest_losestreak).select())).first()
     min_pts_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
             .filter(and_(SeasonStats.season_id==cs_id, 
             (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == 
@@ -41,7 +43,8 @@ def records():
             PlayerMatchStats.hero_damage == func.max(PlayerMatchStats.hero_damage).select())).first()
     
     in_season_records = []
-    in_season_records.append(['Longest winstreak', win_streak_ss.player, win_streak_ss.longest_streak])
+    in_season_records.append(['Longest winstreak', win_streak_ss.player, win_streak_ss.longest_winstreak])
+    in_season_records.append(['Longest losestreak', lose_streak_ss.player, lose_streak_ss.longest_losestreak])
     in_season_records.append(['Max pts ever', max_pts_pms.season_stats.player, 
         max_pts_pms.old_pts + max_pts_pms.pts_diff])
     in_season_records.append(['Min pts ever', min_pts_pms.season_stats.player, 

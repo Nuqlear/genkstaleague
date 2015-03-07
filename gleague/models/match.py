@@ -240,12 +240,20 @@ class Match(db.Model):
             season_stats = stats.season_stats
             if stats.pts_diff > 0:
                 season_stats.wins += 1
-                season_stats.streak += 1
-                if season_stats.streak > season_stats.longest_streak:
-                    season_stats.longest_streak = season_stats.streak
+                if season_stats.streak > 0:
+                    season_stats.streak += 1
+                else:
+                    season_stats.streak = 1
+                if season_stats.streak > season_stats.longest_winstreak:
+                    season_stats.longest_winstreak = season_stats.streak
             else:
-                season_stats.streak = 0 
+                if season_stats.streak > 0:
+                    season_stats.streak = - 1
+                else:
+                    season_stats.streak -= 1
                 season_stats.losses += 1
+                if season_stats.streak < season_stats.longest_losestreak:
+                    season_stats.longest_losestreak = -(season_stats.streak)
         db.session.add(m)
         db.session.flush()
         return m
