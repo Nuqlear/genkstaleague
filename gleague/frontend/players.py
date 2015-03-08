@@ -7,6 +7,7 @@ from ..models import Player, PlayerMatchStats, SeasonStats, Season
 from ..core import db
 from . import login_required, admin_required
 
+
 players_bp = Blueprint('players', __name__)
 
 
@@ -89,6 +90,31 @@ def player_overview(steam_id):
         rating_amount=rating_amount, signature_heroes=signature_heroes, matches_stats=matches_stats,
         pts_history=json.dumps(pts_hist))
 
+
+@players_bp.route('/<int:steam_id>/matches', methods=['GET'])
+@players_bp.route('/<int:steam_id>/matches', methods=['GET'])
+def player_matches(steam_id):
+    p = Player.query.get(steam_id)
+    if not p:
+        return abort(404)
+    _args = {'player': p}
+    page = request.args.get('page', '1')
+    if not page.isdigit():
+        abort(400)
+    page = int(page)
+    hero_filter = request.args.get('hero', None)
+    cs_id = Season.current().id
+    matches_stats = PlayerMatchStats.query.order_by(desc(PlayerMatchStats.match_id))\
+        .join(SeasonStats).filter(SeasonStats.steam_id==steam_id)
+    if hero_filter:
+        _args['hero_filter'] = hero_filter
+        matches_stats = matches_stats.filter(PlayerMatchStats.hero==hero_filter)
+    _args['matches_stats'] = matches_stats.paginate(page, 
+        current_app.config.get('PLAYER_HISTORY_MATCHES_PER_PAGE', 10), True)
+    rating_info = p.get_avg_rating()[0]
+    _args['avg_rating'] = rating_info[0] or 0
+    _args['rating_amount'] = rating_info[1]
+    return render_template('player_matches.html', **_args)
 
 
 @players_bp.route('/', methods=['GET'])

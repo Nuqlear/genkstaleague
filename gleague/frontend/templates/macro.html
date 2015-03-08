@@ -35,17 +35,19 @@
   <title>{{ SITE_TITLE }} | {{ page }}</title>
 {%- endmacro %}
 
-{% macro render_pagination(pagination, url, arg, argval) %}
+{% macro render_pagination(pagination, url) %}
+{% set view_args = kwargs %}
 <div id="pagination">
     <ul class="pagination">
     {% if pagination.has_prev %}
-        <li><a href="{{ url_for(url, page=pagination.prev_num)
-          }}"><</a></li>
+        <li>
+        <a href="{{ url_for(url, page=pagination.prev_num, **view_args) }}"><</a>
+        </li>
     {% endif %}
     {%- for _page in pagination.iter_pages() %}
         {% if _page %}
           {% if _page != pagination.page %}
-            <li><a href="{{ url_for(url, page=_page) }}">{{ _page }}</a></li>
+            <li><a href="{{ url_for(url, page=_page, **view_args) }}">{{ _page }}</a></li>
           {% else %}
             <li class="active"><a>{{ _page }}</strong></a></li>
           {% endif %}
@@ -54,8 +56,7 @@
         {% endif %}
       {%- endfor %}
       {% if pagination.has_next %}
-        <li><a href="{{ url_for(url, page=pagination.next_num)
-          }}">></a></li>
+        <li><a href="{{ url_for(url, page=pagination.next_num, **view_args) }}">></a></li>
       {% endif %}
     </ul>
 </div>

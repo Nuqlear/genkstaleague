@@ -22,7 +22,7 @@
     ])}}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    {{ macro.render_site_title(player.nickname) }}
+    {{ macro.render_site_title(player.nickname ~ ' matches') }}
 </head>
 <body>
 <a href='/'>
@@ -52,65 +52,6 @@
                 </h2>
             </div>
         </div>
-        <div class="row" style="padding: 20px; color:black">
-            <div class="col-md-6">
-                <div class="panel panel-default white_table_hover">
-                    <div class="panel-heading">Signature heroes</div>
-                    <table class="table table-hover">
-                       <thead>
-                        <tr>
-                            <th>Hero</th>
-                            <th>Matches</th>
-                            <th>Winrate</th>
-                            <th>Earned pts</th>
-                            <th>KDA</th>
-                        </tr>
-                        </thead>
-                        <tbody id="signature_heroes">
-                        {% for s in signature_heroes %}
-                        <tr hero={{ s[0] }}>
-                            <td><img class="steam_img" 
-                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s[0] }}_sb.png></td>
-                            <td>{{ s[1] }}</td>
-                            <td>{{ (s[2] / s[1])*100 | round }}%</td>
-                            <td>{{ s[3] }}</td>
-                            <td>{{ '%0.2f' % ((s[4]+s[5])/(s[6] + 1)) }}</td>
-                            </td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div> 
-                <div class="panel panel-default">
-                    <div class="panel-heading">Seasons played</div>
-                    <table class="table">
-                       <thead>
-                        <tr>
-                            <th>Season</th>
-                            <th>Wins/Losses</th>
-                            <th>PTS</th>
-                        </tr>
-                        </thead>
-                        <tbody>
-                        {% for ss in player.season_stats %}
-                        <tr>
-                            <td>{{ ss.season.number }}</td>
-                            <td>{{ ss.wins }} / {{ ss.losses }}</td>
-                            <td>{{ ss.pts }}</td>
-                        </tr>
-                        {% endfor %}
-                        </tbody>
-                    </table>
-                </div> 
-            </div>
-            <div class="col-md-6">
-                <div class="panel panel-default">
-                    <div class="panel-heading">Pts trends</div>
-                    <div id="pts_history_plot">
-                    </div>
-                </div> 
-            </div>
-        </div>
         <div class="player_matches table-responsive">
             <table class="table table-hover">
                 <thead>
@@ -131,7 +72,7 @@
                     </tr>
                 </thead>
                 <tbody>
-                    {% for s in matches_stats %}
+                    {% for s in matches_stats.items %}
                         {% if s.player_slot < 5 %}
                             {% if s.match.radiant_win %}
                             <tr class="win_row" match_id={{ s.match_id }}>
@@ -164,10 +105,13 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <h3 class="text-center"><a class="player" 
-                href="{{ url_for('players.player_matches', steam_id=player.steam_id) }}">Show all matches</a></h3>
         </div>
     </div>
+    {% if hero_filter %}
+        {{ macro.render_pagination(matches_stats, 'players.player_matches', steam_id=player.steam_id, hero=hero_filter) }}
+    {% else %}
+        {{ macro.render_pagination(matches_stats, 'players.player_matches', steam_id=player.steam_id) }}
+    {% endif %}
 </div>
 </body>
 <script>
@@ -181,34 +125,6 @@ $(document).ready(function() {
         $(this).click(function() {
             window.location.href = '/matches/' + $(this).attr('match_id');
         });
-    });
-    $('#signature_heroes tr').each(function() {
-        $(this).click(function() {
-            window.location.href = '/players/{{ player.steam_id }}/matches?hero=' + $(this).attr('hero');
-        });
-    });
-    var pts_array = {{ pts_history | safe}};
-    var tick = 1;
-    if (pts_array.length >= 18) {
-        tick = parseInt(pts_array.length/8);
-    }
-    console.log(tick);
-    $.jqplot('pts_history_plot', [pts_array], {  
-        series:[{showMarker:false}],
-        axes:{
-            xaxis:{
-                labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                min: 0,  
-                tickInterval: tick, 
-                tickOptions: { 
-                    formatString: '%d' 
-                },
-                pad: 0
-            },
-            yaxis:{
-                labelRenderer: $.jqplot.CanvasAxisLabelRenderer
-            }
-        }
     });
 });
 </script>
