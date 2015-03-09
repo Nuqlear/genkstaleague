@@ -151,6 +151,8 @@ def players():
     page = int(page)
     cs_id = Season.current().id
     ss = SeasonStats.query.join(Player).filter(SeasonStats.season_id==cs_id)\
+        .join(PlayerMatchStats).group_by(SeasonStats.id)\
+        .having(func.count(PlayerMatchStats.id) > 3)\
         .order_by(sort_dict.get(sort, desc(SeasonStats.pts)))
     if q:
         ss = ss.filter(func.lower(Player.nickname).startswith(func.lower(q)))
