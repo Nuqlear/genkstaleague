@@ -252,7 +252,7 @@ class Match(db.Model):
                 else:
                     season_stats.streak -= 1
                 season_stats.losses += 1
-                if season_stats.streak < season_stats.longest_losestreak:
+                if season_stats.streak < -(season_stats.longest_losestreak):
                     season_stats.longest_losestreak = -(season_stats.streak)
         db.session.add(m)
         db.session.flush()
