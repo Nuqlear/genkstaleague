@@ -21,27 +21,34 @@ def records():
     min_pts_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
             .filter(and_(SeasonStats.season_id==cs_id, 
             (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == 
-            func.min((PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)).select())).first()
+            func.min((PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)).select()))\
+            .order_by(PlayerMatchStats.id).first()
     max_pts_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
             .filter(and_(SeasonStats.season_id==cs_id, 
             (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == 
-            func.max((PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)).select())).first()
+            func.max((PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)).select()))\
+            .order_by(PlayerMatchStats.id).first()
     max_kda_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
             .filter(and_(SeasonStats.season_id==cs_id, 
             ((PlayerMatchStats.kills + PlayerMatchStats.assists)/(PlayerMatchStats.deaths+1)) == 
-            func.max((PlayerMatchStats.kills + PlayerMatchStats.assists)/(PlayerMatchStats.deaths+1)).select())).first()
+            func.max((PlayerMatchStats.kills + PlayerMatchStats.assists)/(PlayerMatchStats.deaths+1)).select()))\
+            .order_by(PlayerMatchStats.id).first()
     max_kills_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
             .filter(and_(SeasonStats.season_id==cs_id, 
-            PlayerMatchStats.kills == func.max(PlayerMatchStats.kills).select())).first()
+            PlayerMatchStats.kills == func.max(PlayerMatchStats.kills).select()))\
+            .order_by(PlayerMatchStats.id).first()
     max_deaths_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
             .filter(and_(SeasonStats.season_id==cs_id, 
-            PlayerMatchStats.deaths == func.max(PlayerMatchStats.deaths).select())).first()
+            PlayerMatchStats.deaths == func.max(PlayerMatchStats.deaths).select()))\
+            .order_by(PlayerMatchStats.id).first()
     most_lasthits_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
             .filter(and_(SeasonStats.season_id==cs_id, 
-            PlayerMatchStats.last_hits == func.max(PlayerMatchStats.last_hits).select())).first()
+            PlayerMatchStats.last_hits == func.max(PlayerMatchStats.last_hits).select()))\
+            .order_by(PlayerMatchStats.id).first()
     most_herodamage_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
             .filter(and_(SeasonStats.season_id==cs_id, 
-            PlayerMatchStats.hero_damage == func.max(PlayerMatchStats.hero_damage).select())).first()
+            PlayerMatchStats.hero_damage == func.max(PlayerMatchStats.hero_damage).select()))\
+            .order_by(PlayerMatchStats.id).first()
     
     in_season_records = []
     in_season_records.append(['Longest winstreak', win_streak_ss.player, win_streak_ss.longest_winstreak])
