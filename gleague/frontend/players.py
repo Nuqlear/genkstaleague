@@ -1,7 +1,7 @@
 import json
 
 from flask import Blueprint, g, abort, current_app, render_template, request, current_app
-from sqlalchemy import desc, func, and_
+from sqlalchemy import desc, func, and_, case
 
 from ..models import Player, PlayerMatchStats, SeasonStats, Season
 from ..core import db
@@ -49,13 +49,29 @@ def records():
             .filter(and_(SeasonStats.season_id==cs_id, 
             PlayerMatchStats.hero_damage == func.max(PlayerMatchStats.hero_damage).select()))\
             .order_by(PlayerMatchStats.id).first()
+
+    in_season_most_playable = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.season_id==cs_id,)\
+            .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'), 
+                func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0)),
+                func.sum(PlayerMatchStats.pts_diff),
+                func.avg(PlayerMatchStats.kills), func.avg(PlayerMatchStats.assists), 
+                func.avg(PlayerMatchStats.deaths)
+            ).group_by(PlayerMatchStats.hero).order_by(desc('played')).limit(3).all()
+
+    in_season_most_profitable = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.season_id==cs_id,)\
+            .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'), 
+                func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0)),
+                func.sum(PlayerMatchStats.pts_diff).label('earned'),
+                func.avg(PlayerMatchStats.kills), func.avg(PlayerMatchStats.assists), 
+                func.avg(PlayerMatchStats.deaths)
+            ).group_by(PlayerMatchStats.hero).order_by(desc('earned')).limit(3).all()
     
-    in_season_records = []
-    in_season_records.append(['Longest winstreak', win_streak_ss.player, win_streak_ss.longest_winstreak])
-    in_season_records.append(['Longest losestreak', lose_streak_ss.player, lose_streak_ss.longest_losestreak])
-    in_season_records.append(['Max pts ever', max_pts_pms.season_stats.player, 
+    in_season_player_records = []
+    in_season_player_records.append(['Longest winstreak', win_streak_ss.player, win_streak_ss.longest_winstreak])
+    in_season_player_records.append(['Longest losestreak', lose_streak_ss.player, lose_streak_ss.longest_losestreak])
+    in_season_player_records.append(['Max pts ever', max_pts_pms.season_stats.player, 
         max_pts_pms.old_pts + max_pts_pms.pts_diff])
-    in_season_records.append(['Min pts ever', min_pts_pms.season_stats.player, 
+    in_season_player_records.append(['Min pts ever', min_pts_pms.season_stats.player, 
         min_pts_pms.old_pts + min_pts_pms.pts_diff])
 
     in_match_records = []
@@ -70,7 +86,8 @@ def records():
     in_match_records.append([most_herodamage_pms.match_id, 'Most hero damage', most_herodamage_pms.season_stats.player, 
         most_herodamage_pms.hero, most_herodamage_pms.hero_damage])
 
-    return render_template('records.html', in_season_records=in_season_records, in_match_records=in_match_records)
+    return render_template('records.html', in_season_player_records=in_season_player_records, in_match_records=in_match_records,
+        in_season_most_playable=in_season_most_playable, in_season_most_profitable=in_season_most_profitable)
 
 
 @players_bp.route('/<int:steam_id>/', methods=['GET'])
