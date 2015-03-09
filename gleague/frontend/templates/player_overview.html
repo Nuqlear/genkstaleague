@@ -72,7 +72,7 @@
                             <td><img class="steam_img" 
                             src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s[0] }}_sb.png></td>
                             <td>{{ s[1] }}</td>
-                            <td>{{ (s[2] / s[1])*100 | round }}%</td>
+                            <td>{{ '%i' % ((s[2] / s[1])*100) }}%</td>
                             <td>{{ s[3] }}</td>
                             <td>{{ '%0.2f' % ((s[4]+s[5])/(s[6] + 1)) }}</td>
                             </td>
