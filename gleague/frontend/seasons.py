@@ -35,7 +35,7 @@ def players(season_number='current'):
         .filter(SeasonStats.season_id==s_id)\
         .order_by(sort_dict.get(sort, desc(SeasonStats.pts)))\
         .join(PlayerMatchStats).group_by(SeasonStats.id)\
-        .having(func.count(PlayerMatchStats.id) > 3)
+        .having(func.count(PlayerMatchStats.id) > current_app.config['SEASON_CALIBRATING_MATCHES_NUM'])
     if q:
         ss = ss.filter(func.lower(Player.nickname).startswith(func.lower(q)))
     ss = ss.paginate(page, current_app.config['TOP_PLAYERS_PER_PAGE'], True)
