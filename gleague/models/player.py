@@ -51,14 +51,15 @@ class Player(db.Model):
             func.count(PlayerMatchRating.id)).all()
         return q_res
         
-    def get_signature_heroes(self):
+    def get_heroes(self):
         q_res = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.steam_id==self.steam_id)\
             .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'), 
                 func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0)),
                 func.sum(PlayerMatchStats.pts_diff),
                 func.avg(PlayerMatchStats.kills), func.avg(PlayerMatchStats.assists), 
                 func.avg(PlayerMatchStats.deaths)
-            ).group_by(PlayerMatchStats.hero).order_by(desc('played')).limit(3).all()
+            ).group_by(PlayerMatchStats.hero)
+            # .order_by(desc('played')).limit(3).all()
         return q_res       
 
 

@@ -46,7 +46,7 @@ a.player {
     text-decoration: none; 
 }
 
-.player_alt {
+a.player_alt {
     color: #4d795d;
     border-bottom: 1px dashed #4d795d;
     text-decoration: none;  

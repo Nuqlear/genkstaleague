@@ -80,6 +80,10 @@
                         {% endfor %}
                         </tbody>
                     </table>
+                    <div class="text-center">
+                    <a class="player_alt"
+                        href="{{ url_for('players.player_heroes', steam_id=player.steam_id) }}">Show all heroes</a>
+                    </div>
                 </div> 
                 <div class="panel panel-default">
                     <div class="panel-heading">Seasons played</div>

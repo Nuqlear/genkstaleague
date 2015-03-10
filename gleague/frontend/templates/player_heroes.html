@@ -1,0 +1,102 @@
+{% import 'macro.html' as macro with context %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    {{ macro.load_js_lib([
+        'bootstrap/dist/js/bootstrap.js',
+        'raty/lib/jquery.raty.js',
+        'moment/moment.js',
+        'jqplot/jquery.jqplot.min.js'
+    ]) }}
+    {{ macro.load_css_lib([
+        'bootstrap/dist/css/bootstrap.css',
+        'bootstrap/dist/css/bootstrap-theme.css',
+        'jqplot/jquery.jqplot.min.css'
+    ]) }}
+    {{ macro.load_css([
+        'main.css',
+        'player.css'
+    ])}}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    {{ macro.render_site_title(player.nickname ~ ' heroes') }}
+</head>
+<body>
+<a href='/'>
+<div id="home">
+    <span class="glyphicon glyphicon-home"></span>
+</div>
+</a>
+<div id="container">
+    {{ macro.render_logo() }}
+    <hr id="line_after_logo"/>
+    <div style="padding: 0 20px">
+        <div class="row">
+            <div class="col-md-8" style="padding:20px">
+                <h1>
+                    <img style="border: 3px solid white" src={{ player.avatar_medium }}>
+                    <a class="player"
+                        href="{{ url_for('players.player_overview', steam_id=player.steam_id) }}">{{player.nickname}}</a>
+                    <span id="avg_rating"></span> <span style="font-size:12pt">({{ rating_amount }} votes)</span>
+                </h1>
+            </div>
+            <div class="col-md-4" style="padding:20px; text-align:right;">
+                <h2 style="padding-top:15px">
+                    <span style="color:#009900">{{ player.season_stats[-1].wins }}</span> 
+                    / 
+                    <span style="color:#550000">{{ player.season_stats[-1].losses }}</span>
+                    <span style="padding-left:10px">{{ player.season_stats[-1].pts }} pts</span>
+                </h2>
+            </div>
+        </div>
+        <div class="row" style="padding: 20px; color:black">
+            <div class="col-md-offset-2 col-md-8">
+                <div class="panel panel-default white_table_hover">
+                    <div class="panel-heading">All heroes</div>
+                    <table class="table table-hover">
+                       <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Matches</th>
+                            <th>Winrate</th>
+                            <th>Earned pts</th>
+                            <th>KDA</th>
+                        </tr>
+                        </thead>
+                        <tbody id="heroes_stats">
+                        {% for s in heroes_stats %}
+                        <tr hero={{ s[0] }}>
+                            <td><img class="steam_img" 
+                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s[0] }}_sb.png></td>
+                            <td>{{ s[1] }}</td>
+                            <td>{{ '%i' % ((s[2] / s[1])*100) }}%</td>
+                            <td>{{ s[3] }}</td>
+                            <td>{{ '%0.2f' % ((s[4]+s[5])/(s[6] + 1)) }}</td>
+                            </td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div> 
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+$(document).ready(function() {
+    $('#avg_rating').raty({ readOnly: true, path: '/static/lib/bower_components/raty/lib/img', score: parseFloat("{{ avg_rating }}")});
+    $("[data-toggle=tooltip]").tooltip({container:'body'});
+    $('.start_time').each(function() {
+        $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
+    });
+    $('#heroes_stats tr').each(function() {
+        $(this).click(function() {
+            window.location.href = '/players/{{ player.steam_id }}/matches?hero=' + $(this).attr('hero');
+        });
+    });
+});
+</script>
