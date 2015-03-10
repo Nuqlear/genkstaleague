@@ -150,10 +150,11 @@ def players():
     page = request.args.get('page', 1)
     page = int(page)
     cs_id = Season.current().id
-    ss = SeasonStats.query.join(Player).filter(SeasonStats.season_id==cs_id)\
+    ss = SeasonStats.query.join(Player).group_by(Player.steam_id)\
+        .filter(SeasonStats.season_id==cs_id)\
+        .order_by(sort_dict.get(sort, desc(SeasonStats.pts)))\
         .join(PlayerMatchStats).group_by(SeasonStats.id)\
-        .having(func.count(PlayerMatchStats.id) > 3)\
-        .order_by(sort_dict.get(sort, desc(SeasonStats.pts)))
+        .having(func.count(PlayerMatchStats.id) > 3)
     if q:
         ss = ss.filter(func.lower(Player.nickname).startswith(func.lower(q)))
     ss = ss.paginate(page, current_app.config.get('TOP_PLAYERS_PER_PAGE', 15), True)
