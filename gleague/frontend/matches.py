@@ -21,11 +21,13 @@ def match(match_id):
 
 
 @matches_bp.route('/', methods=['GET'])
-@matches_bp.route('/pages/', methods=['GET'])
-@matches_bp.route('/pages/<int:page>', methods=['GET'])
-def matches_preview(page=1):
+def matches_preview():
+    page = request.args.get('page', '1')
+    if not page.isdigit():
+        abort(400)
+    page = int(page)
     m = Match.query.order_by(desc(Match.id)).paginate(page,
-        current_app.config.get('HISTORY_MATCHES_PER_PAGE', 6), True)
+        current_app.config['HISTORY_MATCHES_PER_PAGE'], True)
     return render_template('matches.html', matches=m)
 
 

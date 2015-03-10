@@ -20,14 +20,15 @@ def create_app(settings_override=None):
     oid.init_app(app)
     admin.init_admin(app)
 
-    # from .players import players_bp
-    # app.register_blueprint(players_bp, url_prefix="/players")
+
     from .matches import matches_bp
     app.register_blueprint(matches_bp, url_prefix="/matches")
     from .players import players_bp
     app.register_blueprint(players_bp, url_prefix="/players")
     from .auth import auth_bp
     app.register_blueprint(auth_bp)
+    from .seasons import seasons_bp
+    app.register_blueprint(seasons_bp, url_prefix="/seasons")
 
     @app.route('/favicon.ico')
     @app.route('/robots.txt')
@@ -36,13 +37,11 @@ def create_app(settings_override=None):
 
     @app.route('/')
     def redirect_to_matches():
-        return redirect(url_for('players.players'))
+        return redirect(url_for('seasons.players'))
 
     @app.route('/sitemap.xml', methods=['GET'])
     def sitemap():
-        base_url = app.config.get('SITE_ADDRESS', None)
-        if not base_url:
-            raise Exception('You should set SITE_ADDRESS const to generate sitemap.xml')
+        base_url = app.config['SITE_ADDRESS']
         base_url = 'http://' + base_url
         pages = []
         ten_days_ago = datetime.now() - timedelta(days=10)
@@ -76,8 +75,8 @@ def create_app(settings_override=None):
     @app.context_processor
     def inject_globals():
         return {
-            'GOOGLE_SITE_VERIFICATION_CODE': app.config.get('GOOGLE_SITE_VERIFICATION_CODE', None),
-            'SITE_TITLE': app.config.get('SITE_TITLE', 'gleague')
+            'GOOGLE_SITE_VERIFICATION_CODE': app.config['GOOGLE_SITE_VERIFICATION_CODE'],
+            'SITE_TITLE': app.config['SITE_TITLE']
         }
 
     return app

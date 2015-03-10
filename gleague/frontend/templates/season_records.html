@@ -45,8 +45,8 @@
             {% if g.user %}
                 <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
             {% endif %}
-            <li class="active" ><a href="{{ url_for('players.records') }}">Season Records</a></li>
-            <li ><a href="{{ url_for('players.players') }}">Season Players</a></li>
+            <li class="active" ><a href="{{ url_for('seasons.records') }}">Season Stats</a></li>
+            <li ><a href="{{ url_for('seasons.players') }}">Season Players</a></li>
             <li ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
             <li ><a href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
         </ul>
