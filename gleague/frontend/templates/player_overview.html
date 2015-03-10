@@ -52,6 +52,11 @@
                 </h2>
             </div>
         </div>
+        <ul class="nav nav-tabs">
+            <li class="active" ><a href="{{ url_for('players.player_overview', steam_id=player.steam_id) }}">Overview</a></li>
+            <li ><a href="{{ url_for('players.player_heroes', steam_id=player.steam_id) }}">Heroes</a></li>
+            <li ><a href="{{ url_for('players.player_matches', steam_id=player.steam_id) }}">Matches</a></li>
+        </ul>
         <div class="row" style="padding: 20px; color:black">
             <div class="col-md-6">
                 <div class="panel panel-default white_table_hover">
@@ -80,10 +85,6 @@
                         {% endfor %}
                         </tbody>
                     </table>
-                    <div class="text-center">
-                    <a class="player_alt"
-                        href="{{ url_for('players.player_heroes', steam_id=player.steam_id) }}">Show all heroes</a>
-                    </div>
                 </div> 
                 <div class="panel panel-default">
                     <div class="panel-heading">Seasons played</div>
