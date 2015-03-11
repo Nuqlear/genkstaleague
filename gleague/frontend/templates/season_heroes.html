@@ -1,0 +1,121 @@
+{% import 'macro.html' as macro with context %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    {{ macro.load_js_lib([
+        'bootstrap/dist/js/bootstrap.js'
+    ]) }}
+    {{ macro.load_css_lib([
+        'bootstrap/dist/css/bootstrap.css',
+        'bootstrap/dist/css/bootstrap-theme.css',
+    ]) }}
+    {{ macro.load_css([
+        'main.css',
+        'players.css'
+    ])}}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    {{ macro.render_google_meta() }}
+    {{ macro.render_site_title('RECORDS') }}
+</head>
+<body>
+{% if g.user %}
+    {% if g.user.is_admin() %}
+    <a href='/admin/'>
+    <div id="home">
+        <span class="glyphicon glyphicon-wrench"></span>
+    </div>
+    </a>
+    {% endif %}
+{% else %}
+    <div id="error" class="alert alert-warning alert-dismissable text-center">
+      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+      <a href="/login"><img stlyle="height: 50px;" 
+      src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
+      to rate players.
+    </div>
+{% endif %}
+<div id="container">
+    {{ macro.render_logo() }}
+    <div style="padding:20px">
+        {{ macro.render_navigation('season_heroes') }}
+    </div>
+    <div class="row" style="color:black">
+        <div class="col-md-8 col-md-offset-2">
+            <div class="panel panel-default">
+                <div class="panel-heading">Played heroes</div>
+                <table class="table">
+                   <thead>
+                    <tr>
+                        <th>
+                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='hero', desc='no') }}">Hero
+                            {% if sort == 'hero' %}
+                                <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='played', desc='yes') }}">Matches
+                            {% if not sort or sort == 'played' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='winrate', desc='yes') }}">Winrate
+                            {% if sort == 'winrate' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='earned', desc='yes') }}">Earned pts
+                            {% if sort == 'earned' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='kda', desc='yes') }}">KDA
+                            {% if sort == 'kda' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for h in in_season_heroes %}
+                    <tr>
+                        <td><img class="steam_img" 
+                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ h.hero }}_sb.png></td>
+                        <td>{{ h.played }}</td>
+                        <td>{{ '%i' % h.winrate }}%</td>
+                        <td>{{ h.earned }}</td>
+                        <td>{{ '%0.2f' % h.kda }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+</div>
+</body>
+<script>
+$(document).ready(function() {
+    $('.in_match_records_table tr').each(function() {
+        $(this).click(function() {
+            window.location.href = '/matches/' + $(this).attr('match_id');
+        });
+    });
+    $('.in_season_records_table tr').each(function() {
+        $(this).click(function() {
+            window.location.href = '/players/' + $(this).attr('player_id') + '/overview';
+        });
+    });
+});
+</script>

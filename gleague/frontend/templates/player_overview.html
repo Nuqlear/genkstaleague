@@ -73,13 +73,13 @@
                         </thead>
                         <tbody id="signature_heroes">
                         {% for s in signature_heroes %}
-                        <tr hero={{ s[0] }}>
+                        <tr hero={{ s.hero }}>
                             <td><img class="steam_img" 
-                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s[0] }}_sb.png></td>
-                            <td>{{ s[1] }}</td>
-                            <td>{{ '%i' % ((s[2] / s[1])*100) }}%</td>
-                            <td>{{ s[3] }}</td>
-                            <td>{{ '%0.2f' % ((s[4]+s[5])/(s[6] + 1)) }}</td>
+                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png></td>
+                            <td>{{ s.played }}</td>
+                            <td>{{ '%i' % s.winrate }}%</td>
+                            <td>{{ s.earned }}</td>
+                            <td>{{ '%0.2f' % s.kda }}</td>
                             </td>
                         </tr>
                         {% endfor %}

@@ -28,11 +28,29 @@
 {%- endmacro %}
 
 {% macro render_google_meta() -%}
-  <meta name="google-site-verification" content={{ GOOGLE_SITE_VERIFICATION_CODE }} />
+    <meta name="google-site-verification" content={{ GOOGLE_SITE_VERIFICATION_CODE }} />
 {%- endmacro %}
 
+{% macro render_navigation(active) %}
+  <ul class="nav nav-tabs">
+      {% if g.user %}
+          <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
+      {% endif %}
+      <li {% if active == 'season_records' %} class="active" {% endif %}><a 
+        href="{{ url_for('seasons.records') }}">Season Records</a></li>
+      <li {% if active == 'season_heroes' %} class="active" {% endif %}><a 
+        href="{{ url_for('seasons.heroes') }}">Season Heroes</a></li>
+      <li {% if active == 'season_players' %} class="active" {% endif %}><a 
+        href="{{ url_for('seasons.players') }}">Season Players</a></li>
+      <li {% if active == 'matches_preview' %} class="active" {% endif %}><a 
+        href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
+      <li {% if active == 'team_builder' %} class="active" {% endif %}><a 
+        href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
+  </ul>
+{% endmacro %}
+
 {% macro render_site_title(page) -%}
-  <title>{{ SITE_TITLE }} | {{ page }}</title>
+    <title>{{ SITE_TITLE }} | {{ page }}</title>
 {%- endmacro %}
 
 {% macro render_pagination(pagination, url) %}

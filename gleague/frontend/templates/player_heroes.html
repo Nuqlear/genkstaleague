@@ -60,26 +60,61 @@
         <div class="row" style="padding: 20px; color:black">
             <div class="col-md-offset-2 col-md-8">
                 <div class="panel panel-default white_table_hover">
-                    <div class="panel-heading">All heroes</div>
+                    <div class="panel-heading">Played heroes</div>
                     <table class="table table-hover">
                        <thead>
                         <tr>
-                            <th>Hero</th>
-                            <th>Matches</th>
-                            <th>Winrate</th>
-                            <th>Earned pts</th>
-                            <th>KDA</th>
+                            <th>
+                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='hero',
+                                 desc='no') }}">Hero
+                                {% if sort == 'hero' %}
+                                    <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
+                                {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='played',
+                                desc='yes') }}">Matches
+                                {% if not sort or sort == 'played' %}
+                                    <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='winrate',
+                                desc='yes') }}">Winrate
+                                {% if sort == 'winrate' %}
+                                    <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='earned',
+                                desc='yes') }}">Earned pts
+                                {% if sort == 'earned' %}
+                                    <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                {% endif %}
+                                </a>
+                            </th>
+                            <th>
+                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='kda',
+                                desc='yes') }}">KDA
+                                {% if sort == 'kda' %}
+                                    <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                {% endif %}
+                                </a>
+                            </th>
                         </tr>
                         </thead>
                         <tbody id="heroes_stats">
                         {% for s in heroes_stats %}
-                        <tr hero={{ s[0] }}>
+                        <tr hero={{ s.hero }}>
                             <td><img class="steam_img" 
-                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s[0] }}_sb.png></td>
-                            <td>{{ s[1] }}</td>
-                            <td>{{ '%i' % ((s[2] / s[1])*100) }}%</td>
-                            <td>{{ s[3] }}</td>
-                            <td>{{ '%0.2f' % ((s[4]+s[5])/(s[6] + 1)) }}</td>
+                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png></td>
+                            <td>{{ s.played }}</td>
+                            <td>{{ '%i' % s.winrate }}%</td>
+                            <td>{{ s.earned }}</td>
+                            <td>{{ '%0.2f' % s.kda }}</td>
                             </td>
                         </tr>
                         {% endfor %}

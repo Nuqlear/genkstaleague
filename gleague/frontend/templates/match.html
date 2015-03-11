@@ -43,6 +43,7 @@
         <thead>
             <tr>
             <td>Match id</td>
+            <td>Season</td>
             <td>Game Mode</td>
             <td>Duration</td>
             <td>Date</td>
@@ -50,6 +51,7 @@
         </thead>
         <tbody>
             <td>{{ match.id }}</td>
+            <td>{{ match.season.number }}</td>
             <td>{{ match.game_mode_repr() }}</td>
             <td>{{ match.duration//60 }}:{{match.duration % 60}}</td>
             <td id="start_time">{{ match.start_time }}</td>

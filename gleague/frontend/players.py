@@ -66,12 +66,20 @@ def player_heroes(steam_id):
     p = Player.query.get(steam_id)
     if not p:
         return abort(404)
-    _args = {'player': p}
+    _sort = request.args.get('sort', 'played')
+    if _sort not in ['hero', 'played', 'earned', 'winrate', 'kda']:
+        _sort = 'played'
+    order_by = _sort
+    _desc = request.args.get('desc', 'yes')
+    if _desc != 'no':
+        _desc = 'yes'
+        order_by = desc(order_by)
+    _args = {'player': p, 'sort':_sort, 'desc':_desc}
     hero_filter = request.args.get('hero', None)
     cs_id = Season.current().id
     matches_stats = PlayerMatchStats.query.order_by(desc(PlayerMatchStats.match_id))\
         .join(SeasonStats).filter(SeasonStats.steam_id==steam_id)
-    heroes_stats = p.get_heroes().order_by(desc('played')).all()
+    heroes_stats = p.get_heroes().order_by(order_by).all()
     _args['heroes_stats'] = heroes_stats
     rating_info = p.get_avg_rating()[0]
     _args['avg_rating'] = rating_info[0] or 0

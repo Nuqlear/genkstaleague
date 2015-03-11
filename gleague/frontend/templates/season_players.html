@@ -42,15 +42,7 @@
 <div id="container">
     {{ macro.render_logo() }}
     <div style="padding:20px">
-        <ul class="nav nav-tabs">
-            {% if g.user %}
-                <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
-            {% endif %}
-            <li ><a href="{{ url_for('seasons.records') }}">Season Stats</a></li>
-            <li class="active" ><a href="{{ url_for('seasons.players') }}">Season Players</a></li>
-            <li ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
-            <li ><a href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
-        </ul>
+        {{ macro.render_navigation('season_players') }}
         <form action="{{ url_for('seasons.players') }}">
         <div class="input-group row" style="width: 512px; margin:0 auto; padding: 20px">
             <input type="text" name='q' placeholder="nickname" class="form-control" value={{q}}>

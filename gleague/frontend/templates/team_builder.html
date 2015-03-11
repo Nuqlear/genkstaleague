@@ -49,15 +49,7 @@
 <div id="container">
     {{ macro.render_logo() }}
     <div style="padding:20px">
-        <ul class="nav nav-tabs">
-            {% if g.user %}
-                <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
-            {% endif %}
-            <li ><a href="{{ url_for('seasons.records') }}">Season Stats</a></li>
-            <li ><a href="{{ url_for('seasons.players') }}">Season Players</a></li>
-            <li ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
-            <li class="active" ><a href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
-        </ul>
+        {{ macro.render_navigation('team_builder') }}
        <form method="POST" action="" class="team_builder_row">
             {% for i in range(1, 11) %}
             <div class="team_builder_row">

@@ -81,22 +81,6 @@ def records(season_number='current'):
             .filter(and_(SeasonStats.season_id==s_id, 
             PlayerMatchStats.hero_damage == func.max(PlayerMatchStats.hero_damage).select()))\
             .order_by(PlayerMatchStats.id).first()
-
-    in_season_most_playable = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.season_id==s_id,)\
-            .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'), 
-                func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0)),
-                func.sum(PlayerMatchStats.pts_diff),
-                func.avg(PlayerMatchStats.kills), func.avg(PlayerMatchStats.assists), 
-                func.avg(PlayerMatchStats.deaths)
-            ).group_by(PlayerMatchStats.hero).order_by(desc('played')).limit(3).all()
-
-    in_season_most_profitable = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.season_id==s_id,)\
-            .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'), 
-                func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0)),
-                func.sum(PlayerMatchStats.pts_diff).label('earned'),
-                func.avg(PlayerMatchStats.kills), func.avg(PlayerMatchStats.assists), 
-                func.avg(PlayerMatchStats.deaths)
-            ).group_by(PlayerMatchStats.hero).order_by(desc('earned')).limit(3).all()
     
     in_season_player_records = []
     in_season_player_records.append(['Longest winstreak', win_streak_ss.player, win_streak_ss.longest_winstreak])
@@ -118,5 +102,27 @@ def records(season_number='current'):
     in_match_records.append([most_herodamage_pms.match_id, 'Most hero damage', most_herodamage_pms.season_stats.player, 
         most_herodamage_pms.hero, most_herodamage_pms.hero_damage])
 
-    return render_template('season_records.html', in_season_player_records=in_season_player_records, in_match_records=in_match_records,
-        in_season_most_playable=in_season_most_playable, in_season_most_profitable=in_season_most_profitable)
+    return render_template('season_records.html', in_season_player_records=in_season_player_records, in_match_records=in_match_records)
+
+
+@seasons_bp.route('/current/heroes', methods=['GET'])
+@seasons_bp.route('/<int:season_number>/heroes', methods=['GET'])
+def heroes(season_number='current'):
+    _sort = request.args.get('sort', 'played')
+    if _sort not in ['hero', 'played', 'earned', 'winrate', 'kda']:
+        _sort = 'played'
+    order_by = _sort
+    _desc = request.args.get('desc', 'yes')
+    if _desc != 'no':
+        _desc = 'yes'
+        order_by = desc(order_by)
+    hero_filter = request.args.get('hero', None)
+    in_season_heroes = PlayerMatchStats.query.join(SeasonStats)\
+            .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'), 
+                (100 * func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0))/func.count(PlayerMatchStats.id)).label('winrate'),
+                func.sum(PlayerMatchStats.pts_diff).label('earned'),
+                ((func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists))/
+                    func.avg(PlayerMatchStats.deaths)).label('kda'), 
+            ).group_by(PlayerMatchStats.hero).order_by(order_by).all()
+    return render_template('season_heroes.html', in_season_heroes=in_season_heroes, sort=_sort, _desc=desc)
+    

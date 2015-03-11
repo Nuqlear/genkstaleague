@@ -46,14 +46,7 @@
     {{ macro.render_logo() }}
     <div style="padding:20px">
         <ul class="nav nav-tabs">
-            {% if g.user %}
-                <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
-            {% endif %}
-            <li ><a href="{{ url_for('seasons.records') }}">Season Stats</a></li>
-            <li ><a href="{{ url_for('seasons.players') }}">Season Players</a></li>
-            <li class="active" ><a href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
-            <li ><a href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
-        </ul>
+        {{ macro.render_navigation('matches_preview') }}
         {% for m in matches.items %}
         <div class="match">
             <div class="match_start_time">
