@@ -126,7 +126,7 @@ $(document).ready(function() {
     $('.start_time').each(function() {
         $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
     });
-    $('.player_matches tr').each(function() {
+    $('.player_matches tbody tr').each(function() {
         $(this).click(function() {
             window.location.href = '/matches/' + $(this).attr('match_id');
         });
