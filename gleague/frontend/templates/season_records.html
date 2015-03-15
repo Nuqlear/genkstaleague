@@ -6,7 +6,8 @@
     <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
     <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
     {{ macro.load_js_lib([
-        'bootstrap/dist/js/bootstrap.js'
+        'bootstrap/dist/js/bootstrap.js',
+        'moment/moment.js'
     ]) }}
     {{ macro.load_css_lib([
         'bootstrap/dist/css/bootstrap.css',
@@ -19,7 +20,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     {{ macro.render_google_meta() }}
-    {{ macro.render_site_title('RECORDS') }}
+    {% set active_page = 'records' %}
+    {{ macro.render_site_title(active_page) }}
 </head>
 <body>
 {% if g.user %}
@@ -30,20 +32,18 @@
     </div>
     </a>
     {% endif %}
-{% else %}
-    <div id="error" class="alert alert-warning alert-dismissable text-center">
-      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-      <a href="/login"><img stlyle="height: 50px;" 
-      src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
-      to rate players.
-    </div>
 {% endif %}
 <div id="container">
     {{ macro.render_logo() }}
-    <div style="padding:20px">
-        {{ macro.render_navigation('season_records') }}
+    <div style="padding:20px 0 0 20px">
+        {{ macro.render_navigation('season_stats') }}
     </div>
-    <div class="row" style="padding: 20px; color:black">
+    <div style="padding: 20px">
+        {{ macro.render_season_navigation(seasons, active_page) }}
+    </div>
+    {# longest_match exist => at least 1 game played #}
+    {% if longest_match %}
+    <div class="row" style="padding: 0 20px; color:black">
         <div class="col-md-4">
             <div class="panel panel-default white_table_hover">
                 <div class="panel-heading">In-Season players records</div>
@@ -52,10 +52,48 @@
                     {% for record in in_season_player_records %}
                     <tr player_id={{ record[1].steam_id }}>
                         <td>{{ record[0] }}</td>
-                        <td><span class="player_alt">{{ record[1].nickname }}</span></td>
+                        <td><span class="link_alt">{{ record[1].nickname }}</span></td>
                         <td>{{ record[2] }}</td>
                     </tr>
                     {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel panel-default white_table_hover">
+                <div class="panel-heading">In-Season longest match</div>
+                <table class="table table-hover in_match_records_table">
+                   <thead>
+                    <tr>
+                        <th>Match id</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr match_id={{ longest_match.id }}>
+                        <td>{{ longest_match.id }}</td>
+                        <td class="start_time">{{ longest_match.start_time }}</td>
+                        <td>{{ longest_match.duration//60 }}:{{longest_match.duration % 60}}</td>
+                    </tr>
+                    </tbody>
+                </table>
+            </div>
+            <div class="panel panel-default white_table_hover">
+                <div class="panel-heading">In-Season shortest match</div>
+                <table class="table table-hover in_match_records_table">
+                   <thead>
+                    <tr>
+                        <th>Match id</th>
+                        <th>Date</th>
+                        <th>Duration</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    <tr match_id={{ shortest_match.id }}>
+                        <td>{{ shortest_match.id }}</td>
+                        <td class="start_time">{{ shortest_match.start_time }}</td>
+                        <td>{{ shortest_match.duration//60 }}:{{shortest_match.duration % 60}}</td>
+                    </tr>
                     </tbody>
                 </table>
             </div>
@@ -68,7 +106,7 @@
                     {% for record in in_match_records %}
                     <tr match_id={{ record[0] }}>
                         <td>{{ record[1] }}</td>
-                        <td><span class="player_alt">{{ record[2].nickname }}</span></td>
+                        <td><span class="link_alt">{{ record[2].nickname }}</span></td>
                         <td><img class="steam_img" 
                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ record[3] }}_sb.png></td>
                         <td>{{ record[4] }}</td>
@@ -79,6 +117,7 @@
             </div> 
         </div>
     </div>
+    {% endif %}
 </div>
 </body>
 <script>
@@ -92,6 +131,12 @@ $(document).ready(function() {
         $(this).click(function() {
             window.location.href = '/players/' + $(this).attr('player_id') + '/overview';
         });
+    });
+    $('.start_time').each(function() {
+        $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
+    });
+    $("#select_season").on('change', function (e) {
+        window.location.href = '/seasons/'+this.value+'/{{active_page}}';
     });
 });
 </script>

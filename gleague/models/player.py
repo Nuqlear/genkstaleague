@@ -57,7 +57,7 @@ class Player(db.Model):
                 (100 * func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0))/func.count(PlayerMatchStats.id)).label('winrate'),
                 func.sum(PlayerMatchStats.pts_diff).label('earned'),
                 ((func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists))/
-                    func.avg(PlayerMatchStats.deaths)).label('kda'), 
+                    func.avg(PlayerMatchStats.deaths+1)).label('kda'), 
             ).group_by(PlayerMatchStats.hero)
         return q_res       
 

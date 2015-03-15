@@ -97,7 +97,7 @@
                         </td>
                         <td style="text-align:left">
                             {% if i.season_stats.player.nickname %}
-                                <a class="player" href="{{ url_for('players.player_overview', 
+                                <a class="link" href="{{ url_for('players.player_overview', 
                                     steam_id=i.season_stats.player.steam_id) }}">
                                 {{ i.season_stats.player.nickname }}</a>
                             {% else %}

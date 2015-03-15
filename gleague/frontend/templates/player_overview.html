@@ -38,7 +38,7 @@
             <div class="col-md-8" style="padding:20px">
                 <h1>
                     <img style="border: 3px solid white" src={{ player.avatar_medium }}>
-                    <a class="player"
+                    <a class="link"
                         href="{{ url_for('players.player_overview', steam_id=player.steam_id) }}">{{player.nickname}}</a>
                     <span id="avg_rating"></span> <span style="font-size:12pt">({{ rating_amount }} votes)</span>
                 </h1>
@@ -169,7 +169,7 @@
                     {% endfor %}
                 </tbody>
             </table>
-            <h3 class="text-center"><a class="player" 
+            <h3 class="text-center"><a class="link" 
                 href="{{ url_for('players.player_matches', steam_id=player.steam_id) }}">Show all matches</a></h3>
         </div>
     </div>

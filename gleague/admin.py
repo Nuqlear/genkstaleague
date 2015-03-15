@@ -66,6 +66,7 @@ class PlayerMatchStatsView(BaseModelView):
 
 class SeasonView(BaseModelView):
     can_delete = False
+    can_create = True
 
     def __init__(self, *args, **kwargs):
         super(SeasonView, self).__init__(Season, *args, **kwargs)

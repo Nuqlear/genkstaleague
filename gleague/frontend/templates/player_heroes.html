@@ -38,7 +38,7 @@
             <div class="col-md-8" style="padding:20px">
                 <h1>
                     <img style="border: 3px solid white" src={{ player.avatar_medium }}>
-                    <a class="player"
+                    <a class="link"
                         href="{{ url_for('players.player_overview', steam_id=player.steam_id) }}">{{player.nickname}}</a>
                     <span id="avg_rating"></span> <span style="font-size:12pt">({{ rating_amount }} votes)</span>
                 </h1>
@@ -65,7 +65,7 @@
                        <thead>
                         <tr>
                             <th>
-                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='hero',
+                                <a class="link_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='hero',
                                  desc='no') }}">Hero
                                 {% if sort == 'hero' %}
                                     <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
@@ -73,7 +73,7 @@
                                 </a>
                             </th>
                             <th>
-                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='played',
+                                <a class="link_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='played',
                                 desc='yes') }}">Matches
                                 {% if not sort or sort == 'played' %}
                                     <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -81,7 +81,7 @@
                                 </a>
                             </th>
                             <th>
-                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='winrate',
+                                <a class="link_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='winrate',
                                 desc='yes') }}">Winrate
                                 {% if sort == 'winrate' %}
                                     <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -89,7 +89,7 @@
                                 </a>
                             </th>
                             <th>
-                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='earned',
+                                <a class="link_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='earned',
                                 desc='yes') }}">Earned pts
                                 {% if sort == 'earned' %}
                                     <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -97,7 +97,7 @@
                                 </a>
                             </th>
                             <th>
-                                <a class="player_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='kda',
+                                <a class="link_alt" href="{{ url_for('players.player_heroes', steam_id=player.steam_id, sort='kda',
                                 desc='yes') }}">KDA
                                 {% if sort == 'kda' %}
                                     <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>

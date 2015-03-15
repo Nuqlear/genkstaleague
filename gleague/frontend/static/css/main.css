@@ -40,13 +40,18 @@ body {
     box-shadow: 0 0 2px #555;
 }
 
-a.player {
+a.link {
     color: #61ff68;
     border-bottom: 1px dashed #ffffff;
     text-decoration: none; 
 }
 
-a.player_alt {
+a.active_link {
+    color: white;
+    text-decoration: none; 
+}
+
+a.link_alt {
     color: #4d795d;
     border-bottom: 1px dashed #4d795d;
     text-decoration: none;  

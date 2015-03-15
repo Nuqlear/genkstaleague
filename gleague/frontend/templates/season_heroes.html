@@ -19,7 +19,8 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     {{ macro.render_google_meta() }}
-    {{ macro.render_site_title('RECORDS') }}
+    {% set active_page = 'heroes' %}
+    {{ macro.render_site_title(active_page) }}
 </head>
 <body>
 {% if g.user %}
@@ -30,18 +31,14 @@
     </div>
     </a>
     {% endif %}
-{% else %}
-    <div id="error" class="alert alert-warning alert-dismissable text-center">
-      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-      <a href="/login"><img stlyle="height: 50px;" 
-      src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
-      to rate players.
-    </div>
 {% endif %}
 <div id="container">
     {{ macro.render_logo() }}
     <div style="padding:20px">
-        {{ macro.render_navigation('season_heroes') }}
+        {{ macro.render_navigation('season_stats') }}
+    </div>
+    <div style="padding: 0 20px 20px 20px">
+        {{ macro.render_season_navigation(seasons, active_page) }}
     </div>
     <div class="row" style="color:black">
         <div class="col-md-8 col-md-offset-2">
@@ -51,35 +48,40 @@
                    <thead>
                     <tr>
                         <th>
-                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='hero', desc='no') }}">Hero
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero', 
+                            desc='no', season_number=season_number) }}">Hero
                             {% if sort == 'hero' %}
                                 <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
                             {% endif %}
                             </a>
                         </th>
                         <th>
-                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='played', desc='yes') }}">Matches
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='played', 
+                            desc='yes', season_number=season_number) }}">Matches
                             {% if not sort or sort == 'played' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                             {% endif %}
                             </a>
                         </th>
                         <th>
-                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='winrate', desc='yes') }}">Winrate
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='winrate',
+                            desc='yes', season_number=season_number) }}">Winrate
                             {% if sort == 'winrate' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                             {% endif %}
                             </a>
                         </th>
                         <th>
-                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='earned', desc='yes') }}">Earned pts
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='earned', 
+                            desc='yes', season_number=season_number) }}">Earned pts
                             {% if sort == 'earned' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                             {% endif %}
                             </a>
                         </th>
                         <th>
-                            <a class="player_alt" href="{{ url_for('seasons.heroes', sort='kda', desc='yes') }}">KDA
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='kda', 
+                            desc='yes', season_number=season_number) }}">KDA
                             {% if sort == 'kda' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                             {% endif %}
@@ -116,6 +118,9 @@ $(document).ready(function() {
         $(this).click(function() {
             window.location.href = '/players/' + $(this).attr('player_id') + '/overview';
         });
+    });
+    $("#select_season").on('change', function (e) {
+        window.location.href = '/seasons/'+this.value+'/{{active_page}}';
     });
 });
 </script>

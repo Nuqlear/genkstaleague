@@ -36,17 +36,29 @@
       {% if g.user %}
           <li ><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">Profile</a></li>
       {% endif %}
-      <li {% if active == 'season_records' %} class="active" {% endif %}><a 
-        href="{{ url_for('seasons.records') }}">Season Records</a></li>
-      <li {% if active == 'season_heroes' %} class="active" {% endif %}><a 
-        href="{{ url_for('seasons.heroes') }}">Season Heroes</a></li>
-      <li {% if active == 'season_players' %} class="active" {% endif %}><a 
-        href="{{ url_for('seasons.players') }}">Season Players</a></li>
+      <li {% if active == 'season_stats' %} class="active" {% endif %}><a 
+        href="{{ url_for('seasons.players') }}">Season Stats</a></li>
       <li {% if active == 'matches_preview' %} class="active" {% endif %}><a 
         href="{{ url_for('matches.matches_preview') }}">Matches</a></li>
       <li {% if active == 'team_builder' %} class="active" {% endif %}><a 
         href="{{ url_for('matches.team_builder') }}">Teambuilder</a></li>
   </ul>
+{% endmacro %}
+
+{% macro render_season_navigation(seasons, active) %}
+    Season #
+    <select id="select_season" name="season">
+        {% for number in seasons %}
+            <option {% if number==season_number %} selected="selected" {% endif %} 
+                value={{ number }}>{{ number }}</option>
+        {% endfor %}
+    </select>
+    <a {% if active == 'players' %} class="active_link" {% else %} class="link" {% endif %} 
+      style="padding: 0 5px 0 5px" href="{{ url_for('seasons.players', season_number=season_number) }}">Players</a> |
+    <a {% if active == 'records' %} class="active_link" {% else %} class="link" {% endif %} 
+      style="padding: 0 5px 0 5px" href="{{ url_for('seasons.records', season_number=season_number) }}">Records</a> |
+    <a {% if active == 'heroes' %} class="active_link" {% else %} class="link" {% endif %}  
+      style="padding: 0 5px 0 5px" href="{{ url_for('seasons.heroes', season_number=season_number) }}">Heroes</a>
 {% endmacro %}
 
 {% macro render_site_title(page) -%}

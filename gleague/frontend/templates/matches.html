@@ -34,13 +34,6 @@
     </div>
     </a>
     {% endif %}
-{% else %}
-    <div id="error" class="alert alert-warning alert-dismissable text-center">
-      <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-      <a href="/login"><img stlyle="height: 50px;" 
-      src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
-      to rate players.
-    </div>
 {% endif %}
 <div id="container">
     {{ macro.render_logo() }}
@@ -67,7 +60,7 @@
                         <p>
                         <img width=35px height=20px class="steam_img" 
                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
-                        <a class="player" href="{{ url_for('players.player_overview', steam_id=p.season_stats.steam_id) }}">
+                        <a class="link" href="{{ url_for('players.player_overview', steam_id=p.season_stats.steam_id) }}">
                         {{ p.season_stats.player.nickname }} 
                         </a>
                         </p>
@@ -80,7 +73,7 @@
                         <p>
                         <img width=35px height=20px class="steam_img" 
                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
-                        <a class="player" href="{{ url_for('players.player_overview', steam_id=p.season_stats.steam_id) }}">
+                        <a class="link" href="{{ url_for('players.player_overview', steam_id=p.season_stats.steam_id) }}">
                         {{ p.season_stats.player.nickname }}
                         </a>
                         </p>
