@@ -150,3 +150,7 @@ div#home:hover {
 .select2-results {
   max-height: 680px;
 }
+
+#select_season {
+  color:black;
+}
