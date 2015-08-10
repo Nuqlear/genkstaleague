@@ -70,8 +70,6 @@ class SeasonStats(db.Model):
         s = SeasonStats.query.filter(and_(SeasonStats.season_id==season_id, SeasonStats.steam_id==steam_id)).all()
         if not s:
             s = SeasonStats(steam_id=steam_id, season_id=season_id)
-            db.session.add(s)
-            db.session.flush()
         else:
             s = s[0]
         return s
