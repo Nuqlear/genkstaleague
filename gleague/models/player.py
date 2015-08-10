@@ -2,7 +2,7 @@ import json
 import socket
 import io
 
-from sqlalchemy import Column, String, Integer, ForeignKey, BigInteger, func, case, desc
+from sqlalchemy import Column, String, Integer, ForeignKey, BigInteger, func, case, desc, and_
 from sqlalchemy.orm import relationship
 from flask import current_app
 
@@ -51,8 +51,11 @@ class Player(db.Model):
             func.count(PlayerMatchRating.id)).all()
         return q_res
         
-    def get_heroes(self):
-        q_res = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.steam_id==self.steam_id)\
+    def get_heroes(self, cs_id=None):
+        filters = SeasonStats.steam_id==self.steam_id
+        if cs_id is not None:
+            filters = and_(filters, SeasonStats.season_id==cs_id)
+        q_res = PlayerMatchStats.query.join(SeasonStats).filter(filters)\
             .with_entities(PlayerMatchStats.hero.label('hero'), func.count(PlayerMatchStats.id).label('played'), 
                 (100 * func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0))/func.count(PlayerMatchStats.id)).label('winrate'),
                 func.sum(PlayerMatchStats.pts_diff).label('earned'),

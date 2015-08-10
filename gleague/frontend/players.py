@@ -36,7 +36,7 @@ def player_overview(steam_id):
     rating_info = p.get_avg_rating()[0]
     avg_rating = rating_info[0] or 0
     rating_amount = rating_info[1]
-    signature_heroes = p.get_heroes().order_by(desc('played')).limit(3).all()
+    signature_heroes = p.get_heroes(cs_id).order_by(desc('played')).limit(3).all()
     matches_stats = stats.all()
     season_stats = get_season_stats(cs_id, p)
     return render_template('player_overview.html', player=p, season_stats=season_stats, avg_rating=avg_rating,
@@ -86,9 +86,7 @@ def player_heroes(steam_id):
     _args = {'player': p, 'sort':_sort, 'desc':_desc}
     hero_filter = request.args.get('hero', None)
     cs_id = Season.current().id
-    matches_stats = PlayerMatchStats.query.order_by(desc(PlayerMatchStats.match_id))\
-        .join(SeasonStats).filter(SeasonStats.steam_id==steam_id)
-    heroes_stats = p.get_heroes().order_by(order_by).all()
+    heroes_stats = p.get_heroes(cs_id).order_by(order_by).all()
     _args['heroes_stats'] = heroes_stats
     rating_info = p.get_avg_rating()[0]
     _args['avg_rating'] = rating_info[0] or 0

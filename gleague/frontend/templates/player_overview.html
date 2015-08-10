@@ -121,6 +121,7 @@
                 <thead>
                     <tr class="header_table">
                         <th>Match id</th>
+                        <th>Season</th>
                         <th>Hero</th>
                         <th>Date</th>
                         <th>Duration</th>
@@ -151,6 +152,7 @@
                             {% endif %}
                         {% endif %}
                             <td>{{ s.match_id }}</td>
+                            <td>{{ s.match.season.number }}</td>
                             <td class="avatar_table">
                                 <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png>
                             </td>
