@@ -1,6 +1,6 @@
 import datetime
 
-from sqlalchemy import Column, Integer, ForeignKey, BigInteger, DateTime, func, desc
+from sqlalchemy import Column, Integer, ForeignKey, BigInteger, DateTime, func, desc, and_
 from sqlalchemy.orm import relationship
 
 from ..core import db
@@ -64,6 +64,17 @@ class SeasonStats(db.Model):
     longest_losestreak = Column(Integer, default=0, nullable=False)
     streak = Column(Integer, default=0, nullable=False)
     player_matches_stats = relationship('PlayerMatchStats', lazy='dynamic', backref='season_stats')
+
+    @staticmethod
+    def get_or_create(steam_id, season_id):
+        s = SeasonStats.query.filter(and_(SeasonStats.season_id==season_id, SeasonStats.steam_id==steam_id)).all()
+        if not s:
+            s = SeasonStats(steam_id=steam_id, season_id=season_id)
+        else:
+            s = s[0]
+        db.session.add(s)
+        db.session.flush()
+        return s
 
     def __repr__(self):
         return '{} ({})'.format(self.player.__repr__(), self.season.__repr__())

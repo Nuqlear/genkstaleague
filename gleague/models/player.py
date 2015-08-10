@@ -23,7 +23,7 @@ class Player(db.Model):
     nickname = Column(String(80))
     avatar = Column(String(255))
     avatar_medium = Column(String(255))
-    season_stats = relationship('SeasonStats', lazy='dynamic', backref='player')
+    season_stats = relationship('SeasonStats', lazy='dynamic', backref='player', order_by="desc(SeasonStats.season_id)")
 
     def __repr__(self):
         return '{} ({})'.format(self.nickname, self.steam_id)

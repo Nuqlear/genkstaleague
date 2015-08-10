@@ -11,6 +11,13 @@ from . import login_required, admin_required
 players_bp = Blueprint('players', __name__)
 
 
+def get_season_stats(cs_id, player):
+    stats = player.season_stats[0]
+    if player.season_stats[0].season_id != cs_id:
+        return {'wins':0, 'losses':0, 'pts':1000}
+    else:
+        return stats
+
 @players_bp.route('/<int:steam_id>/', methods=['GET'])
 @players_bp.route('/<int:steam_id>/overview', methods=['GET'])
 def player_overview(steam_id):
@@ -31,7 +38,8 @@ def player_overview(steam_id):
     rating_amount = rating_info[1]
     signature_heroes = p.get_heroes().order_by(desc('played')).limit(3).all()
     matches_stats = stats.all()
-    return render_template('player_overview.html', player = p, avg_rating=avg_rating,
+    season_stats = get_season_stats(cs_id, p)
+    return render_template('player_overview.html', player=p, season_stats=season_stats, avg_rating=avg_rating,
         rating_amount=rating_amount, signature_heroes=signature_heroes, matches_stats=matches_stats,
         pts_history=json.dumps(pts_hist))
 
@@ -58,6 +66,7 @@ def player_matches(steam_id):
     rating_info = p.get_avg_rating()[0]
     _args['avg_rating'] = rating_info[0] or 0
     _args['rating_amount'] = rating_info[1]
+    _args['season_stats'] = get_season_stats(cs_id, p)
     return render_template('player_matches.html', **_args)
 
 
@@ -84,4 +93,5 @@ def player_heroes(steam_id):
     rating_info = p.get_avg_rating()[0]
     _args['avg_rating'] = rating_info[0] or 0
     _args['rating_amount'] = rating_info[1]
+    _args['season_stats'] = get_season_stats(cs_id, p)
     return render_template('player_heroes.html', **_args)

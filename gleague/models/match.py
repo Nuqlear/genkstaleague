@@ -7,6 +7,7 @@ from sqlalchemy.orm import relationship
 from flask import current_app
 
 from gleague.core import db
+from .season import SeasonStats
 from ..utils.steam_api import get_dota2_heroes
 
 
@@ -174,7 +175,7 @@ class Match(db.Model):
                 db.session.rollback()
                 return None
             db.session.flush()
-            season_stats = player.season_stats[-1]
+            season_stats = SeasonStats.get_or_create(account_id, m.season_id)
             player_stats.season_stats_id = season_stats.id
             player_stats.kills = i['kills']
             player_stats.hero_healing = i['hero_healing']
