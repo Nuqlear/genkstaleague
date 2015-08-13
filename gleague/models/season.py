@@ -10,10 +10,19 @@ class Season(db.Model):
     __tablename__ = 'season'
     id = Column(Integer, primary_key=True)
     number = Column(Integer, nullable=False, unique=True)
-    started = Column(DateTime, default=datetime.datetime.now)
+    started = Column(DateTime, default=datetime.datetime.utcnow)
     ended = Column(DateTime)
-    season_stats = relationship('SeasonStats', lazy='dynamic', backref='season')
+    season_stats = relationship('SeasonStats', lazy='dynamic', backref='season', order_by="desc(SeasonStats.season_id)")
     matches = relationship('Match', lazy='dynamic', backref='season')
+    place_1 = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"))
+    place_2 = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"))
+    place_3 = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"))
+    place_1_player = db.relationship('Player', foreign_keys='Season.place_1',
+                              backref=db.backref('place_1_seasons', lazy='dynamic'))
+    place_2_player = db.relationship('Player', foreign_keys='Season.place_2',
+                              backref=db.backref('place_2_seasons', lazy='dynamic'))
+    place_3_player = db.relationship('Player', foreign_keys='Season.place_3',
+                              backref=db.backref('place_3_seasons', lazy='dynamic'))
 
 
     def __init__(self, *args, **kwargs):
@@ -21,7 +30,6 @@ class Season(db.Model):
             x = db.session.query(func.max(Season.number)).first()[0] or 0
             kwargs['number'] = 1 + x
         super(Season, self).__init__(*args, **kwargs)
-
 
     def __repr__(self):
         return '{} ({}-{})'.format(self.id, self.started, self.ended or '...')
@@ -39,6 +47,15 @@ class Season(db.Model):
     def current():
         cs = Season.query.order_by(desc(Season.number)).first()
         return cs
+
+    def end(self, date=datetime.datetime.utcnow):
+        self.ended = date
+        stats = SeasonStats.query.filter(SeasonStats.season_id==self.id).with_entities(SeasonStats.steam_id,
+            SeasonStats.pts).order_by(desc(SeasonStats.pts)).limit(3).all()
+        for s in stats:
+            self.place_1 = stats[0]
+            self.place_2 = stats[1]
+            self.place_3 = stats[2]
 
     @staticmethod
     def start_new():

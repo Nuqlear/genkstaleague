@@ -19,12 +19,26 @@
 
 {% macro load_js(files) -%}
     {% for js in files %}
-        <script src="{{ url_for('static', filename='js/' ~ js) }}" type="text/javascript" charset="utf-8"></script>
+        <script src="{{ url_for('static', filename='js/' ~ js) }}" type="text/javascript" charset="utf-8">
+        </script>
     {% endfor %}
 {%- endmacro %}
 
 {% macro render_logo() -%}
-    <img style="width:1024px; padding-top: 20px;" src='/static/img/logo.png'>
+    <img style="width:1024px; padding-top: 20px;" src="{{ url_for('static', filename='img/logo.png') }}">
+{%- endmacro %}
+
+{% macro render_trophy(place, season) -%}
+  {% if place == 1 %}
+    <img class="trophy_img" src="{{ url_for('static', filename='img/gold_trophy.png') }}"
+    data-toggle="tooltip" data-placement="top" title="1st place season #{{ season.number }}">
+  {% elif place == 2 %}
+    <img class="trophy_img" src="{{ url_for('static', filename='img/silver_trophy.png') }}"
+    data-toggle="tooltip" data-placement="top" title="2nd place season #{{ season.number }}">
+  {% elif place == 3 %}
+    <img class="trophy_img" src="{{ url_for('static', filename='img/bronze_trophy.png') }}"
+    data-toggle="tooltip" data-placement="top" title="3rd place season #{{ season.number }}">
+  {% endif %}
 {%- endmacro %}
 
 {% macro render_google_meta() -%}

@@ -18,3 +18,8 @@ tr.loss_row {
 .player_matches {
     padding: 10px;
 }
+
+.trophy_img {
+    margin-top: 5px;
+    padding-left: 2px;
+}
