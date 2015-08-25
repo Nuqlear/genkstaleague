@@ -17,7 +17,7 @@ class IndexView(AdminAccessMixin, AdminIndexView):
     pass
 
 
-class BaseModelView(ModelView, AdminAccessMixin):
+class BaseModelView(AdminAccessMixin, ModelView):
     can_create = False
 
     def __init__(self, model, *args, **kwargs):
