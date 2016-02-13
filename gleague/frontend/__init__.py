@@ -76,7 +76,7 @@ def create_app(settings_override=None):
     def inject_globals():
         return {
             'GOOGLE_SITE_VERIFICATION_CODE': app.config['GOOGLE_SITE_VERIFICATION_CODE'],
-            'SITE_TITLE': app.config['SITE_TITLE']
+            'SITE_NAME': app.config['SITE_NAME']
         }
 
     return app
