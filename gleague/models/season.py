@@ -48,20 +48,20 @@ class Season(db.Model):
         cs = Season.query.order_by(desc(Season.number)).first()
         return cs
 
-    def end(self, date=datetime.datetime.utcnow):
+    def end(self, date=datetime.datetime.utcnow()):
         self.ended = date
         stats = SeasonStats.query.filter(SeasonStats.season_id==self.id).with_entities(SeasonStats.steam_id,
             SeasonStats.pts).order_by(desc(SeasonStats.pts)).limit(3).all()
         for s in stats:
-            self.place_1 = stats[0]
-            self.place_2 = stats[1]
-            self.place_3 = stats[2]
+            self.place_1 = stats[0][0]
+            self.place_2 = stats[1][0]
+            self.place_3 = stats[2][0]
 
     @staticmethod
     def start_new():
         os = Season.current()
         ns = Season()
-        os.ended = ns.started
+        os.end()
         db.session.add(ns)
         db.session.add(os)
         db.session.flush()

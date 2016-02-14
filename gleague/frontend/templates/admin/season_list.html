@@ -1,0 +1,42 @@
+{% extends 'admin/model/list.html' %}
+
+{% block model_menu_bar %}
+<ul class="nav nav-tabs actions-nav">
+    <li class="active">
+        <a href="javascript:void(0)">{{ _gettext('List') }}{% if count %} ({{ count }}){% endif %}</a>
+    </li>
+
+    <li>
+        <a href="{{ url_for('.start_new', **request.args) }}" title="{{ _gettext('Start new') }}">{{ _gettext('Start new') }}</a>
+    </li>
+
+    {% if admin_view.can_export %}
+    <li>
+        <a href="{{ get_url('.export_csv', **request.args) }}" title="{{ _gettext('Export') }}">{{ _gettext('Export') }}</a>
+    </li>
+    {% endif %}
+
+    {% block model_menu_bar_before_filters %}
+    {% endblock %}
+
+    {% if filters %}
+    <li class="dropdown">
+        {{ model_layout.filter_options() }}
+    </li>
+    {% endif %}
+
+    {% if actions %}
+    <li class="dropdown">
+        {{ actionlib.dropdown(actions) }}
+    </li>
+    {% endif %}
+
+    {% if search_supported %}
+    <li>
+        {{ model_layout.search_form() }}
+    </li>
+    {% endif %}
+    {% block model_menu_bar_after_filters %}
+    {% endblock %}
+</ul>
+{% endblock %}

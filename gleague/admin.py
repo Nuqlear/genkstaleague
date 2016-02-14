@@ -1,7 +1,7 @@
 from flask.ext.admin.contrib.sqla import ModelView
 from flask.ext.admin import Admin, BaseView, expose, AdminIndexView
 from flask import g
-from flask import redirect, current_app
+from flask import redirect, current_app, url_for
 
 from .core import db
 from .models import Player, Match, PlayerMatchRating, PlayerMatchStats, Season, SeasonStats
@@ -67,9 +67,16 @@ class PlayerMatchStatsView(BaseModelView):
 class SeasonView(BaseModelView):
     can_delete = False
     can_create = True
+    list_template = "/admin/season_list.html"
 
     def __init__(self, *args, **kwargs):
         super(SeasonView, self).__init__(Season, *args, **kwargs)
+
+    @expose('/start_new', methods=('GET', ))
+    def start_new(self):
+        Season.start_new()
+        db.session.commit()
+        return redirect(url_for("season.edit_view"))
 
 
 class SeasonStatsView(BaseModelView):
