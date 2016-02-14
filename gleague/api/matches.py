@@ -13,10 +13,9 @@ matches_bp = Blueprint('matches', __name__)
 @matches_bp.route('/', methods=['POST'])
 @admin_required
 def create_match():
-    data = request.get_json()
-    if data:
-        data = data['result']
-        m = Match.create_from_dict(data)
+    replay = request.files['file']
+    if replay:
+        m = Match.create_from_replay_fs(replay)
         if m is None:
             return abort(500)
         return Response(status=201)

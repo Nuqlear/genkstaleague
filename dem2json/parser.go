@@ -104,9 +104,17 @@ func (matchData *MatchData) TryToUpdatePlayersData(pe *manta.PacketEntity) {
     }
 }
 
-func ParseDemo(path string) string {
+func ParseFromFile(path string) string {
     p, _ := manta.NewParserFromFile(path)
+    return ParseDemo(p)
+}
 
+func ParseFromRawData(buf []byte) string {
+    p, _ := manta.NewParser(buf)
+    return ParseDemo(p)
+}
+
+func ParseDemo(p* manta.Parser) string {
     var matchData = MatchData{}
     var gameEndTime, gameStartTime float32
 

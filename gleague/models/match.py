@@ -1,10 +1,13 @@
 import json
+import os
+import tempfile
 
 from sqlalchemy import (Column, String, Integer, ForeignKey, Boolean, BigInteger, SmallInteger, desc, func, 
     and_, or_)
 from sqlalchemy.schema import CheckConstraint, UniqueConstraint
 from sqlalchemy.orm import relationship
 from flask import current_app
+from subprocess import Popen, PIPE
 
 from gleague.core import db
 from .season import SeasonStats
@@ -119,7 +122,7 @@ class Match(db.Model):
     start_time = Column(Integer)
 
     game_modes_dict = {1:'All Pick', 2:'Captains Mode', 3:'Random Draft', 4:'Single Draft',
-        5:'All Random', 8:'Reverse Captain Mode', 16:'Captains Draft'}
+        5:'All Random', 8:'Reverse Captain Mode', 16:'Captains Draft', 22:'Ranked All Pick'}
 
     def __repr__(self):
         return "%s" % self.id
@@ -152,6 +155,21 @@ class Match(db.Model):
         return q
 
     @staticmethod
+    def create_from_replay_fs(replay_fs):
+        output = None
+        fd, path = tempfile.mkstemp()
+        try:
+            with os.fdopen(fd, 'wb') as tmp:
+                tmp.write(replay_fs.read())
+            process = Popen([os.path.join(os.getcwd(), "dem2json/dem2json"), path], stdout=PIPE)
+            (output, err) = process.communicate()
+            exit_code = process.wait()
+        finally:
+            os.remove(path)
+        json_data = json.loads(output.decode("utf-8"))
+        Match.create_from_dict(json_data['result'])
+
+    @staticmethod
     def create_from_dict(steamdata):
         from .player import Player
         from .season import Season
@@ -178,7 +196,7 @@ class Match(db.Model):
             season_stats = SeasonStats.get_or_create(account_id, m.season_id)
             player_stats.season_stats_id = season_stats.id
             player_stats.kills = i['kills']
-            player_stats.hero_healing = i['hero_healing']
+            # player_stats.hero_healing = i['hero_healing']
             player_stats.assists = i['assists']
             player_stats.level = i['level']
             player_stats.pts_diff = 20
@@ -258,4 +276,3 @@ class Match(db.Model):
         db.session.add(m)
         db.session.flush()
         return m
-        
