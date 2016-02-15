@@ -50,8 +50,8 @@ class Season(db.Model):
 
     def end(self, date=datetime.datetime.utcnow()):
         self.ended = date
-        stats = SeasonStats.query.filter(SeasonStats.season_id==self.id).with_entities(SeasonStats.steam_id,
-            SeasonStats.pts).order_by(desc(SeasonStats.pts)).limit(3).all()
+        stats = SeasonStats.query.filter(and_(SeasonStats.season_id==self.id, (SeasonStats.wins+SeasonStats.losses)>current_app.config.get('SEASON_CALIBRATING_MATCHES_NUM', 0)))\
+            .with_entities(SeasonStats.steam_id,SeasonStats.pts).order_by(desc(SeasonStats.pts)).limit(3).all()
         for s in stats:
             self.place_1 = stats[0][0]
             self.place_2 = stats[1][0]
