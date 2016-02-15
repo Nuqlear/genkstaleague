@@ -54,7 +54,7 @@ func (matchData *MatchData) TryToUpdatePlayersData(pe *manta.PacketEntity) {
             if result, ok := pe.FetchUint64(fetchFrom + ".m_iPlayerSteamID"); ok && matchPlayerData.AccountId == 0 {
                 matchPlayerData.AccountIdOrig = result
                 // format account_id to match Web API version
-                matchPlayerData.AccountId, _ = strconv.ParseUint(strconv.Itoa(int(result))[3:], 10, 64)
+                matchPlayerData.AccountId, _ = strconv.ParseUint(strconv.FormatUint(result, 10)[3:], 10, 64)
                 matchPlayerData.AccountId -= 61197960265728
             }
             fetchFrom = "m_vecPlayerTeamData.000" + strconv.Itoa(count)
