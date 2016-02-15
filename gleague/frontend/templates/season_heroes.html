@@ -23,24 +23,13 @@
     {{ macro.render_site_title(active_page) }}
 </head>
 <body>
-{% if g.user %}
-    {% if g.user.is_admin() %}
-    <a href='/admin/'>
-    <div id="home">
-        <span class="glyphicon glyphicon-wrench"></span>
+{{ macro.render_navbar(active_page) }}
+<div class="container">
+    <div style="padding: 0px 20px 20px 20px">
+        {{ macro.render_season_number_navbar(seasons, active_page) }}
     </div>
-    </a>
-    {% endif %}
-{% endif %}
-<div id="container">
-    {{ macro.render_logo() }}
-    <div style="padding:20px">
-        {{ macro.render_navigation('season_stats') }}
-    </div>
-    <div style="padding: 0 20px 20px 20px">
-        {{ macro.render_season_navigation(seasons, active_page) }}
-    </div>
-    <div class="row" style="color:black">
+    {{ macro.render_season_navbar(seasons, active_page) }}
+    <div class="row" style="padding: 20px 20px; color:black">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
                 <div class="panel-heading">Played heroes</div>

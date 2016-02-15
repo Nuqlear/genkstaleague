@@ -16,8 +16,8 @@ def create_match():
     replay = request.files['file']
     if replay:
         m = Match.create_from_replay_fs(replay)
-        if m is None:
-            return abort(500)
+        # if m is None:
+        #     return abort(500)
         return Response(status=201)
     return abort(400)
 

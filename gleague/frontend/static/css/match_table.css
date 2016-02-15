@@ -11,10 +11,7 @@
 .match_players_table {
     padding: 0 25px 25px 25px;
     font-size: 12pt;
-    /*filter:progid:DXImageTransform.Microsoft.Alpha(opacity=93); /* IE 5.5+*/
-    /*-moz-opacity: 0.93;  Mozilla 1.6 и ниже */
-    /*-khtml-opacity: 0.93;  Konqueror 3.1, Safari 1.1 */
-    /*opacity: 0.93;  CSS3 - Mozilla 1.7b +, Firefox 0.9 +, Safari 1.2+, Opera 9+ */
+    padding-top: 15px;
 }
 
 .match_players_table td {
@@ -32,6 +29,10 @@
 
 .match_info_table td {
     padding: 0 20px 0 20px;
+}
+
+.match_info_table thead {
+    color: #cccccc;
 }
 
 .radiant_table {

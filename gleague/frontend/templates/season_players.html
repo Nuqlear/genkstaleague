@@ -24,22 +24,13 @@
     {{ macro.render_site_title(active_page) }}
 </head>
 <body>
-{% if g.user %}
-    {% if g.user.is_admin() %}
-    <a href='/admin/'>
-    <div id="home">
-        <span class="glyphicon glyphicon-wrench"></span>
+{{ macro.render_navbar(active_page) }}
+<div class="container">
+    <div style="padding: 0px 20px 20px 20px">
+        {{ macro.render_season_number_navbar(seasons, active_page) }}
     </div>
-    </a>
-    {% endif %}
-{% endif %}
-<div id="container">
-    {{ macro.render_logo() }}
-    <div style="padding:20px">
-        {{ macro.render_navigation('season_stats') }}
-        <div style="padding: 20px 20px 0 0">
-            {{ macro.render_season_navigation(seasons, active_page) }}
-        </div>
+    {{ macro.render_season_navbar(seasons, active_page) }}
+    <div class="row" style="padding: 20px 20px;">
         <form action="{{ url_for('seasons.players') }}">
         <div class="input-group row" style="width: 512px; margin:0 auto; padding: 20px">
             <input type="text" name='q' placeholder="nickname" class="form-control" value={{q}}>

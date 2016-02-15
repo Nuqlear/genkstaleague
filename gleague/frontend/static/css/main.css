@@ -18,26 +18,29 @@ body {
     margin: 20 auto 0 0;
 }
 
-#footer {
-    text-align: left;
-    background-color: #3d594d;
-    color: #2a514d;
-    width: 1024px;
-    margin: 0 auto;
-    padding: 0 auto;
+#warning {
+  max-width: 560px;
+  margin: 15px auto;
+  text-align: center;
 }
 
-#container {
+.container {
     color: white;
     font-family: 'Gafata', sans-serif;
-    width: 1024px;
-    min-height: 100%;
     margin: 0 auto;
     padding: 0 auto;
     background-color: #3d594d;
     -moz-box-shadow: 0 0 2px #555;
     -webkit-box-shadow: 0 0 2px #555;
     box-shadow: 0 0 2px #555;
+}
+
+.dire_text_color {
+    color: #8f5050;
+}
+
+.radiant_text_color {
+    color: #368d36;    
 }
 
 a.link {
@@ -61,7 +64,6 @@ div#home{
     margin: 0 auto;
     padding: 0 auto;
     background-color: #2d493d;
-    width: 1024px;
     text-align: center;
     padding: 10px;
     color: gray;
@@ -78,14 +80,58 @@ div#home{
     float: none !important;
 }
 
-div#home:hover {
-    color: white;
-    background-color: #3d594d;
-    cursor: pointer;
-}
 
 #pagination {
     text-align:center;
+}
+
+
+/* custom bootstrap navbar */
+    /*color: rgba(63, 120, 15, 1);*/
+
+#navbar.navbar-brand {
+    color: rgba(255, 255, 255, 1);
+}
+#navbar {
+    font-weight:bold; 
+    font-size: 16pt;
+    background-color: rgba(248, 248, 248, 0);
+    border-width: 1px;
+    border-radius: 4px;
+}
+#navbar .navbar-nav>li>a {
+    color: rgba(89, 168, 20, 1);
+    background-color: rgba(248, 248, 248, 0);
+}
+#navbar .navbar-nav>li>a:hover,
+#navbar .navbar-nav>li>a:focus {
+    cursor: pointer;
+    color: rgba(105, 195, 27, 1);
+    /*color: rgba(245, 59, 59, 1);*/
+    background-color: rgba(248, 248, 248, 0);
+}
+#navbar .navbar-nav>.active>a,
+#navbar .navbar-nav>.active>a:hover,
+#navbar .navbar-nav>.active>a:focus {
+    color: rgba(105, 195, 27, 1);
+}
+#navbar .navbar-toggle {
+    border-color: #ffffff;
+}
+#navbar .navbar-toggle:hover,
+#navbar.navbar-toggle:focus {
+    background-color: #ffffff;
+}
+#navbar .navbar-toggle .icon-bar {
+    background-color: #ffffff;
+}
+#navbar .navbar-toggle:hover .icon-bar,
+#navbar .navbar-toggle:focus .icon-bar {
+    background-color: #f8f8f8;
+}
+
+.navbar-brand, .navbar-nav > li > a {
+    text-shadow: 0 1px 0 rgba(0, 0, 0, .55);    
 }
 
 /* bootstrap changes */

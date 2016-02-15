@@ -139,15 +139,21 @@ class Match(db.Model):
         }
         return d
 
-    def game_mode_repr(self):
-        return self.game_modes_dict.get(self.game_mode, 'unknown')
-
     @staticmethod
     def is_exists(id):
         return bool(Match.query.get(id))
 
     def is_played(self, steam_id):
         return steam_id in (ps.season_stats.steam_id for ps in self.players_stats)
+
+    def game_mode_string(self):
+        return self.game_modes_dict.get(self.game_mode, 'unknown')
+
+    def winner_string(self):
+        return 'Radiant' if self.radiant_win else 'Dire'
+
+    def duration_string(self):
+        return "{}:{}".format(self.duration//60, self.duration%60)
 
     @staticmethod
     def get_batch(amount, offset):

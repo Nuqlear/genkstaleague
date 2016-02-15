@@ -24,8 +24,64 @@
     {% endfor %}
 {%- endmacro %}
 
+{% macro render_navbar(active) -%}
+    <div class="container">
+        <div id="navbar" class="navbar" style="padding-top: 20px;">
+            <div class="navbar-header">
+                <a href="/"><img src="{{ url_for('static', filename='img/logo.png') }}"></a>
+            </div>
+            <div class="navbar-collapse collapse">
+                <ul class="nav navbar-nav">
+                    <li {% if active=="records" or active=="players" or active=="heroes" %} class="active"  {% endif %} >
+                        <a href="{{ url_for('seasons.players') }}">SEASON STATS</a>
+                    </li>
+                    <li {% if active=="matches_preview" %} class="active" {% endif %}>
+                        <a href="{{ url_for('matches.matches_preview') }}">MATCH HISTORY</a>
+                    </li>
+                </ul>
+                <ul class="nav navbar-nav navbar-right">
+                    {% if g.user %}
+                        {% if g.user.is_admin() %}
+                        <li><a href="{{ url_for('admin.index') }}">ADMIN</a></li>
+                        {% endif %}
+                        <li><a href="{{ url_for('players.player_overview', steam_id=g.user.steam_id) }}">PROFILE</a></li>
+                    {% else %}
+                        <li><a href="{{ url_for('auth.login') }}">LOGIN THROUGH STEAM</a></li>
+                    {% endif %}
+                </ul>
+            </div>
+        </div>
+        <hr id="line_after_logo"/>
+    </div>
+{%- endmacro %}
+
+{% macro render_season_navbar(seasons, active) %}
+    <ul class="nav nav-tabs">
+        <li {% if active=="records" %} class="active" {% endif %}>
+            <a href="{{ url_for('seasons.records', season_number=season_number) }}">Records</a>
+        </li>
+        <li {% if active=="players" %} class="active" {% endif %}>
+            <a href="{{ url_for('seasons.players', season_number=season_number) }}">Players</a>
+        </li>
+        <li {% if active=="heroes" %} class="active" {% endif %}>
+            <a href="{{ url_for('seasons.heroes', season_number=season_number) }}">Heroes</a>
+        </li>
+    </ul>
+{% endmacro %}
+
+{% macro render_season_number_navbar(seasons, active) %}
+    {# additional jquery code required #}
+    Season #
+    <select id="select_season" name="season">
+        {% for number in seasons %}
+            <option {% if number==season_number %} selected="selected" {% endif %} 
+                value={{ number }}>{{ number }}</option>
+        {% endfor %}
+    </select>
+{% endmacro %}
+
 {% macro render_logo() -%}
-    <img style="width:1024px; padding-top: 20px;" src="{{ url_for('static', filename='img/logo.png') }}">
+    <img src="{{ url_for('static', filename='img/logo.png') }}">
 {%- endmacro %}
 
 {% macro render_trophy(place, season) -%}

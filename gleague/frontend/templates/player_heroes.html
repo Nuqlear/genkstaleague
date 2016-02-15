@@ -25,14 +25,8 @@
     {{ macro.render_site_title(player.nickname ~ ' heroes') }}
 </head>
 <body>
-<a href='/'>
-<div id="home">
-    <span class="glyphicon glyphicon-home"></span>
-</div>
-</a>
-<div id="container">
-    {{ macro.render_logo() }}
-    <hr id="line_after_logo"/>
+{{ macro.render_navbar() }}
+<div class="container">
     <div style="padding: 0 20px">
         <div class="row">
             <div class="col-md-9" style="padding:20px">
@@ -45,9 +39,9 @@
             </div>
             <div class="col-md-3" style="padding:20px; text-align:right;">
                 <h2 style="padding-top:15px">
-                    <span style="color:#009900">{{ season_stats.wins }}</span> 
+                    <span class="radiant_text_color">{{ season_stats.wins }}</span> 
                     / 
-                    <span style="color:#550000">{{ season_stats.losses }}</span>
+                    <span class="dire_text_color">{{ season_stats.losses }}</span>
                     <span style="padding-left:10px">{{ season_stats.pts }} pts</span>
                 </h2>
             </div>
