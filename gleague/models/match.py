@@ -35,6 +35,9 @@ class PlayerMatchStats(db.Model):
     hero = Column(String(255), nullable=False)
     hero_healing = Column(Integer)
     level = Column(Integer, nullable=False)
+    xp_per_min = Column(Integer, nullable=True)
+    gold_per_min = Column(Integer, nullable=True)
+    damage_taken = Column(Integer, nullable=True)
     player_match_ratings = relationship('PlayerMatchRating', cascade="all, delete", 
                                                             backref="player_match_stats")
 
@@ -212,6 +215,9 @@ class Match(db.Model):
             player_stats.player_slot = i['player_slot']
             player_stats.denies = i['denies']
             player_stats.tower_damage = i['tower_damage']
+            player_stats.damage_taken = i['damage_taken']
+            player_stats.xp_per_min = i['xp_per_min']
+            player_stats.gold_per_min = i['gold_per_min']
             player_stats.hero = heroes[i['hero_id']].replace('npc_dota_hero_', '')
             player_stats.match_id = m.id
             db.session.add(player_stats)
