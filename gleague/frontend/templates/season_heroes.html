@@ -19,16 +19,16 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     {{ macro.render_google_meta() }}
-    {% set active_page = 'heroes' %}
-    {{ macro.render_site_title(active_page) }}
+    {{ macro.render_site_title("heroes") }}
 </head>
 <body>
-{{ macro.render_navbar(active_page) }}
 <div class="container">
+{{ macro.render_navbar() }}
+<div class="row">
     <div style="padding: 0px 20px 20px 20px">
-        {{ macro.render_season_number_navbar(seasons, active_page) }}
+        {{ macro.render_season_number_navbar(seasons) }}
     </div>
-    {{ macro.render_season_navbar(seasons, active_page) }}
+    {{ macro.render_season_navbar(seasons) }}
     <div class="row" style="padding: 20px 20px; color:black">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
@@ -61,9 +61,9 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='earned', 
-                            desc='yes', season_number=season_number) }}">Earned pts
-                            {% if sort == 'earned' %}
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff', 
+                            desc='yes', season_number=season_number) }}">PTS diff
+                            {% if sort == 'pts_diff' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                             {% endif %}
                             </a>
@@ -85,7 +85,7 @@
                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ h.hero }}_sb.png></td>
                         <td>{{ h.played }}</td>
                         <td>{{ '%i' % h.winrate }}%</td>
-                        <td>{{ h.earned }}</td>
+                        <td>{{ h.pts_diff }}</td>
                         <td>{{ '%0.2f' % h.kda }}</td>
                     </tr>
                     {% endfor %}
@@ -94,6 +94,7 @@
             </div>
         </div>
     </div>
+</div>
 </div>
 </body>
 <script>
@@ -109,7 +110,7 @@ $(document).ready(function() {
         });
     });
     $("#select_season").on('change', function (e) {
-        window.location.href = '/seasons/'+this.value+'/{{active_page}}';
+        window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
     });
 });
 </script>

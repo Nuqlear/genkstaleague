@@ -20,16 +20,16 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     {{ macro.render_google_meta() }}
-    {% set active_page = 'players' %}
-    {{ macro.render_site_title(active_page) }}
+    {{ macro.render_site_title("players") }}
 </head>
 <body>
-{{ macro.render_navbar(active_page) }}
 <div class="container">
+{{ macro.render_navbar() }}
+<div class="row">
     <div style="padding: 0px 20px 20px 20px">
-        {{ macro.render_season_number_navbar(seasons, active_page) }}
+        {{ macro.render_season_number_navbar(seasons) }}
     </div>
-    {{ macro.render_season_navbar(seasons, active_page) }}
+    {{ macro.render_season_navbar(seasons) }}
     <div class="row" style="padding: 20px 20px;">
         <form action="{{ url_for('seasons.players') }}">
         <div class="input-group row" style="width: 512px; margin:0 auto; padding: 20px">
@@ -82,7 +82,7 @@
             {% for s in stats.items %}
             <tbody>
                 <td>
-                    <a class="link" href="{{ url_for('players.player_overview', steam_id=s.steam_id)}}">
+                    <a class="link" href="{{ url_for('players.overview', steam_id=s.steam_id)}}">
                     {{ s.player.nickname }} 
                     </a>
                 </td>
@@ -118,11 +118,12 @@
         </div>
     </div>
 </div>
+</div>
 </body>
 <script>
 $(document).ready(function() {
     $("#select_season").on('change', function (e) {
-        window.location.href = '/seasons/'+this.value+'/{{active_page}}';
+        window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
     });
 });
 </script>

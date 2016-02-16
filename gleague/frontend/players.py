@@ -20,7 +20,7 @@ def get_season_stats(cs_id, player):
 
 @players_bp.route('/<int:steam_id>/', methods=['GET'])
 @players_bp.route('/<int:steam_id>/overview', methods=['GET'])
-def player_overview(steam_id):
+def overview(steam_id):
     p = Player.query.get(steam_id)
     if not p:
         return abort(404)
@@ -45,7 +45,7 @@ def player_overview(steam_id):
 
 
 @players_bp.route('/<int:steam_id>/matches', methods=['GET'])
-def player_matches(steam_id):
+def matches(steam_id):
     p = Player.query.get(steam_id)
     if not p:
         return abort(404)
@@ -71,12 +71,12 @@ def player_matches(steam_id):
 
 
 @players_bp.route('/<int:steam_id>/heroes', methods=['GET'])
-def player_heroes(steam_id):
+def heroes(steam_id):
     p = Player.query.get(steam_id)
     if not p:
         return abort(404)
     _sort = request.args.get('sort', 'played')
-    if _sort not in ['hero', 'played', 'earned', 'winrate', 'kda']:
+    if _sort not in ['hero', 'played', 'pts_diff', 'winrate', 'kda']:
         _sort = 'played'
     order_by = _sort
     _desc = request.args.get('desc', 'yes')

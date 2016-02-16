@@ -58,7 +58,7 @@ class Player(db.Model):
         q_res = PlayerMatchStats.query.join(SeasonStats).filter(filters)\
             .with_entities(PlayerMatchStats.hero.label('hero'), func.count(PlayerMatchStats.id).label('played'), 
                 (100 * func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0))/func.count(PlayerMatchStats.id)).label('winrate'),
-                func.sum(PlayerMatchStats.pts_diff).label('earned'),
+                func.sum(PlayerMatchStats.pts_diff).label('pts_diff'),
                 ((func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists))/
                     func.avg(PlayerMatchStats.deaths+1)).label('kda'), 
             ).group_by(PlayerMatchStats.hero)

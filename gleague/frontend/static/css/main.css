@@ -1,5 +1,5 @@
-body, html {
-    height: 100%;
+html, body{  
+    height:100%;
 }
 
 body {
@@ -25,14 +25,16 @@ body {
 }
 
 .container {
+    padding: 0 35px 0 35px;
     color: white;
     font-family: 'Gafata', sans-serif;
     margin: 0 auto;
-    padding: 0 auto;
+    /*padding: 0 auto;*/
     background-color: #3d594d;
     -moz-box-shadow: 0 0 2px #555;
     -webkit-box-shadow: 0 0 2px #555;
     box-shadow: 0 0 2px #555;
+    min-height: 100%;
 }
 
 .dire_text_color {

@@ -23,13 +23,9 @@
     {{ macro.render_site_title(match.id ~ ' match') }}
 </head>
 <body>
-<!-- <a href='/' >
-<div id="home" class="container">
-    <span class="glyphicon glyphicon-home"></span>
-</div>
-</a> -->
-{{ macro.render_navbar() }}
 <div class="container">
+{{ macro.render_navbar() }}
+<div class="row">
     <div class="row">
         <div class="col-md-5">
             <h2 class="match_winner"> 
@@ -84,48 +80,54 @@
                     <th data-toggle="tooltip" data-placement="top" title="Last Hits">LH</th>
                     <th data-toggle="tooltip" data-placement="top" title="Hero Damage">HD</th>
                     <th data-toggle="tooltip" data-placement="top" title="Tower Damage">TD</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Damage Taken">DT</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
+                    <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
                     <th>PTS</th>
                     <th>Rating</th>
                 </tr>
             </thead>
             <tbody>
-                {% for i in match.players_stats %}
-                    {% if i.player_slot < 5 %}
+                {% for s in match.players_stats %}
+                    {% if s.player_slot < 5 %}
                         <tr class="radiant_table">
                     {% else %}
                         <tr class="dire_table">
                     {% endif %}
                         <td>
-                            {% if i.season_stats.player.avatar %}
-                                <img class="steam_img" src={{ i.season_stats.player.avatar }}>
+                            {% if s.season_stats.player.avatar %}
+                                <img class="steam_img" src={{ s.season_stats.player.avatar }}>
                             {% endif %}
                         </td>
                         <td style="text-align:left">
-                            {% if i.season_stats.player.nickname %}
-                                <a class="link" href="{{ url_for('players.player_overview', 
-                                    steam_id=i.season_stats.player.steam_id) }}">
-                                {{ i.season_stats.player.nickname }}</a>
+                            {% if s.season_stats.player.nickname %}
+                                <a class="link" href="{{ url_for('players.overview', 
+                                    steam_id=s.season_stats.player.steam_id) }}">
+                                {{ s.season_stats.player.nickname }}</a>
                             {% else %}
                                 <span style="color: gray;">Anonymous</span>
                             {% endif %}
                         </td>
                         <td style="text-align:left" class="avatar_table">
-                            <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ i.hero }}_sb.png>
+                            <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png>
                         </td>
-                        <td>{{ i.level }}</td>
-                        <td>{{ i.kills }}</td>
-                        <td>{{ i.deaths }}</td>
-                        <td>{{ i.assists }}</td>
-                        <td>{{ i.last_hits }}</td>
-                        <td>{{ i.hero_damage }}</td>
-                        <td>{{ i.tower_damage }}</td>
+                        <td>{{ s.level }}</td>
+                        <td>{{ s.kills }}</td>
+                        <td>{{ s.deaths }}</td>
+                        <td>{{ s.assists }}</td>
+                        <td>{{ s.last_hits }}</td>
+                        <td>{{ s.hero_damage }}</td>
+                        <td>{{ s.tower_damage }}</td>
+                        <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
+                        <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
+                        <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
                         <td>
-                        {{ i.pts }}
-                        {% if i.pts_diff > 0 %}<span style="color:green">+{% else %}
-                        <span style="color:red">{% endif %}{{ i.pts_diff }}</span>
+                        {{ s.pts }}
+                        {% if s.pts_diff > 0 %}<span style="color:green">+{% else %}
+                        <span style="color:red">{% endif %}{{ s.pts_diff }}</span>
                         </td>
                         <td style="cursor:default"> 
-                            <div class="rating" match_player_stats_id="{{i.id}}">
+                            <div class="rating" match_player_stats_id="{{s.id}}">
                             </div>
                         </td>
                     </tr>

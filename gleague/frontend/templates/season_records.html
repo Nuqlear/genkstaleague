@@ -20,16 +20,16 @@
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
     {{ macro.render_google_meta() }}
-    {% set active_page = 'records' %}
-    {{ macro.render_site_title(active_page) }}
+    {{ macro.render_site_title("records") }}
 </head>
 <body>
-{{ macro.render_navbar(active_page) }}
 <div class="container">
+{{ macro.render_navbar() }}
+<div class="row">
     <div style="padding: 0px 20px 20px 20px">
-        {{ macro.render_season_number_navbar(seasons, active_page) }}
+        {{ macro.render_season_number_navbar(seasons) }}
     </div>
-    {{ macro.render_season_navbar(seasons, active_page) }}
+    {{ macro.render_season_navbar(seasons) }}
     {# longest_match exist => at least 1 game played #}
     {% if longest_match %}
     <div class="row" style="padding: 20px 20px; color:black">
@@ -108,6 +108,7 @@
     </div>
     {% endif %}
 </div>
+</div>
 </body>
 <script>
 $(document).ready(function() {
@@ -125,7 +126,7 @@ $(document).ready(function() {
         $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
     });
     $("#select_season").on('change', function (e) {
-        window.location.href = '/seasons/'+this.value+'/{{active_page}}';
+        window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
     });
 });
 </script>

@@ -22,19 +22,14 @@
     {{ macro.render_site_title('MATCHES') }}
 </head>
 <body>
-<div id="error" class="alert alert-danger alert-dismissable" hidden=true>
-  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-  <strong>Error!</strong> Something goes wrong.
-</div>
-{{ macro.render_navbar("matches_preview") }}
 <div class="container">
+{{ macro.render_navbar() }}
+<div class="row">
     {% for m in matches.items %}
-    <div class="match row" style="padding: 5px; margin:20px; background-color: #eaeaea;-webkit-border-radius: 8px;
--moz-border-radius: 8px;
-border-radius: 8px;">
+    <div class="matches_table row">
         <div class="col-md-4 table-responsive">
             <table class="table">
-                <caption class="radiant_text_color" style="text-align: right; font-weight: bold; font-size: 16pt">
+                <caption class="radiant_text_color">
                     Radiant
                 </caption>
                 <thead>
@@ -53,12 +48,12 @@ border-radius: 8px;">
                             {% endif %}
                         </td>
                         <td>
-                            <a class="link_alt" href="{{ url_for('players.player_overview', steam_id=p.season_stats.steam_id) }}">
+                            <a class="link_alt" href="{{ url_for('players.overview', steam_id=p.season_stats.steam_id) }}">
                             {{ p.season_stats.player.nickname }} 
                             </a>
                         </td>
                         <td>
-                            <img width=35px height=20px class="steam_img" 
+                            <img class="steam_img" 
                             src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
                         </td>
                     </tr>
@@ -69,7 +64,7 @@ border-radius: 8px;">
         <div class="col-md-4 table-responsive text-center">
                 <caption>
                 </caption>
-                <table class="table" style="margin-top: 35px; color:black; font-size:12pt">
+                <table class="table">
                 <thead>
                     <tr><th></th></tr>
                 </thead>
@@ -113,7 +108,7 @@ border-radius: 8px;">
                 {% for p in m.players_stats[5:] %}
                     <tr>
                         <td>
-                            <img width=35px height=20px class="steam_img" 
+                            <img class="steam_img" 
                             src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
                         </td>
                         <td>
@@ -122,7 +117,7 @@ border-radius: 8px;">
                             {% endif %}
                         </td>
                         <td>
-                            <a class="link_alt" href="{{ url_for('players.player_overview', steam_id=p.season_stats.steam_id) }}">
+                            <a class="link_alt" href="{{ url_for('players.overview', steam_id=p.season_stats.steam_id) }}">
                             {{ p.season_stats.player.nickname }} 
                             </a>
                         </td>
@@ -135,7 +130,8 @@ border-radius: 8px;">
     {% endfor %}
 
 
-        {{ macro.render_pagination(matches, 'matches.matches_preview')}}
+    {{ macro.render_pagination(matches, 'matches.matches_preview')}}
+</div>
 </div>
 </body>
 <script>

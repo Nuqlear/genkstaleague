@@ -15,18 +15,19 @@
     text-align: center;
 }
 
-.match {
-    padding: 20px;
+.matches_table {
+    padding: 5px; 
+    margin:20px; 
+    background-color: #eaeaea;
+    -webkit-border-radius: 8px;
+    -moz-border-radius: 8px;
+    border-radius: 8px;
+    color: black;
+    font-size: 12pt;
 }
 
-.matches_history_table {
-    margin: 0 172px 0 172px;
-    border: 1px solid grey;
-}
-
-.matches_history_table td {
-    min-width: 300px;
-    text-align: left;
-    padding: 2px 0 0 10px;
-    border-right: 1px solid black;
+.matches_table caption {
+    text-align: right; 
+    font-weight: bold; 
+    font-size: 16pt;
 }

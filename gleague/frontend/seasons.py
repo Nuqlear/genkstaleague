@@ -169,7 +169,7 @@ def records(season_number=-1):
 def heroes(season_number=-1):
     season_number, s_id = get_season_id(season_number)
     _sort = request.args.get('sort', 'played')
-    if _sort not in ['hero', 'played', 'earned', 'winrate', 'kda']:
+    if _sort not in ['hero', 'played', 'pts_diff', 'winrate', 'kda']:
         _sort = 'played'
     order_by = _sort
     _desc = request.args.get('desc', 'yes')
@@ -180,7 +180,7 @@ def heroes(season_number=-1):
     in_season_heroes = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.season_id==s_id)\
             .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'), 
                 (100 * func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0))/func.count(PlayerMatchStats.id)).label('winrate'),
-                func.sum(PlayerMatchStats.pts_diff).label('earned'),
+                func.sum(PlayerMatchStats.pts_diff).label('pts_diff'),
                 ((func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists))/
                     func.avg(PlayerMatchStats.deaths+1)).label('kda'), 
             ).group_by(PlayerMatchStats.hero).order_by(order_by).all()

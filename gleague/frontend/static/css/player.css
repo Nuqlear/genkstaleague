@@ -1,6 +1,15 @@
+.player_matches {
+    padding: 10px;
+}
+
 .player_matches .table-hover tbody tr:hover td, .table-hover tbody tr:hover th {
     background-color: #223a34;
     cursor: pointer;
+}
+
+.player_matches .table-hover thead tr:hover td, .table-hover thead tr:hover th {
+    text-align: cetner;
+    cursor: default;
 }
 
 tr.win_row {
@@ -13,10 +22,6 @@ tr.loss_row {
 
 #pts_history_plot {
     margin: 20px;
-}
-
-.player_matches {
-    padding: 10px;
 }
 
 .trophy_img {

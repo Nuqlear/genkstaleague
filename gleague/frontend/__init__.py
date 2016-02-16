@@ -1,5 +1,5 @@
 from flask import (jsonify, g, Response, current_app, url_for, redirect, render_template, make_response, 
-    send_from_directory, request)
+    send_from_directory, request, request)
 from functools import wraps
 from flask_openid import OpenID
 from datetime import datetime, timedelta
@@ -76,7 +76,8 @@ def create_app(settings_override=None):
     def inject_globals():
         return {
             'GOOGLE_SITE_VERIFICATION_CODE': app.config['GOOGLE_SITE_VERIFICATION_CODE'],
-            'SITE_NAME': app.config['SITE_NAME']
+            'SITE_NAME': app.config['SITE_NAME'],
+            'endpoint': (request.endpoint).split('.')
         }
 
     return app

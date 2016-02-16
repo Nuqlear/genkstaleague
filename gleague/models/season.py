@@ -2,6 +2,7 @@ import datetime
 
 from sqlalchemy import Column, Integer, ForeignKey, BigInteger, DateTime, func, desc, and_
 from sqlalchemy.orm import relationship
+from flask import current_app
 
 from ..core import db
 
