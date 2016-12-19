@@ -4,7 +4,7 @@ from unittest import TestCase
 
 from gleague import models
 from gleague.core import db
-from .mixin import FlaskTestCaseMixin
+from tests.mixin import FlaskTestCaseMixin
 
 
 class GleagueTestCase(TestCase):
