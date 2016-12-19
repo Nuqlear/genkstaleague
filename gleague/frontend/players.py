@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, g, abort, current_app, render_template, request, current_app
 from sqlalchemy import desc, func, and_, case
 
-from ..models import Player, PlayerMatchStats, SeasonStats, Season
+from ..models import Player, DotaPlayerMatchStats, DotaSeasonStats, DotaSeason
 from ..core import db
 from . import login_required, admin_required
 
@@ -24,12 +24,12 @@ def overview(steam_id):
     p = Player.query.get(steam_id)
     if not p:
         return abort(404)
-    cs_id = Season.current().id
-    stats = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.steam_id==steam_id)\
-        .order_by(desc(PlayerMatchStats.match_id)).limit(8)
-    pts_seq = PlayerMatchStats.query.join(SeasonStats).filter(and_(SeasonStats.season_id==cs_id,
-        SeasonStats.steam_id==steam_id)).order_by(PlayerMatchStats.match_id)\
-        .values(PlayerMatchStats.old_pts+PlayerMatchStats.pts_diff)
+    cs_id = DotaSeason.current().id
+    stats = DotaPlayerMatchStats.query.join(DotaSeasonStats).filter(DotaSeasonStats.steam_id==steam_id)\
+        .order_by(desc(DotaPlayerMatchStats.match_id)).limit(8)
+    pts_seq = DotaPlayerMatchStats.query.join(DotaSeasonStats).filter(and_(DotaSeasonStats.season_id==cs_id,
+        DotaSeasonStats.steam_id==steam_id)).order_by(DotaPlayerMatchStats.match_id)\
+        .values(DotaPlayerMatchStats.old_pts+DotaPlayerMatchStats.pts_diff)
     pts_hist = [[0, 1000]]
     for index, el in enumerate(pts_seq):
         pts_hist.append([index+1, el[0]])
@@ -55,12 +55,12 @@ def matches(steam_id):
         abort(400)
     page = int(page)
     hero_filter = request.args.get('hero', None)
-    cs_id = Season.current().id
-    matches_stats = PlayerMatchStats.query.order_by(desc(PlayerMatchStats.match_id))\
-        .join(SeasonStats).filter(SeasonStats.steam_id==steam_id)
+    cs_id = DotaSeason.current().id
+    matches_stats = DotaPlayerMatchStats.query.order_by(desc(DotaPlayerMatchStats.match_id))\
+        .join(DotaSeasonStats).filter(DotaSeasonStats.steam_id==steam_id)
     if hero_filter:
         _args['hero_filter'] = hero_filter
-        matches_stats = matches_stats.filter(PlayerMatchStats.hero==hero_filter)
+        matches_stats = matches_stats.filter(DotaPlayerMatchStats.hero==hero_filter)
     _args['matches_stats'] = matches_stats.paginate(page, 
         current_app.config['PLAYER_HISTORY_MATCHES_PER_PAGE'], True)
     rating_info = p.get_avg_rating()[0]
@@ -85,7 +85,7 @@ def heroes(steam_id):
         order_by = desc(order_by)
     _args = {'player': p, 'sort':_sort, 'desc':_desc}
     hero_filter = request.args.get('hero', None)
-    cs_id = Season.current().id
+    cs_id = DotaSeason.current().id
     heroes_stats = p.get_heroes(cs_id).order_by(order_by).all()
     _args['heroes_stats'] = heroes_stats
     rating_info = p.get_avg_rating()[0]

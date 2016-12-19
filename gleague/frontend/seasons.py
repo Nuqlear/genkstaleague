@@ -3,7 +3,7 @@ import json
 from flask import Blueprint, g, abort, current_app, render_template, request, current_app
 from sqlalchemy import desc, func, and_, case
 
-from ..models import Player, PlayerMatchStats, SeasonStats, Season, Match
+from ..models import Player, DotaPlayerMatchStats, DotaSeasonStats, DotaSeason, DotaMatch
 from ..core import db
 
 
@@ -13,9 +13,9 @@ seasons_bp = Blueprint('seasons', __name__)
 def get_season_id(season_number):
     season = None
     if season_number == -1:
-        season = Season.current()
+        season = DotaSeason.current()
     else:
-        season = Season.query.filter(Season.number==season_number).first()
+        season = DotaSeason.query.filter(DotaSeason.number==season_number).first()
         if not season:
             abort(404)
     return season.number, season.id
@@ -27,20 +27,20 @@ def players(season_number=-1):
     season_number, s_id = get_season_id(season_number)
     q = request.args.get('q')
     sort = request.args.get('sort', 'pts')
-    sort_dict = {'pts':desc(SeasonStats.pts), 'nickname':func.lower(Player.nickname),
-        'wins':desc(SeasonStats.wins), 'losses':desc(SeasonStats.losses)}
+    sort_dict = {'pts':desc(DotaSeasonStats.pts), 'nickname':func.lower(Player.nickname),
+        'wins':desc(DotaSeasonStats.wins), 'losses':desc(DotaSeasonStats.losses)}
     page = request.args.get('page', 1)
     page = int(page)
-    ss = SeasonStats.query.join(Player).group_by(Player.steam_id)\
-        .filter(SeasonStats.season_id==s_id)\
-        .order_by(sort_dict.get(sort, desc(SeasonStats.pts)))\
-        .join(PlayerMatchStats).group_by(SeasonStats.id)\
-        .having(func.count(PlayerMatchStats.id) > current_app.config['SEASON_CALIBRATING_MATCHES_NUM'])
+    ss = DotaSeasonStats.query.join(Player).group_by(Player.steam_id)\
+        .filter(DotaSeasonStats.season_id==s_id)\
+        .order_by(sort_dict.get(sort, desc(DotaSeasonStats.pts)))\
+        .join(DotaPlayerMatchStats).group_by(DotaSeasonStats.id)\
+        .having(func.count(DotaPlayerMatchStats.id) > current_app.config['SEASON_CALIBRATING_MATCHES_NUM'])
     if q:
         ss = ss.filter(func.lower(Player.nickname).startswith(func.lower(q)))
     ss = ss.paginate(page, current_app.config['TOP_PLAYERS_PER_PAGE'], True)
 
-    seasons = [e[0] for e in db.session.query(Season.number).all()]
+    seasons = [e[0] for e in db.session.query(DotaSeason.number).all()]
 
     return render_template('season_players.html', stats=ss, sort=sort, seasons=seasons, season_number=season_number)
 
@@ -50,85 +50,85 @@ def players(season_number=-1):
 def records(season_number=-1):
     season_number, s_id = get_season_id(season_number)
 
-    subq = (Match.query.join(Season)
-        .filter(Season.id == s_id)
-        .with_entities(func.max(Match.duration)).as_scalar())
-    longest_match = Match.query.filter(and_(Match.duration==subq), 
-        Match.season_id==s_id).first()
+    subq = (DotaMatch.query.join(DotaSeason)
+        .filter(DotaSeason.id == s_id)
+        .with_entities(func.max(DotaMatch.duration)).as_scalar())
+    longest_match = DotaMatch.query.filter(and_(DotaMatch.duration==subq), 
+        DotaMatch.season_id==s_id).first()
 
     _args = {'longest_match': longest_match}
 
     if longest_match:
-        subq = (SeasonStats.query
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.max(SeasonStats.longest_winstreak)).as_scalar())
-        win_streak_ss = db.session.query(SeasonStats).filter(and_(SeasonStats.season_id==s_id, 
-            SeasonStats.longest_winstreak==subq)).first()
+        subq = (DotaSeasonStats.query
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaSeasonStats.longest_winstreak)).as_scalar())
+        win_streak_ss = db.session.query(DotaSeasonStats).filter(and_(DotaSeasonStats.season_id==s_id, 
+            DotaSeasonStats.longest_winstreak==subq)).first()
 
-        subq = (SeasonStats.query
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.max(SeasonStats.longest_losestreak)).as_scalar())
-        lose_streak_ss = db.session.query(SeasonStats).filter(and_(SeasonStats.season_id==s_id, 
-            SeasonStats.longest_losestreak==subq)).first()
+        subq = (DotaSeasonStats.query
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaSeasonStats.longest_losestreak)).as_scalar())
+        lose_streak_ss = db.session.query(DotaSeasonStats).filter(and_(DotaSeasonStats.season_id==s_id, 
+            DotaSeasonStats.longest_losestreak==subq)).first()
 
-        subq = (PlayerMatchStats.query.join(SeasonStats)
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.min(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)).as_scalar())
-        min_pts_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
-                .filter(and_(SeasonStats.season_id==s_id, 
-                (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == 
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.min(DotaPlayerMatchStats.old_pts + DotaPlayerMatchStats.pts_diff)).as_scalar())
+        min_pts_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                (DotaPlayerMatchStats.old_pts + DotaPlayerMatchStats.pts_diff) == 
                 subq))\
-                .order_by(PlayerMatchStats.id).first()
+                .order_by(DotaPlayerMatchStats.id).first()
 
-        subq = (PlayerMatchStats.query.join(SeasonStats)
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.max(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)).as_scalar())
-        max_pts_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
-                .filter(and_(SeasonStats.season_id==s_id, 
-                (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == 
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaPlayerMatchStats.old_pts + DotaPlayerMatchStats.pts_diff)).as_scalar())
+        max_pts_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                (DotaPlayerMatchStats.old_pts + DotaPlayerMatchStats.pts_diff) == 
                 subq))\
-                .order_by(PlayerMatchStats.id).first()
+                .order_by(DotaPlayerMatchStats.id).first()
 
-        subq = (PlayerMatchStats.query.join(SeasonStats)
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.max((PlayerMatchStats.kills + PlayerMatchStats.assists)/(PlayerMatchStats.deaths+1))).as_scalar())
-        max_kda_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
-                .filter(and_(SeasonStats.season_id==s_id, 
-                ((PlayerMatchStats.kills + PlayerMatchStats.assists)/(PlayerMatchStats.deaths+1)) == 
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max((DotaPlayerMatchStats.kills + DotaPlayerMatchStats.assists)/(DotaPlayerMatchStats.deaths+1))).as_scalar())
+        max_kda_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                ((DotaPlayerMatchStats.kills + DotaPlayerMatchStats.assists)/(DotaPlayerMatchStats.deaths+1)) == 
                 subq))\
-                .order_by(PlayerMatchStats.id).first()
+                .order_by(DotaPlayerMatchStats.id).first()
 
-        subq = (PlayerMatchStats.query.join(SeasonStats)
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.max(PlayerMatchStats.kills)).as_scalar())
-        max_kills_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
-                .filter(and_(SeasonStats.season_id==s_id, 
-                PlayerMatchStats.kills == subq))\
-                .order_by(PlayerMatchStats.id).first()
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaPlayerMatchStats.kills)).as_scalar())
+        max_kills_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                DotaPlayerMatchStats.kills == subq))\
+                .order_by(DotaPlayerMatchStats.id).first()
 
-        subq = (PlayerMatchStats.query.join(SeasonStats)
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.max(PlayerMatchStats.deaths)).as_scalar())
-        max_deaths_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
-                .filter(and_(SeasonStats.season_id==s_id, 
-                PlayerMatchStats.deaths == subq))\
-                .order_by(PlayerMatchStats.id).first()
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaPlayerMatchStats.deaths)).as_scalar())
+        max_deaths_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                DotaPlayerMatchStats.deaths == subq))\
+                .order_by(DotaPlayerMatchStats.id).first()
 
-        subq = (PlayerMatchStats.query.join(SeasonStats)
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.max(PlayerMatchStats.last_hits)).as_scalar())
-        most_lasthits_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
-                .filter(and_(SeasonStats.season_id==s_id, 
-                PlayerMatchStats.last_hits == subq))\
-                .order_by(PlayerMatchStats.id).first()
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaPlayerMatchStats.last_hits)).as_scalar())
+        most_lasthits_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                DotaPlayerMatchStats.last_hits == subq))\
+                .order_by(DotaPlayerMatchStats.id).first()
 
-        subq = (PlayerMatchStats.query.join(SeasonStats)
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(func.max(PlayerMatchStats.hero_damage)).as_scalar())
-        most_herodamage_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
-                .filter(and_(SeasonStats.season_id==s_id, 
-                PlayerMatchStats.hero_damage == subq))\
-                .order_by(PlayerMatchStats.id).first()
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaPlayerMatchStats.hero_damage)).as_scalar())
+        most_herodamage_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                DotaPlayerMatchStats.hero_damage == subq))\
+                .order_by(DotaPlayerMatchStats.id).first()
         
         in_season_player_records = []
         in_match_records = []
@@ -150,13 +150,13 @@ def records(season_number=-1):
         in_match_records.append([most_herodamage_pms.match_id, 'Most hero damage', most_herodamage_pms.season_stats.player, 
             most_herodamage_pms.hero, most_herodamage_pms.hero_damage])
 
-        subq = (Match.query.join(Season)
-            .filter(Season.id == s_id)
-            .with_entities(func.min(Match.duration)).as_scalar())
-        shortest_match = Match.query.filter(and_(Match.duration==subq), 
-            Match.season_id==s_id).first()
+        subq = (DotaMatch.query.join(DotaSeason)
+            .filter(DotaSeason.id == s_id)
+            .with_entities(func.min(DotaMatch.duration)).as_scalar())
+        shortest_match = DotaMatch.query.filter(and_(DotaMatch.duration==subq), 
+            DotaMatch.season_id==s_id).first()
 
-        seasons = [e[0] for e in db.session.query(Season.number).all()]
+        seasons = [e[0] for e in db.session.query(DotaSeason.number).all()]
 
         _args = dict(in_season_player_records=in_season_player_records, in_match_records=in_match_records,
             longest_match=longest_match, shortest_match=shortest_match, seasons=seasons, season_number=season_number)
@@ -177,15 +177,15 @@ def heroes(season_number=-1):
         _desc = 'yes'
         order_by = desc(order_by)
     hero_filter = request.args.get('hero', None)
-    in_season_heroes = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.season_id==s_id)\
-            .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'), 
-                (100 * func.sum(case([(PlayerMatchStats.pts_diff>0, 1)], else_=0))/func.count(PlayerMatchStats.id)).label('winrate'),
-                func.sum(PlayerMatchStats.pts_diff).label('pts_diff'),
-                ((func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists))/
-                    func.avg(PlayerMatchStats.deaths+1)).label('kda'), 
-            ).group_by(PlayerMatchStats.hero).order_by(order_by).all()
+    in_season_heroes = DotaPlayerMatchStats.query.join(DotaSeasonStats).filter(DotaSeasonStats.season_id==s_id)\
+            .with_entities(DotaPlayerMatchStats.hero, func.count(DotaPlayerMatchStats.id).label('played'), 
+                (100 * func.sum(case([(DotaPlayerMatchStats.pts_diff>0, 1)], else_=0))/func.count(DotaPlayerMatchStats.id)).label('winrate'),
+                func.sum(DotaPlayerMatchStats.pts_diff).label('pts_diff'),
+                ((func.avg(DotaPlayerMatchStats.kills) + func.avg(DotaPlayerMatchStats.assists))/
+                    func.avg(DotaPlayerMatchStats.deaths+1)).label('kda'), 
+            ).group_by(DotaPlayerMatchStats.hero).order_by(order_by).all()
 
-    seasons = [e[0] for e in db.session.query(Season.number).all()]
+    seasons = [e[0] for e in db.session.query(DotaSeason.number).all()]
 
     return render_template('season_heroes.html', in_season_heroes=in_season_heroes, sort=_sort, _desc=desc, seasons=seasons, 
         season_number=season_number)

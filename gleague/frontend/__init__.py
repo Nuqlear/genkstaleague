@@ -4,9 +4,9 @@ from functools import wraps
 from flask_openid import OpenID
 from datetime import datetime, timedelta
 
-from .. import core
-from .. import admin
-from ..models import Player, Match
+from gleague import core
+from gleague import admin
+from gleague.models import Player, DotaMatch
 
 oid = OpenID()
 

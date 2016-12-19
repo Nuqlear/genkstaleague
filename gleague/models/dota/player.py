@@ -7,7 +7,7 @@ from sqlalchemy.orm import relationship
 from flask import current_app
 
 from gleague.core import db
-from gleague.models.dota.season import DotaSeason, DotaSeasonStats
+from gleague.models.dota.season import Season, SeasonStats
 from gleague.models.dota.match import DotaPlayerMatchStats
 
 from gleague.utils.steam_api import get_steam_user_info
@@ -23,7 +23,7 @@ class Player(db.Model):
     nickname = Column(String(80))
     avatar = Column(String(255))
     avatar_medium = Column(String(255))
-    season_stats = relationship('DotaSeasonStats', lazy='dynamic', backref='player', order_by="desc(DotaSeasonStats.season_id)")
+    dota_season_stats = relationship('DotaSeasonStats', lazy='dynamic', backref='player', order_by="desc(SeasonStats.season_id)")
 
     def __repr__(self):
         return '{} ({})'.format(self.nickname, self.steam_id)
@@ -37,7 +37,7 @@ class Player(db.Model):
             d.update({
                 'avatar': self.avatar,
                 'avatar_medium': self.avatar_medium,
-                'season_stats': [ss.to_dict() for ss in self.season_stats]
+                'dota_season_stats': [ss.to_dict() for ss in self.season_stats]
             })
         return d
 
@@ -81,11 +81,11 @@ class Player(db.Model):
             p.avatar_medium = steamdata['avatarmedium']
             db.session.add(p)
             db.session.flush()
-            db.session.add(SeasonStats(season_id=cs.id, steam_id=p.steam_id))
+            db.session.add(DotaSeasonStats(season_id=cs.id, steam_id=p.steam_id))
         else:
             p.update_from_steam()
             if p.season_stats[0].season_id != cs.id:
-                db.session.add(SeasonStats(season_id=cs.id, steam_id=p.steam_id))
+                db.session.add(DotaSeasonStats(season_id=cs.id, steam_id=p.steam_id))
         db.session.flush()
         return p
 
