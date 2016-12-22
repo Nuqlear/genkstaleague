@@ -6,33 +6,34 @@ from functools import reduce
 from gleague.core import db
 from gleague import models
 from tests.api import GleagueApiTestCase
-from tests.factories import DotaPlayerMatchStatsFactory
-from tests.factories import DotaMatchFactory
-from tests.factories import DotaSeasonFactory
-from tests.factories import PlayerFactory
-from tests.factories import DotaPlayerMatchRatingFactory
+from tests.factories.dota import DotaPlayerMatchStatsFactory
+from tests.factories.dota import DotaMatchFactory
+from tests.factories.dota import DotaSeasonFactory
+from tests.factories.dota import PlayerFactory
+from tests.factories.dota import DotaPlayerMatchRatingFactory
 
 
-class DotaMatchTestCase(GleagueApiTestCase):
-    base_url = '/matches/'
+class DotaTestCase(GleagueApiTestCase):
+    base_url = '/dota/'
+    matches_url = base_url + 'matches/'
 
     def _create_fixtures(self):
         self.season = DotaSeasonFactory()
 
     def add_match(self, json_match):
-        return self.jpost(self.base_url, data=json_match)
+        return self.jpost(self.matches_url, data=json_match)
 
     def get_match(self, match_id):
-        return self.jget(self.base_url + '%i/' % match_id)
+        return self.jget(self.matches_url + '%i/' % match_id)
 
     def get_matches(self, amount, offset):
-        return self.jget(self.base_url + '?amount=%s&offset=%s' % (amount, offset))
+        return self.jget(self.matches_url + '?amount=%s&offset=%s' % (amount, offset))
 
     def rate_player(self, match_id, player_match_stats_id, rating):
-        return self.post(self.base_url + '%i/ratings/%i?rating=%i' % (match_id, player_match_stats_id, rating))
+        return self.post(self.matches_url + '%i/ratings/%i?rating=%i' % (match_id, player_match_stats_id, rating))
 
     def get_ratings(self, match_id):
-        return self.get(self.base_url + '%i/ratings/' % (match_id))
+        return self.get(self.matches_url + '%i/ratings/' % (match_id))
 
     def test_add_match(self, *args):
         json_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fixtures/test_create_match.json')

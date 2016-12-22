@@ -1,11 +1,19 @@
 import sqlalchemy
 import re
 
-from flask import Blueprint, request, g, abort, jsonify, redirect, session, Response, abort
+from flask import Blueprint
+from flask import request
+from flask import g
+from flask import abort
+from flask import jsonify
+from flask import redirect
+from flask import session
+from flask import Response
+from flask import abort
 
-from ..models import Player
-from ..core import db
-from .import oid
+from gleague.models import Player
+from gleague.core import db
+from gleague.api import oid
 
 
 _steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
@@ -33,4 +41,4 @@ def create_or_login(resp):
     match = _steam_id_re.search(resp.identity_url)
     g.user = Player.get_or_create(match.group(1))
     session['steam_id'] = g.user.steam_id
-    return redirect("/#/", code=302)
+    return redirect("/", code=302)

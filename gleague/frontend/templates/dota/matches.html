@@ -1,4 +1,4 @@
-{% import 'macro.html' as macro with context %}
+{% import 'dota/macro.html' as macro with context %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -48,7 +48,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a class="link_alt" href="{{ url_for('players.overview', steam_id=p.season_stats.steam_id) }}">
+                            <a class="link_alt" href="{{ url_for('dota.players.overview', steam_id=p.season_stats.steam_id) }}">
                             {{ p.season_stats.player.nickname }} 
                             </a>
                         </td>
@@ -88,7 +88,7 @@
                 </tr>
                 </tbody>
             </table>
-            <a href="{{ url_for('matches.match', match_id=m.id) }}" style="padding-right: 20px">
+            <a href="{{ url_for('dota.matches.match', match_id=m.id) }}" style="padding-right: 20px">
                 <button type="button" class="btn btn-success">View Match</button>
             </a>
         </div>
@@ -117,7 +117,7 @@
                             {% endif %}
                         </td>
                         <td>
-                            <a class="link_alt" href="{{ url_for('players.overview', steam_id=p.season_stats.steam_id) }}">
+                            <a class="link_alt" href="{{ url_for('dota.players.overview', steam_id=p.season_stats.steam_id) }}">
                             {{ p.season_stats.player.nickname }} 
                             </a>
                         </td>
@@ -130,7 +130,7 @@
     {% endfor %}
 
 
-    {{ macro.render_pagination(matches, 'matches.matches_preview')}}
+    {{ macro.render_pagination(matches, 'dota.matches.matches_preview')}}
 </div>
 </div>
 </body>

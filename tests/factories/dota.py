@@ -1,4 +1,6 @@
-from factory import Factory, Sequence, SubFactory
+from factory import Factory
+from factory import Sequence
+from factory import SubFactory
 from factory.alchemy import SQLAlchemyModelFactory
 from flask import current_app
 from random import randrange

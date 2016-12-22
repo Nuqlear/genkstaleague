@@ -1,6 +1,13 @@
 import datetime
 
-from sqlalchemy import Column, Integer, ForeignKey, BigInteger, DateTime, func, desc, and_
+from sqlalchemy import Column
+from sqlalchemy import Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy import BigInteger
+from sqlalchemy import DateTime
+from sqlalchemy import func
+from sqlalchemy import desc
+from sqlalchemy import and_
 from sqlalchemy.orm import relationship
 from flask import current_app
 
@@ -8,7 +15,8 @@ from gleague.core import db
 
 
 class DotaSeason(db.Model):
-    __tablename__ = 'season'
+    __tablename__ = 'dota_season'
+    
     id = Column(Integer, primary_key=True)
     number = Column(Integer, nullable=False, unique=True)
     started = Column(DateTime, default=datetime.datetime.utcnow)
@@ -49,7 +57,9 @@ class DotaSeason(db.Model):
         cs = DotaSeason.query.order_by(desc(DotaSeason.number)).first()
         return cs
 
-    def end(self, date=datetime.datetime.utcnow()):
+    def end(self, date=None):
+        if date is None:
+            date = datetime.datetime.utcnow()
         self.ended = date
         stats = DotaSeasonStats.query.filter(and_(DotaSeasonStats.season_id==self.id, 
             (DotaSeasonStats.wins+DotaSeasonStats.losses)>current_app.config.get('SEASON_CALIBRATING_MATCHES_NUM', 0)))\
@@ -63,18 +73,19 @@ class DotaSeason(db.Model):
     def start_new():
         os = DotaSeason.current()
         ns = DotaSeason()
-        os.end()
+        if os:
+            os.end()
+            db.session.add(os)
         db.session.add(ns)
-        db.session.add(os)
         db.session.flush()
         return ns
 
 
 class DotaSeasonStats(db.Model):
-    __tablename__ = 'season_stats'
+    __tablename__ = 'dota_season_stats'
     
     id = Column(Integer, primary_key=True)
-    season_id = Column(Integer, ForeignKey('season.id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
+    season_id = Column(Integer, ForeignKey('dota_season.id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     steam_id = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     wins = Column(Integer, default=0, nullable=False)
     losses = Column(Integer, default=0, nullable=False)

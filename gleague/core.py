@@ -1,7 +1,10 @@
 import logging
 import logging.handlers
 
-from flask import Flask, session, g, request
+from flask import Flask
+from flask import session
+from flask import g
+from flask import request
 from flask_sqlalchemy import SQLAlchemy
 
 

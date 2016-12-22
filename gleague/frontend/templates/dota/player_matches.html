@@ -1,4 +1,4 @@
-{% import 'macro.html' as macro with context %}
+{% import 'dota/macro.html' as macro with context %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -22,7 +22,7 @@
     ])}}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    {{ macro.render_site_title(player.nickname ~ ' matches') }}
+    {{ macro.render_site_title(player.nickname ~ ' dota2 matches') }}
 </head>
 <body>
 <div class="container">
@@ -33,7 +33,8 @@
             <h1>
                 <img style="border: 3px solid white" src={{ player.avatar_medium }}>
                 <a class="link"
-                    href="{{ url_for('players.overview', steam_id=player.steam_id) }}">{{player.nickname}}</a>
+                    href="{{ url_for('dota.players.overview', steam_id=player.steam_id) }}">{{player.nickname}}
+                </a>
                 <span id="avg_rating"></span> <span style="font-size:12pt">({{ rating_amount }} votes)</span>
             </h1>
         </div>
@@ -110,9 +111,9 @@
         </table>
     </div>
     {% if hero_filter %}
-        {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id, hero=hero_filter) }}
+        {{ macro.render_pagination(matches_stats, 'dota.players.matches', steam_id=player.steam_id, hero=hero_filter) }}
     {% else %}
-        {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id) }}
+        {{ macro.render_pagination(matches_stats, 'dota.players.matches', steam_id=player.steam_id) }}
     {% endif %}
 </div>
 </div>
@@ -126,7 +127,7 @@ $(document).ready(function() {
     });
     $('.player_matches tbody tr').each(function() {
         $(this).click(function() {
-            window.location.href = '/matches/' + $(this).attr('match_id');
+            window.location.href = '/dota/matches/' + $(this).attr('match_id');
         });
     });
 });

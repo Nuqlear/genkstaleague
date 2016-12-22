@@ -1,12 +1,15 @@
 import re
 
-from flask import redirect, g, Blueprint, session
+from flask import redirect
+from flask import Blueprint
+from flask import g
+from flask import session
 
-from . import oid
-from ..models import Player
+from gleague.frontend import oid
+from gleague.models import Player
+
 
 _steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
-
 auth_bp = Blueprint('auth', __name__)
 
 
@@ -23,6 +26,7 @@ def login():
     if g.user is not None:
         return redirect(oid.get_next_url())
     return oid.try_login('http://steamcommunity.com/openid')
+
 
 @oid.after_login
 def create_or_login(resp):

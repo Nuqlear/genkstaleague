@@ -1,10 +1,15 @@
 from flask.ext.admin.contrib.sqla import ModelView
-from flask.ext.admin import Admin, BaseView, expose, AdminIndexView
+from flask.ext.admin import Admin
+from flask.ext.admin import BaseView
+from flask.ext.admin import expose
+from flask.ext.admin import AdminIndexView
 from flask import g
-from flask import redirect, current_app, url_for
+from flask import redirect
+from flask import current_app
+from flask import url_for
 
-from .core import db
-from .models import Player, DotaMatch, DotaPlayerMatchRating, DotaPlayerMatchStats, DotaSeason, DotaSeasonStats
+from gleague.core import db
+from gleague.models import *
 
 
 class AdminAccessMixin(object):

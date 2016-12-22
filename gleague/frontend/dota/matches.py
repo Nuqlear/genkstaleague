@@ -1,15 +1,22 @@
 import json
 import random
 
-from flask import Blueprint, g, abort, current_app, render_template, request
+from flask import Blueprint
+from flask import g
+from flask import abort
+from flask import current_app
+from flask import render_template
+from flask import request
 from sqlalchemy import desc
 
-from ..models import DotaMatch, DotaSeasonStats, DotaSeason, Player
-from ..core import db
-from . import login_required, admin_required
+from gleague.models import DotaMatch
+from gleague.models import DotaSeasonStats
+from gleague.models import DotaSeason
+from gleague.models import Player
+from gleague.core import db
+
 
 matches_bp = Blueprint('matches', __name__)
-
 
 
 @matches_bp.route('/<int:match_id>', methods=['GET'])
@@ -17,7 +24,7 @@ def match(match_id):
     m = DotaMatch.query.get(match_id)
     if not m:
         return abort(404)
-    return render_template('match.html', match = m)
+    return render_template('dota/match.html', match = m)
 
 
 @matches_bp.route('/', methods=['GET'])
@@ -28,25 +35,7 @@ def matches_preview():
     page = int(page)
     m = DotaMatch.query.order_by(desc(DotaMatch.id)).paginate(page,
         current_app.config['HISTORY_MATCHES_PER_PAGE'], True)
-    return render_template('matches.html', matches=m)
-
-
-@matches_bp.route('/team_builder', methods=['GET', 'POST'])
-def team_builder():
-    cs_id = DotaSeason.current().id
-    season_stats = DotaSeasonStats.query.filter(DotaSeasonStats.season_id==cs_id).all()
-    if request.method == 'POST':
-        players = []
-        for i in range(1, 11):
-            player_id = request.form.get('player-%i' %i)
-            if player_id == 'None':
-                players.append(['NOT REGISTERED PLAYER', DotaSeasonStats.pts.default.arg])
-            else:
-                p = Player.query.get(player_id)
-                players.append([p.nickname, p.season_stats[0].pts])
-        players = sort_by_pts(players)
-        return render_template('team_builder.html', season_stats=season_stats, players=players)
-    return render_template('team_builder.html', season_stats=season_stats)
+    return render_template('dota/matches.html', matches=m)
 
 
 # SERGEY

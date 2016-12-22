@@ -1,13 +1,20 @@
 import sqlalchemy
 import json
 
-from flask import Blueprint, request, g, abort, jsonify, Response
+from flask import Blueprint
+from flask import request
+from flask import g
+from flask import abort
+from flask import jsonify
+from flask import Response
 
-from gleague.models import DotaMatch, DotaPlayerMatchRating
+from gleague.models import DotaMatch
+from gleague.models import DotaPlayerMatchRating
 from gleague.core import db
-from gleague.api import login_required, admin_required
+from gleague.api import login_required
+from gleague.api import admin_required
 
-matches_bp = Blueprint('matches', __name__)
+matches_bp = Blueprint('dota_matches', __name__)
 
 
 @matches_bp.route('/', methods=['POST'])
@@ -28,7 +35,6 @@ def get_match(match_id):
     if not m:
         return abort(404)
     return jsonify(m.to_dict()), 200
-
 
 @matches_bp.route('/', methods=['GET'])
 def get_matches_preview():

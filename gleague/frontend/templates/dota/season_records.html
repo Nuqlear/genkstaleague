@@ -1,4 +1,4 @@
-{% import 'macro.html' as macro with context %}
+{% import 'dota/macro.html' as macro with context %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -114,19 +114,19 @@
 $(document).ready(function() {
     $('.in_match_records_table tr').each(function() {
         $(this).click(function() {
-            window.location.href = '/matches/' + $(this).attr('match_id');
+            window.location.href = '/dota/matches/' + $(this).attr('match_id');
         });
     });
     $('.in_season_records_table tr').each(function() {
         $(this).click(function() {
-            window.location.href = '/players/' + $(this).attr('player_id') + '/overview';
+            window.location.href = '/dota/players/' + $(this).attr('player_id') + '/overview';
         });
     });
     $('.start_time').each(function() {
         $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
     });
     $("#select_season").on('change', function (e) {
-        window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
+        window.location.href = '/dota/seasons/'+this.value+'/{{ endpoint[1] }}';
     });
 });
 </script>

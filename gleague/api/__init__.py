@@ -1,9 +1,13 @@
-from flask import jsonify, g, Response, current_app
 from functools import wraps
+
+from flask import jsonify
+from flask import g
+from flask import Response
+from flask import current_app
 from flask_openid import OpenID
 
-from .. import core
-from .. import admin
+from gleague import core
+from gleague import admin
 
 
 oid = OpenID()
@@ -21,10 +25,15 @@ def create_app(settings_override=None):
     oid.init_app(app)
     admin.init_admin(app)
 
-    from .players import players_bp
-    app.register_blueprint(players_bp, url_prefix="/players")
-    from .matches import matches_bp
-    app.register_blueprint(matches_bp, url_prefix="/matches")
+    from gleague.api.players import players_bp
+    app.register_blueprint(players_bp, url_prefix='/players')
+    from gleague.api.dota.matches import matches_bp as dota_matches_bp
+    url_prefix = '/matches'
+    dota_prefix = app.config.get('DOTA_URL_PREFIX', None)
+    if dota_prefix:
+        url_prefix = '/%s%s' % (dota_prefix, url_prefix)
+    dota_prefix = app.config.get('DOTA_URL_PREFIX', None)
+    app.register_blueprint(dota_matches_bp, url_prefix=url_prefix)
 
     return app
 

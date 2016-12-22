@@ -1,13 +1,24 @@
 import json
 import os
 import tempfile
+from subprocess import Popen
+from subprocess import PIPE
 
-from sqlalchemy import (Column, String, Integer, ForeignKey, Boolean, BigInteger, SmallInteger, desc, func, 
-    and_, or_)
-from sqlalchemy.schema import CheckConstraint, UniqueConstraint
+from sqlalchemy import Column
+from sqlalchemy import String
+from sqlalchemy import Integer
+from sqlalchemy import ForeignKey
+from sqlalchemy import Boolean
+from sqlalchemy import BigInteger
+from sqlalchemy import SmallInteger
+from sqlalchemy import func
+from sqlalchemy import desc
+from sqlalchemy import and_
+from sqlalchemy import or_
+from sqlalchemy.schema import CheckConstraint
+from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy.orm import relationship
 from flask import current_app
-from subprocess import Popen, PIPE
 
 from gleague.core import db
 from gleague.models.dota.season import DotaSeasonStats
@@ -15,12 +26,12 @@ from gleague.utils.steam_api import get_dota2_heroes
 
 
 class DotaPlayerMatchStats(db.Model):
-    __tablename__ = 'player_match_stats'
+    __tablename__ = 'dota_player_match_stats'
 
     id = Column(Integer, primary_key=True)
-    season_stats_id = Column(Integer, ForeignKey('season_stats.id', onupdate="CASCADE", 
+    season_stats_id = Column(Integer, ForeignKey('dota_season_stats.id', onupdate="CASCADE", 
                                                     ondelete="CASCADE"), nullable=False)
-    match_id = Column(BigInteger, ForeignKey('match.id', onupdate="CASCADE", 
+    match_id = Column(BigInteger, ForeignKey('dota_match.id', onupdate="CASCADE", 
                                                     ondelete="CASCADE"), nullable=False)
     old_pts = Column(Integer, nullable=False)
     pts_diff = Column(Integer, nullable=False)
@@ -73,18 +84,18 @@ class DotaPlayerMatchStats(db.Model):
 
 
 class DotaPlayerMatchRating(db.Model):
-    __tablename__ = 'player_match_rating'
+    __tablename__ = 'dota_player_match_rating'
 
     id = Column(Integer, primary_key=True)
     rated_by_steam_id = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", 
                                                                 ondelete="CASCADE"), nullable=False)
     rating = Column(SmallInteger, default=5)
-    player_match_stats_id = Column(Integer, ForeignKey('player_match_stats.id', onupdate="CASCADE", 
+    player_match_stats_id = Column(Integer, ForeignKey('dota_player_match_stats.id', onupdate="CASCADE", 
                                                                 ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (
-        CheckConstraint('player_match_rating.rating >= 1'),
-        CheckConstraint('player_match_rating.rating <= 5'),
+        CheckConstraint('dota_player_match_rating.rating >= 1'),
+        CheckConstraint('dota_player_match_rating.rating <= 5'),
         UniqueConstraint('rated_by_steam_id', 'player_match_stats_id', name='rated_once')
     )
 
@@ -112,10 +123,10 @@ class DotaPlayerMatchRating(db.Model):
 
 
 class DotaMatch(db.Model):
-    __tablename__ = 'match'
+    __tablename__ = 'dota_match'
 
     id = Column(BigInteger, primary_key=True)
-    season_id = Column(Integer, ForeignKey('season.id', onupdate="CASCADE", ondelete="CASCADE"),
+    season_id = Column(Integer, ForeignKey('dota_season.id', onupdate="CASCADE", ondelete="CASCADE"),
                                                                                 nullable=False)
     players_stats = relationship('DotaPlayerMatchStats', cascade="all,delete", backref="match", 
          order_by=DotaPlayerMatchStats.player_slot)
@@ -165,6 +176,7 @@ class DotaMatch(db.Model):
 
     @staticmethod
     def create_from_replay_fs(replay_fs):
+        # parsing should be done asynchronously, but whatever
         output = None
         fd, path = tempfile.mkstemp()
         try:
@@ -180,7 +192,7 @@ class DotaMatch(db.Model):
 
     @staticmethod
     def create_from_dict(steamdata):
-        from gleague.models.dota.player import Player
+        from gleague.models.player import DotaPlayer
         from gleague.models.dota.season import DotaSeason
 
         base_pts_diff = current_app.config.get('MATCH_BASE_PTS_DIFF', 20)
@@ -197,7 +209,7 @@ class DotaMatch(db.Model):
         for i in steamdata['players']:
             player_stats = DotaPlayerMatchStats()
             account_id = '765' + str(i['account_id'] + 61197960265728)
-            player = Player.get_or_create(account_id)
+            player = DotaPlayer.get_or_create(account_id)
             if player is None:
                 db.session.rollback()
                 return None

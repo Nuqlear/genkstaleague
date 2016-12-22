@@ -1,4 +1,4 @@
-{% import 'macro.html' as macro with context %}
+{% import 'dota/macro.html' as macro with context %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -101,7 +101,7 @@
                         </td>
                         <td style="text-align:left">
                             {% if s.season_stats.player.nickname %}
-                                <a class="link" href="{{ url_for('players.overview', 
+                                <a class="link" href="{{ url_for('dota.players.overview', 
                                     steam_id=s.season_stats.player.steam_id) }}">
                                 {{ s.season_stats.player.nickname }}</a>
                             {% else %}
@@ -141,7 +141,7 @@
 $(document).ready(function() {
     $("[data-toggle=tooltip]").tooltip({container:'body'});
     function update_rating() {
-        var url = '/api/matches/{{match.id}}/ratings/';
+        var url = '/api/dota/matches/{{match.id}}/ratings/';
         $.getJSON(url, function(data) {
             $('.rating').each(function(){
                 var d = data['ratings'][$(this).attr('match_player_stats_id')]
@@ -149,7 +149,7 @@ $(document).ready(function() {
                 $(this).raty({ readOnly: !d['allowed_rate'],
                     path: '/static/lib/bower_components/raty/lib/img', score: d['avg_rating'], 
                     click: function(score, evt) {
-                        $.post('/api/matches/{{match.id}}/ratings/'+$(this).parent().find('.rating').attr('match_player_stats_id')
+                        $.post('/api/dota/matches/{{match.id}}/ratings/'+$(this).parent().find('.rating').attr('match_player_stats_id')
                             +'?rating='+score);
                         update_rating();
                     }

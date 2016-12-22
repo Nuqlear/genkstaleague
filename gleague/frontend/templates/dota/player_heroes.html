@@ -1,4 +1,4 @@
-{% import 'macro.html' as macro with context %}
+{% import 'dota/macro.html' as macro with context %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -22,7 +22,7 @@
     ])}}
     <meta charset="utf-8">
     <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    {{ macro.render_site_title(player.nickname ~ ' heroes') }}
+    {{ macro.render_site_title(player.nickname ~ ' dota2 heroes') }}
 </head>
 <body>
 <div class="container">
@@ -33,7 +33,7 @@
             <h1>
                 <img style="border: 3px solid white" src={{ player.avatar_medium }}>
                 <a class="link"
-                    href="{{ url_for('players.overview', steam_id=player.steam_id) }}">{{player.nickname}}</a>
+                    href="{{ url_for('dota.players.overview', steam_id=player.steam_id) }}">{{player.nickname}}</a>
                 <span id="avg_rating"></span> <span style="font-size:12pt">({{ rating_amount }} votes)</span>
             </h1>
         </div>
@@ -55,7 +55,7 @@
                    <thead>
                     <tr>
                         <th>
-                            <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='hero',
+                            <a class="link_alt" href="{{ url_for('dota.players.heroes', steam_id=player.steam_id, sort='hero',
                              desc='no') }}">Hero
                             {% if sort == 'hero' %}
                                 <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
@@ -63,7 +63,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='played',
+                            <a class="link_alt" href="{{ url_for('dota.players.heroes', steam_id=player.steam_id, sort='played',
                             desc='yes') }}">Matches
                             {% if not sort or sort == 'played' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -71,7 +71,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='winrate',
+                            <a class="link_alt" href="{{ url_for('dota.players.heroes', steam_id=player.steam_id, sort='winrate',
                             desc='yes') }}">Winrate
                             {% if sort == 'winrate' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -79,7 +79,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='pts_diff',
+                            <a class="link_alt" href="{{ url_for('dota.players.heroes', steam_id=player.steam_id, sort='pts_diff',
                             desc='yes') }}">Earned pts
                             {% if sort == 'pts_diff' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -87,7 +87,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='kda',
+                            <a class="link_alt" href="{{ url_for('dota.players.heroes', steam_id=player.steam_id, sort='kda',
                             desc='yes') }}">KDA
                             {% if sort == 'kda' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -125,7 +125,7 @@ $(document).ready(function() {
     });
     $('#heroes_stats tr').each(function() {
         $(this).click(function() {
-            window.location.href = '/players/{{ player.steam_id }}/matches?hero=' + $(this).attr('hero');
+            window.location.href = '/dota/players/{{ player.steam_id }}/matches?hero=' + $(this).attr('hero');
         });
     });
 });

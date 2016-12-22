@@ -1,5 +1,5 @@
-from gleague.models.player import Player
-from gleague.models.player import DotaPlayer
+from gleague.models.base import Player
+from gleague.models.dota import DotaPlayer
 from gleague.models.dota import DotaSeason
 from gleague.models.dota import DotaSeasonStats
 from gleague.models.dota import DotaMatch

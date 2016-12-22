@@ -1,19 +1,29 @@
 import json
 
-from flask import Blueprint, g, abort, current_app, render_template, request, current_app
-from sqlalchemy import desc, func, and_, case
+from flask import Blueprint
+from flask import g
+from flask import abort
+from flask import current_app
+from flask import render_template
+from flask import request
+from sqlalchemy import desc
+from sqlalchemy import func
+from sqlalchemy import and_
+from sqlalchemy import case
 
-from ..models import Player, DotaPlayerMatchStats, DotaSeasonStats, DotaSeason
-from ..core import db
-from . import login_required, admin_required
+from gleague.models import DotaPlayer
+from gleague.models import DotaPlayerMatchStats
+from gleague.models import DotaSeasonStats
+from gleague.models import DotaSeason
+from gleague.core import db
 
 
 players_bp = Blueprint('players', __name__)
 
 
 def get_season_stats(cs_id, player):
-    stats = player.season_stats[0]
-    if player.season_stats[0].season_id != cs_id:
+    stats = player.dota_season_stats[0]
+    if player.dota_season_stats[0].season_id != cs_id:
         return {'wins':0, 'losses':0, 'pts':1000}
     else:
         return stats
@@ -21,7 +31,7 @@ def get_season_stats(cs_id, player):
 @players_bp.route('/<int:steam_id>/', methods=['GET'])
 @players_bp.route('/<int:steam_id>/overview', methods=['GET'])
 def overview(steam_id):
-    p = Player.query.get(steam_id)
+    p = DotaPlayer.get_or_create(steam_id)
     if not p:
         return abort(404)
     cs_id = DotaSeason.current().id
@@ -39,14 +49,14 @@ def overview(steam_id):
     signature_heroes = p.get_heroes(cs_id).order_by(desc('played')).limit(3).all()
     matches_stats = stats.all()
     season_stats = get_season_stats(cs_id, p)
-    return render_template('player_overview.html', player=p, season_stats=season_stats, avg_rating=avg_rating,
+    return render_template('dota/player_overview.html', player=p, season_stats=season_stats, avg_rating=avg_rating,
         rating_amount=rating_amount, signature_heroes=signature_heroes, matches_stats=matches_stats,
         pts_history=json.dumps(pts_hist))
 
 
 @players_bp.route('/<int:steam_id>/matches', methods=['GET'])
 def matches(steam_id):
-    p = Player.query.get(steam_id)
+    p = DotaPlayer.query.get(steam_id)
     if not p:
         return abort(404)
     _args = {'player': p}
@@ -67,12 +77,12 @@ def matches(steam_id):
     _args['avg_rating'] = rating_info[0] or 0
     _args['rating_amount'] = rating_info[1]
     _args['season_stats'] = get_season_stats(cs_id, p)
-    return render_template('player_matches.html', **_args)
+    return render_template('dota/player_matches.html', **_args)
 
 
 @players_bp.route('/<int:steam_id>/heroes', methods=['GET'])
 def heroes(steam_id):
-    p = Player.query.get(steam_id)
+    p = DotaPlayer.query.get(steam_id)
     if not p:
         return abort(404)
     _sort = request.args.get('sort', 'played')
@@ -92,4 +102,4 @@ def heroes(steam_id):
     _args['avg_rating'] = rating_info[0] or 0
     _args['rating_amount'] = rating_info[1]
     _args['season_stats'] = get_season_stats(cs_id, p)
-    return render_template('player_heroes.html', **_args)
+    return render_template('dota/player_heroes.html', **_args)

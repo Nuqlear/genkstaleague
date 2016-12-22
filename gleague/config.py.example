@@ -12,6 +12,7 @@ class BaseConfig(object):
     LOGFILE = '/tmp/gleague_log.txt'
     ADMINS_STEAM_ID = []
     MATCH_BASE_PTS_DIFF = 10
+    DOTA_URL_PREFIX = 'dota' # can be set to None
 
 
 class gleague_api(BaseConfig):

@@ -1,10 +1,22 @@
 import json
 
-from flask import Blueprint, g, abort, current_app, render_template, request, current_app
-from sqlalchemy import desc, func, and_, case
+from flask import Blueprint
+from flask import g
+from flask import abort
+from flask import current_app
+from flask import render_template
+from flask import request
+from sqlalchemy import desc
+from sqlalchemy import func
+from sqlalchemy import and_
+from sqlalchemy import case
 
-from ..models import Player, DotaPlayerMatchStats, DotaSeasonStats, DotaSeason, DotaMatch
-from ..core import db
+from gleague.models import Player
+from gleague.models import DotaPlayerMatchStats
+from gleague.models import DotaSeasonStats
+from gleague.models import DotaSeason
+from gleague.models import DotaMatch
+from gleague.core import db
 
 
 seasons_bp = Blueprint('seasons', __name__)
@@ -42,7 +54,7 @@ def players(season_number=-1):
 
     seasons = [e[0] for e in db.session.query(DotaSeason.number).all()]
 
-    return render_template('season_players.html', stats=ss, sort=sort, seasons=seasons, season_number=season_number)
+    return render_template('dota/season_players.html', stats=ss, sort=sort, seasons=seasons, season_number=season_number)
 
 
 @seasons_bp.route('/current/records', methods=['GET'])
@@ -56,7 +68,8 @@ def records(season_number=-1):
     longest_match = DotaMatch.query.filter(and_(DotaMatch.duration==subq), 
         DotaMatch.season_id==s_id).first()
 
-    _args = {'longest_match': longest_match}
+    seasons = [e[0] for e in db.session.query(DotaSeason.number).all()]
+    _kwargs = {'longest_match': longest_match, 'season_number':season_number, 'seasons':seasons}
 
     if longest_match:
         subq = (DotaSeasonStats.query
@@ -156,12 +169,10 @@ def records(season_number=-1):
         shortest_match = DotaMatch.query.filter(and_(DotaMatch.duration==subq), 
             DotaMatch.season_id==s_id).first()
 
-        seasons = [e[0] for e in db.session.query(DotaSeason.number).all()]
-
-        _args = dict(in_season_player_records=in_season_player_records, in_match_records=in_match_records,
+        _kwargs = dict(in_season_player_records=in_season_player_records, in_match_records=in_match_records,
             longest_match=longest_match, shortest_match=shortest_match, seasons=seasons, season_number=season_number)
 
-    return render_template('season_records.html', **_args)
+    return render_template('dota/season_records.html', **_kwargs)
 
 
 @seasons_bp.route('/current/heroes', methods=['GET'])
@@ -187,5 +198,5 @@ def heroes(season_number=-1):
 
     seasons = [e[0] for e in db.session.query(DotaSeason.number).all()]
 
-    return render_template('season_heroes.html', in_season_heroes=in_season_heroes, sort=_sort, _desc=desc, seasons=seasons, 
+    return render_template('dota/season_heroes.html', in_season_heroes=in_season_heroes, sort=_sort, _desc=desc, seasons=seasons, 
         season_number=season_number)
