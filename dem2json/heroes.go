@@ -107,9 +107,11 @@ var heroesMap = map[int32]string {
     105:"npc_dota_hero_techies",
     106:"npc_dota_hero_ember_spirit",
     107:"npc_dota_hero_earth_spirit",
+    108:"npc_dota_hero_abyssal_underlord",
     109:"npc_dota_hero_terrorblade",
     110:"npc_dota_hero_phoenix",
     111:"npc_dota_hero_oracle",
     112:"npc_dota_hero_winter_wyvern",
-    113:"npc_dota_hero_arc_warden" }
+    113:"npc_dota_hero_arc_warden",
+    114:"npc_dota_hero_monkey_king" }
     

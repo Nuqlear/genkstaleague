@@ -1,6 +1,7 @@
 package main
 
 import (
+    "io"
     "strconv"
     "encoding/json"
 
@@ -29,7 +30,7 @@ type MatchPlayerData struct {
 }
 
 type MatchData struct {
-    MatchId uint32 `json:"match_id"`
+    MatchId uint64 `json:"match_id"`
     GameMode int32 `json:"game_mode"`
     StartTime uint32 `json:"start_time"`
     EndTime uint32 `json:"end_time"`
@@ -104,8 +105,8 @@ func (matchData *MatchData) TryToUpdatePlayersData(pe *manta.PacketEntity) {
     }
 }
 
-func ParseFromFile(path string) string {
-    p, _ := manta.NewParserFromFile(path)
+func ParseFromStream(stream io.Reader) string {
+    p, _ := manta.NewStreamParser(stream)
     return ParseDemo(p)
 }
 

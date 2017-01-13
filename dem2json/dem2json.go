@@ -16,7 +16,8 @@ func main() {
             fmt.Printf("ERROR: %s doesnt exist\n", filePath)
             return
         } else {
-            output := ParseFromFile(filePath)
+            file, _ := os.Open(filePath)
+            output := ParseFromStream(file)
             fmt.Println(string(output))
         }
     }
