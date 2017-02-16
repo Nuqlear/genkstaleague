@@ -142,6 +142,22 @@ def records(season_number=-1):
                 .filter(and_(DotaSeasonStats.season_id==s_id, 
                 DotaPlayerMatchStats.hero_damage == subq))\
                 .order_by(DotaPlayerMatchStats.id).first()
+
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaPlayerMatchStats.tower_damage)).as_scalar())
+        most_towerdamage_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                DotaPlayerMatchStats.tower_damage == subq))\
+                .order_by(DotaPlayerMatchStats.id).first()
+
+        subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
+            .filter(DotaSeasonStats.season_id == s_id)
+            .with_entities(func.max(DotaPlayerMatchStats.damage_taken)).as_scalar())
+        most_damagetaken_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats)\
+                .filter(and_(DotaSeasonStats.season_id==s_id, 
+                DotaPlayerMatchStats.damage_taken == subq))\
+                .order_by(DotaPlayerMatchStats.id).first()
         
         in_season_player_records = []
         in_match_records = []
@@ -160,8 +176,23 @@ def records(season_number=-1):
             max_deaths_pms.hero, max_deaths_pms.deaths])
         in_match_records.append([most_lasthits_pms.match_id, 'Most last hits', most_lasthits_pms.season_stats.player, 
             most_lasthits_pms.hero, most_lasthits_pms.last_hits])
-        in_match_records.append([most_herodamage_pms.match_id, 'Most hero damage', most_herodamage_pms.season_stats.player, 
-            most_herodamage_pms.hero, most_herodamage_pms.hero_damage])
+        if most_herodamage_pms:
+            in_match_records.append([most_herodamage_pms.match_id,
+                                     'Most hero damage',
+                                     most_herodamage_pms.season_stats.player,
+                                     most_herodamage_pms.hero,
+                                    most_herodamage_pms.hero_damage])
+        if most_towerdamage_pms:
+            in_match_records.append([most_towerdamage_pms.match_id,
+                                     'Most tower damage',
+                                     most_towerdamage_pms.season_stats.player,
+                                     most_towerdamage_pms.hero,
+                                     most_towerdamage_pms.tower_damage])
+        if most_damagetaken_pms:
+            in_match_records.append([most_damagetaken_pms.match_id,
+                                     'Most damage taken',
+                                     most_damagetaken_pms.season_stats.player,
+                                     most_damagetaken_pms.hero, most_damagetaken_pms.damage_taken])
 
         subq = (DotaMatch.query.join(DotaSeason)
             .filter(DotaSeason.id == s_id)
