@@ -110,7 +110,7 @@ $(document).ready(function() {
         });
     });
     $("#select_season").on('change', function (e) {
-        window.location.href = '/dota/seasons/'+this.value+'/{{ endpoint[1] }}';
+        window.location.href = '/dota/seasons/'+this.value+'/{{ endpoint[-1] }}';
     });
 });
 </script>

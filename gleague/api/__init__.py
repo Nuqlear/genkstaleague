@@ -28,11 +28,7 @@ def create_app(settings_override=None):
     from gleague.api.players import players_bp
     app.register_blueprint(players_bp, url_prefix='/players')
     from gleague.api.dota.matches import matches_bp as dota_matches_bp
-    url_prefix = '/matches'
-    dota_prefix = app.config.get('DOTA_URL_PREFIX', None)
-    if dota_prefix:
-        url_prefix = '/%s%s' % (dota_prefix, url_prefix)
-    dota_prefix = app.config.get('DOTA_URL_PREFIX', None)
+    url_prefix = '/dota/matches'
     app.register_blueprint(dota_matches_bp, url_prefix=url_prefix)
 
     return app

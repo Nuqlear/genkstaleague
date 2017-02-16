@@ -126,7 +126,7 @@ $(document).ready(function() {
         $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
     });
     $("#select_season").on('change', function (e) {
-        window.location.href = '/dota/seasons/'+this.value+'/{{ endpoint[1] }}';
+        window.location.href = '/dota/seasons/'+this.value+'/{{ endpoint[-1] }}';
     });
 });
 </script>

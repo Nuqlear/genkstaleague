@@ -31,11 +31,8 @@ def create_app(settings_override=None):
     from gleague.frontend.dota.seasons import seasons_bp as dota_seasons_bp
     for bp in (dota_matches_bp, dota_players_bp, dota_seasons_bp):
         old_name = bp.name
-        bp.name = "dota.%s" % old_name
-        dota_prefix = app.config.get('DOTA_URL_PREFIX', None)
-        url_prefix = '/%s' % old_name
-        if dota_prefix:
-            url_prefix = '/%s%s' % (dota_prefix, url_prefix)
+        bp.name = 'dota.%s' % old_name
+        url_prefix = '/%s/%s' % ('dota', old_name)
         app.register_blueprint(bp, url_prefix=url_prefix)
     from .auth import auth_bp
     app.register_blueprint(auth_bp)
