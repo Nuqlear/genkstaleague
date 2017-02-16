@@ -1,3 +1,6 @@
+from datetime import datetime, timedelta
+from functools import wraps
+
 from flask import g
 from flask import Response
 from flask import current_app
@@ -6,10 +9,8 @@ from flask import redirect
 from flask import render_template
 from flask import send_from_directory
 from flask import request 
-from functools import wraps
+from flask import make_response 
 from flask_openid import OpenID
-from datetime import timedelta
-from datetime import timedelta
 
 from gleague import core
 from gleague import admin
@@ -36,6 +37,36 @@ def create_app(settings_override=None):
         app.register_blueprint(bp, url_prefix=url_prefix)
     from .auth import auth_bp
     app.register_blueprint(auth_bp)
+
+    @app.route('/sitemap.xml', methods=['GET'])        
+    def sitemap():        
+        base_url = app.config['SITE_ADDRESS']     
+        base_url = 'http://' + base_url       
+        pages = []        
+        ten_days_ago = datetime.now() - timedelta(days=10)        
+        ten_days_ago = ten_days_ago.date().isoformat()
+
+        pages.append([base_url+url_for('dota.seasons.players'), ten_days_ago])
+        pages.append([base_url+url_for('dota.seasons.records'), ten_days_ago])
+        pages.append([base_url+url_for('dota.seasons.heroes'), ten_days_ago])
+        pages.append([base_url+url_for('dota.matches.matches_preview'), ten_days_ago])
+      
+        players = Player.query.order_by(Player.steam_id).all()        
+        for player in players:        
+            url = url_for('dota.players.overview', steam_id=player.steam_id)        
+            pages.append([base_url+url, ten_days_ago])        
+      
+        matches = DotaMatch.query.order_by(DotaMatch.id).all()        
+        for match in matches:     
+            url = url_for('dota.matches.match', match_id=match.id)     
+            modified_time = datetime.fromtimestamp(match.start_time).date().isoformat()       
+            pages.append([base_url+url, modified_time])       
+      
+        sitemap_xml = render_template('sitemap_template.xml', pages=pages)        
+        response = make_response(sitemap_xml)     
+        response.headers["Content-Type"] = "application/xml"          
+      
+        return response
 
     @app.route('/favicon.ico')
     @app.route('/robots.txt')
