@@ -60,7 +60,7 @@ class DotaPlayerMatchStats(db.Model):
         d = {
             'id': self.id,
             'player_slot': self.player_slot,
-            'self.hero': self.hero
+            'hero': self.hero
         }
         if extensive:
             d.update({
@@ -71,8 +71,8 @@ class DotaPlayerMatchStats(db.Model):
                 'hero_damage': self.hero_damage,
                 'denies': self.denies,
                 'tower_damage': self.tower_damage,
-                'self.hero_healing': self.hero_healing,
-                'self.level': self.level
+                'hero_healing': self.hero_healing,
+                'level': self.level
             })
             if with_season_stats:
                 d['season_stats'] = self.season_stats.to_dict(True)
