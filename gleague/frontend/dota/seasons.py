@@ -158,7 +158,7 @@ def records(season_number=-1):
                 .filter(and_(DotaSeasonStats.season_id==s_id, 
                 DotaPlayerMatchStats.damage_taken == subq))\
                 .order_by(DotaPlayerMatchStats.id).first()
-        
+
         in_season_player_records = []
         in_match_records = []
 
@@ -200,8 +200,24 @@ def records(season_number=-1):
         shortest_match = DotaMatch.query.filter(and_(DotaMatch.duration==subq), 
             DotaMatch.season_id==s_id).first()
 
-        _kwargs = dict(in_season_player_records=in_season_player_records, in_match_records=in_match_records,
-            longest_match=longest_match, shortest_match=shortest_match, seasons=seasons, season_number=season_number)
+        avg_match_duration = (DotaMatch.query.join(DotaSeason)
+            .filter(DotaSeason.id == s_id)
+            .with_entities(func.avg(DotaMatch.duration)).first())
+        avg_match_duration = avg_match_duration[0] if avg_match_duration else None
+
+        radiant_winrate = (100 * func.sum(case([(DotaMatch.radiant_win==True, 1)], else_=0))/
+                            func.count(DotaMatch.id))
+        dire_winrate = (100 * func.sum(case([(DotaMatch.radiant_win==False, 1)], else_=0))/
+                            func.count(DotaMatch.id))
+        side_winrates = (DotaMatch.query.join(DotaSeason)
+            .filter(DotaSeason.id == s_id)
+            .with_entities(radiant_winrate, dire_winrate).first())
+
+        _kwargs = dict(in_season_player_records=in_season_player_records, 
+            in_match_records=in_match_records, longest_match=longest_match, 
+            shortest_match=shortest_match, seasons=seasons, 
+            season_number=season_number, avg_match_duration=avg_match_duration,
+            side_winrates=side_winrates)
 
     return render_template('dota/season_records.html', **_kwargs)
 

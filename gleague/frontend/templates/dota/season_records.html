@@ -48,40 +48,27 @@
                     </tbody>
                 </table>
             </div>
-            <div class="panel panel-default white_table_hover">
-                <div class="panel-heading">In-Season longest match</div>
-                <table class="table table-hover in_match_records_table">
-                   <thead>
-                    <tr>
-                        <th>Match id</th>
-                        <th>Date</th>
-                        <th>Duration</th>
-                    </tr>
-                    </thead>
+            <div class="panel panel-default">
+                <div class="panel-heading">In-Season averages</div>
+                <table class="table in_match_records_table">
                     <tbody>
-                    <tr match_id={{ longest_match.id }}>
-                        <td>{{ longest_match.id }}</td>
-                        <td class="start_time">{{ longest_match.start_time }}</td>
-                        <td>{{ longest_match.duration//60 }}:{{longest_match.duration % 60}}</td>
-                    </tr>
-                    </tbody>
-                </table>
-            </div>
-            <div class="panel panel-default white_table_hover">
-                <div class="panel-heading">In-Season shortest match</div>
-                <table class="table table-hover in_match_records_table">
-                   <thead>
                     <tr>
-                        <th>Match id</th>
-                        <th>Date</th>
-                        <th>Duration</th>
+                        <td>Average match duration</td>
+                        <td>
+                            {{ avg_match_duration//60 }}:{{(shortest_match.duration % 60)}}
+                        </td>
                     </tr>
-                    </thead>
-                    <tbody>
-                    <tr match_id={{ shortest_match.id }}>
-                        <td>{{ shortest_match.id }}</td>
-                        <td class="start_time">{{ shortest_match.start_time }}</td>
-                        <td>{{ shortest_match.duration//60 }}:{{shortest_match.duration % 60}}</td>
+                    <tr>
+                        <td>Radiant Winrate</td>
+                        <td>
+                            {{ side_winrates[0] }}%
+                        </td>
+                    </tr>
+                    <tr>
+                        <td>Dire Winrate</td>
+                        <td>
+                            {{ side_winrates[1] }}%
+                        </td>
                     </tr>
                     </tbody>
                 </table>
@@ -103,7 +90,53 @@
                     {% endfor %}
                     </tbody>
                 </table>
-            </div> 
+            </div>
+            <div class="row">
+                <div class="col-md-6">
+                    <div class="panel panel-default white_table_hover">
+                        <div class="panel-heading">In-Season longest match</div>
+                        <table class="table table-hover in_match_records_table">
+                           <thead>
+                            <tr>
+                                <th>Match id</th>
+                                <th>Date</th>
+                                <th>Duration</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr match_id={{ longest_match.id }}>
+                                <td>{{ longest_match.id }}</td>
+                                <td class="start_time">{{ longest_match.start_time }}</td>
+                                <td>
+                                    {{ longest_match.duration//60 }}:{{ longest_match.duration % 60 }}
+                                </td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+                <div class="col-md-6">
+                    <div class="panel panel-default white_table_hover">
+                        <div class="panel-heading">In-Season shortest match</div>
+                        <table class="table table-hover in_match_records_table">
+                           <thead>
+                            <tr>
+                                <th>Match id</th>
+                                <th>Date</th>
+                                <th>Duration</th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            <tr match_id={{ shortest_match.id }}>
+                                <td>{{ shortest_match.id }}</td>
+                                <td class="start_time">{{ shortest_match.start_time }}</td>
+                                <td>{{ shortest_match.duration//60 }}:{{shortest_match.duration % 60}}</td>
+                            </tr>
+                            </tbody>
+                        </table>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
     {% endif %}
@@ -117,11 +150,13 @@ $(document).ready(function() {
             window.location.href = '/dota/matches/' + $(this).attr('match_id');
         });
     });
-    $('.in_season_records_table tr').each(function() {
-        $(this).click(function() {
-            window.location.href = '/dota/players/' + $(this).attr('player_id') + '/overview';
-        });
-    });
+    $('.in_season_records_table tr').each(
+        function() {
+            $(this).click(function() {
+                window.location.href = '/dota/players/' + $(this).attr('player_id') + '/overview';
+            });
+        }
+    );
     $('.start_time').each(function() {
         $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
     });
