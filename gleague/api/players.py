@@ -1,12 +1,12 @@
 import re
 
-from flask import Blueprint, jsonify
+from flask import Blueprint, jsonify, request
 from flask import g
 from flask import redirect
 from flask import session
 
 from gleague.api import oid
-from gleague.models import Player
+from gleague.models import Player, DotaSeasonStats
 
 _steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
 
@@ -36,8 +36,29 @@ def create_or_login(resp):
     return redirect("/")
 
 
-@players.route('/stats')
+@players.route('/')
 def players_list():
     return jsonify({
-        'players_stats': [p.to_dict() for p in Player.query.all()]
+        'players': [p.to_dict() for p in Player.query.all()]
     })
+
+
+@players.route('/stats/<int:season_id>')
+@players.route('/stats/')
+def players_stats(season_id=-1):
+    nickname_filter = request.args.get('q', None)
+    sort = request.args.get('sort', 'pts')
+
+    items = []
+
+    for s in DotaSeasonStats.get_stats(season_id, nickname_filter, sort):
+        items.append({
+            'steam_id': s.player.steam_id,
+            'nickname': s.player.nickname,
+            'pts': s.pts,
+            'wins': s.wins,
+            'loses': s.losses,
+            'win_rate': s.wins / max(s.wins + s.losses, 1) * 100,
+        })
+
+    return jsonify({'players': items})

@@ -54,8 +54,10 @@ def get_matches_preview():
 def get_rates(match_id):
     if not DotaMatch.is_exists(match_id):
         return abort(404)
+
     steam_id = g.user.steam_id if g.user else None
     ratings = DotaPlayerMatchRating.get_match_ratings(match_id, steam_id)
+
     return jsonify({'ratings': ratings}), 200
 
 

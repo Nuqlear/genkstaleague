@@ -124,7 +124,9 @@ class DotaSeasonStats(db.Model):
         }
 
         rv = (
-            DotaSeasonStats.query.join(Player).group_by(Player.steam_id)
+            DotaSeasonStats.query
+                .join(Player)
+                .group_by(Player.steam_id)
                 .filter(DotaSeasonStats.season_id == s_id)
                 .order_by(sort_dict.get(sort, desc(DotaSeasonStats.pts)))
                 .join(DotaPlayerMatchStats)
