@@ -39,7 +39,7 @@ class PlayerView(BaseModelView):
 
 
 class GoToIndex(BaseView):
-  @expose('/')
+  @expose()
   def index(self):
     return redirect('/')
 

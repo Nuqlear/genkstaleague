@@ -17,14 +17,14 @@ players_bp = Blueprint('players', __name__)
 def logout():
     session.clear()
     g.user = None
-    return redirect("/", code=302)
+    return redirect("/")
 
 
 @players_bp.route('/login')
 @oid.loginhandler
 def login():
     if g.user is not None:
-        return redirect("/", code=302)
+        return redirect("/")
     return oid.try_login('http://steamcommunity.com/openid')
 
 
@@ -33,4 +33,4 @@ def create_or_login(resp):
     match = _steam_id_re.search(resp.identity_url)
     g.user = Player.get_or_create(match.group(1))
     session['steam_id'] = g.user.steam_id
-    return redirect("/", code=302)
+    return redirect("/")
