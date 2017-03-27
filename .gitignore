@@ -1,4 +1,3 @@
-.DS_Store
 *.pyc
 *.db
 config.py
@@ -30,3 +29,6 @@ Desktop.ini
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
 
+# IntellijIDEA
+.idea/
+dem2json/dem2json
