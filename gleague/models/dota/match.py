@@ -1,24 +1,23 @@
 import json
 import os
 import tempfile
-from subprocess import Popen
 from subprocess import PIPE
+from subprocess import Popen
 
-from sqlalchemy import Column
-from sqlalchemy import String
-from sqlalchemy import Integer
-from sqlalchemy import ForeignKey
-from sqlalchemy import Boolean
+from flask import current_app
 from sqlalchemy import BigInteger
+from sqlalchemy import Boolean
+from sqlalchemy import Column
+from sqlalchemy import ForeignKey
+from sqlalchemy import Integer
 from sqlalchemy import SmallInteger
-from sqlalchemy import func
-from sqlalchemy import desc
+from sqlalchemy import String
 from sqlalchemy import and_
-from sqlalchemy import or_
+from sqlalchemy import desc
+from sqlalchemy import func
+from sqlalchemy.orm import relationship
 from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.schema import UniqueConstraint
-from sqlalchemy.orm import relationship
-from flask import current_app
 
 from gleague.core import db
 from gleague.models.dota.season import DotaSeasonStats

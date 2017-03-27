@@ -9,7 +9,7 @@ from flask import current_app
 from flask import url_for
 
 from gleague.core import db
-from gleague.models import *
+from gleague.models import Player, DotaMatch, DotaPlayerMatchRating, DotaPlayerMatchStats, DotaSeason, DotaSeasonStats
 
 
 class AdminAccessMixin(object):

@@ -11,10 +11,10 @@ from gleague.core import db
 from gleague.models import DotaMatch
 from gleague.models import DotaPlayerMatchRating
 
-matches_bp = Blueprint('dota_matches', __name__)
+matches = Blueprint('dota_matches', __name__)
 
 
-@matches_bp.route('/', methods=['POST'])
+@matches.route('/', methods=['POST'])
 @admin_required
 def create_match():
     replay = request.files['file']
@@ -26,7 +26,7 @@ def create_match():
     return abort(400)
 
 
-@matches_bp.route('/<int:match_id>', methods=['GET'])
+@matches.route('/<int:match_id>', methods=['GET'])
 def get_match(match_id):
     m = DotaMatch.query.get(match_id)
     if not m:
@@ -34,20 +34,23 @@ def get_match(match_id):
     return jsonify(m.to_dict()), 200
 
 
-@matches_bp.route('/', methods=['GET'])
+@matches.route('/', methods=['GET'])
 def get_matches_preview():
     amount = request.args.get('amount', 4)
     offs = request.args.get('offset', 0)
+
     try:
         amount = int(amount)
         offs = int(offs)
     except Exception:
         return abort(406)
+
     matches = DotaMatch.get_batch(amount, offs)
+
     return jsonify({'matches': [m.to_dict(False) for m in matches]}), 200
 
 
-@matches_bp.route('/<int:match_id>/ratings/', methods=['GET'])
+@matches.route('/<int:match_id>/ratings/', methods=['GET'])
 def get_rates(match_id):
     if not DotaMatch.is_exists(match_id):
         return abort(404)
@@ -56,23 +59,31 @@ def get_rates(match_id):
     return jsonify({'ratings': ratings}), 200
 
 
-@matches_bp.route('/<int:match_id>/ratings/<int:player_match_stats_id>', methods=['POST'])
+@matches.route('/<int:match_id>/ratings/<int:player_match_stats_id>', methods=['POST'])
 @login_required
 def rate_player(match_id, player_match_stats_id):
     rating = request.args.get('rating', None)
+
     try:
         rating = int(rating)
     except Exception:
         return abort(400)
+
     m = DotaMatch.query.get(match_id)
+
     if not m:
         return abort(404)
+
     if rating not in range(1, 6):
         return abort(406)
+
     if not m.is_played(g.user.steam_id):
         return abort(403)
-    pmr = DotaPlayerMatchRating(player_match_stats_id=player_match_stats_id, rating=rating,
-                                rated_by_steam_id=g.user.steam_id)
-    db.session.add(pmr)
+
+    db.session.add(DotaPlayerMatchRating(
+        player_match_stats_id=player_match_stats_id,
+        rating=rating,
+        rated_by_steam_id=g.user.steam_id
+    ))
     db.session.flush()
     return Response(status=200)

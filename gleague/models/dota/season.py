@@ -63,7 +63,7 @@ class DotaSeason(db.Model):
         self.ended = date
         stats = DotaSeasonStats.query.filter(and_(DotaSeasonStats.season_id == self.id,
                                                   (
-                                                  DotaSeasonStats.wins + DotaSeasonStats.losses) > current_app.config.get(
+                                                      DotaSeasonStats.wins + DotaSeasonStats.losses) > current_app.config.get(
                                                       'SEASON_CALIBRATING_MATCHES_NUM', 0))) \
             .with_entities(DotaSeasonStats.steam_id, DotaSeasonStats.pts).order_by(desc(DotaSeasonStats.pts)).limit(
             3).all()
@@ -107,6 +107,35 @@ class DotaSeasonStats(db.Model):
         else:
             s = s[0]
         return s
+
+    @staticmethod
+    def get_stats(season_number=-1, nickname_filter=None, sort='pts'):
+        from gleague.models import Player
+        from gleague.models import DotaPlayerMatchStats
+        from gleague.frontend.dota.seasons import get_season_id
+
+        season_number, s_id = get_season_id(season_number)
+
+        sort_dict = {
+            'pts': desc(DotaSeasonStats.pts),
+            'nickname': func.lower(Player.nickname),
+            'wins': desc(DotaSeasonStats.wins),
+            'losses': desc(DotaSeasonStats.losses)
+        }
+
+        rv = (
+            DotaSeasonStats.query.join(Player).group_by(Player.steam_id)
+                .filter(DotaSeasonStats.season_id == s_id)
+                .order_by(sort_dict.get(sort, desc(DotaSeasonStats.pts)))
+                .join(DotaPlayerMatchStats)
+                .group_by(DotaSeasonStats.id)
+                .having(func.count(DotaPlayerMatchStats.id) > current_app.config['SEASON_CALIBRATING_MATCHES_NUM'])
+        )
+
+        if nickname_filter:
+            rv = rv.filter(func.lower(Player.nickname).startswith(func.lower(nickname_filter)))
+
+        return rv
 
     def __repr__(self):
         return '{} ({})'.format(self.player.__repr__(), self.season.__repr__())

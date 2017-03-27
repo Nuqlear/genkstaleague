@@ -1,21 +1,20 @@
 from datetime import datetime, timedelta
 from functools import wraps
 
-from flask import g
 from flask import Response
 from flask import current_app
-from flask import url_for
+from flask import g
+from flask import make_response
 from flask import redirect
 from flask import render_template
-from flask import send_from_directory
 from flask import request
-from flask import make_response
+from flask import send_from_directory
+from flask import url_for
 from flask_openid import OpenID
 
-from gleague import core
 from gleague import admin
-from gleague.models import Player
-from gleague.models import DotaMatch
+from gleague import core
+from gleague.models import *
 
 oid = OpenID()
 
@@ -40,6 +39,7 @@ def create_app(settings_override=None):
 
     @app.route('/sitemap.xml', methods=['GET'])
     def sitemap():
+
         base_url = app.config['SITE_ADDRESS']
         base_url = 'http://' + base_url
         pages = []
@@ -52,11 +52,13 @@ def create_app(settings_override=None):
         pages.append([base_url + url_for('dota.matches.matches_preview'), ten_days_ago])
 
         players = Player.query.order_by(Player.steam_id).all()
+
         for player in players:
             url = url_for('dota.players.overview', steam_id=player.steam_id)
             pages.append([base_url + url, ten_days_ago])
 
         matches = DotaMatch.query.order_by(DotaMatch.id).all()
+
         for match in matches:
             url = url_for('dota.matches.match', match_id=match.id)
             modified_time = datetime.fromtimestamp(match.start_time).date().isoformat()
@@ -82,7 +84,7 @@ def create_app(settings_override=None):
         return {
             'GOOGLE_SITE_VERIFICATION_CODE': app.config['GOOGLE_SITE_VERIFICATION_CODE'],
             'SITE_NAME': app.config['SITE_NAME'],
-            'endpoint': (request.endpoint).split('.')
+            'endpoint': request.endpoint.split('.')
         }
 
     return app

@@ -1,6 +1,6 @@
 import re
 
-from flask import Blueprint
+from flask import Blueprint, jsonify
 from flask import g
 from flask import redirect
 from flask import session
@@ -10,17 +10,17 @@ from gleague.models import Player
 
 _steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
 
-players_bp = Blueprint('players', __name__)
+players = Blueprint('players', __name__)
 
 
-@players_bp.route('/logout')
+@players.route('/logout')
 def logout():
     session.clear()
     g.user = None
     return redirect("/")
 
 
-@players_bp.route('/login')
+@players.route('/login')
 @oid.loginhandler
 def login():
     if g.user is not None:
@@ -34,3 +34,10 @@ def create_or_login(resp):
     g.user = Player.get_or_create(match.group(1))
     session['steam_id'] = g.user.steam_id
     return redirect("/")
+
+
+@players.route('/stats')
+def players_list():
+    return jsonify({
+        'players_stats': [p.to_dict() for p in Player.query.all()]
+    })

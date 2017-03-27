@@ -9,17 +9,15 @@ from sqlalchemy import desc
 from sqlalchemy import func
 
 from gleague.core import db
-from gleague.models import DotaMatch
-from gleague.models import DotaPlayerMatchStats
-from gleague.models import DotaSeason
-from gleague.models import DotaSeasonStats
-from gleague.models import Player
+from ...models import DotaMatch
+from ...models import DotaPlayerMatchStats
+from ...models import DotaSeason
+from ...models import DotaSeasonStats
 
 seasons_bp = Blueprint('seasons', __name__)
 
 
 def get_season_id(season_number):
-    season = None
     if season_number == -1:
         season = DotaSeason.current()
     else:
@@ -35,23 +33,20 @@ def players(season_number=-1):
     season_number, s_id = get_season_id(season_number)
     q = request.args.get('q')
     sort = request.args.get('sort', 'pts')
-    sort_dict = {'pts': desc(DotaSeasonStats.pts), 'nickname': func.lower(Player.nickname),
-                 'wins': desc(DotaSeasonStats.wins), 'losses': desc(DotaSeasonStats.losses)}
-    page = request.args.get('page', 1)
-    page = int(page)
-    ss = DotaSeasonStats.query.join(Player).group_by(Player.steam_id) \
-        .filter(DotaSeasonStats.season_id == s_id) \
-        .order_by(sort_dict.get(sort, desc(DotaSeasonStats.pts))) \
-        .join(DotaPlayerMatchStats).group_by(DotaSeasonStats.id) \
-        .having(func.count(DotaPlayerMatchStats.id) > current_app.config['SEASON_CALIBRATING_MATCHES_NUM'])
-    if q:
-        ss = ss.filter(func.lower(Player.nickname).startswith(func.lower(q)))
-    ss = ss.paginate(page, current_app.config['TOP_PLAYERS_PER_PAGE'], True)
+    page = int(request.args.get('page', 1))
+
+    stats = DotaSeasonStats.get_stats(season_number, q, sort)
+    stats = stats.paginate(page, current_app.config['TOP_PLAYERS_PER_PAGE'], True)
 
     seasons = [e[0] for e in db.session.query(DotaSeason.number).all()]
 
-    return render_template('dota/season_players.html', stats=ss, sort=sort, seasons=seasons,
-                           season_number=season_number)
+    return render_template(
+        'dota/season_players.html',
+        stats=stats,
+        sort=sort,
+        seasons=seasons,
+        season_number=season_number
+    )
 
 
 @seasons_bp.route('/current/records', methods=['GET'])
@@ -102,11 +97,11 @@ def records(season_number=-1):
         subq = (DotaPlayerMatchStats.query.join(DotaSeasonStats)
                 .filter(DotaSeasonStats.season_id == s_id)
                 .with_entities(func.max((DotaPlayerMatchStats.kills + DotaPlayerMatchStats.assists) / (
-        DotaPlayerMatchStats.deaths + 1))).as_scalar())
+            DotaPlayerMatchStats.deaths + 1))).as_scalar())
         max_kda_pms = db.session.query(DotaPlayerMatchStats).join(DotaSeasonStats) \
             .filter(and_(DotaSeasonStats.season_id == s_id,
                          ((DotaPlayerMatchStats.kills + DotaPlayerMatchStats.assists) / (
-                         DotaPlayerMatchStats.deaths + 1)) ==
+                             DotaPlayerMatchStats.deaths + 1)) ==
                          subq)) \
             .order_by(DotaPlayerMatchStats.id).first()
 
