@@ -9,7 +9,6 @@ from flask_openid import OpenID
 from gleague import core
 from gleague import admin
 
-
 oid = OpenID()
 
 
@@ -62,4 +61,3 @@ def admin_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
-    

@@ -48,7 +48,6 @@ class Player(db.Model):
     def get_or_create(steam_id):
         p = Player.query.filter_by(steam_id=steam_id).first()
         if p is None:
-            steamdata = {}
             steamdata = get_steam_user_info(steam_id, current_app.config['STEAM_API_KEY'])
             if steamdata == {}:
                 return None

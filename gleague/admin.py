@@ -13,7 +13,6 @@ from gleague.models import *
 
 
 class AdminAccessMixin(object):
-
     def is_accessible(self):
         return g.user and g.user.steam_id in current_app.config['ADMINS_STEAM_ID']
 
@@ -39,9 +38,9 @@ class PlayerView(BaseModelView):
 
 
 class GoToIndex(BaseView):
-  @expose()
-  def index(self):
-    return redirect('/')
+    @expose()
+    def index(self):
+        return redirect('/')
 
 
 class DotaMatchView(BaseModelView):
@@ -77,7 +76,7 @@ class DotaSeasonView(BaseModelView):
     def __init__(self, *args, **kwargs):
         super(DotaSeasonView, self).__init__(DotaSeason, *args, **kwargs)
 
-    @expose('/start_new', methods=('GET', ))
+    @expose('/start_new', methods=('GET',))
     def start_new(self):
         DotaSeason.start_new()
         db.session.commit()
@@ -85,7 +84,6 @@ class DotaSeasonView(BaseModelView):
 
 
 class DotaSeasonStatsView(BaseModelView):
-
     def __init__(self, *args, **kwargs):
         super(DotaSeasonStatsView, self).__init__(DotaSeasonStats, *args, **kwargs)
 
@@ -99,4 +97,3 @@ def init_admin(app):
     admin.add_view(DotaPlayerMatchStatsView())
     admin.add_view(DotaPlayerMatchRatingView())
     admin.add_view(GoToIndex(name='go to "/"'))
-

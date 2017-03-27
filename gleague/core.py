@@ -39,6 +39,7 @@ def setup_logging(app):
 
 def reg_gl_vars(app):
     from .models import Player
+
     @app.before_request
     def guser():
         g.user = None
