@@ -1,8 +1,6 @@
-import json
 import random
 
 from flask import Blueprint
-from flask import g
 from flask import abort
 from flask import current_app
 from flask import render_template
@@ -10,11 +8,6 @@ from flask import request
 from sqlalchemy import desc
 
 from gleague.models import DotaMatch
-from gleague.models import DotaSeasonStats
-from gleague.models import DotaSeason
-from gleague.models import Player
-from gleague.core import db
-
 
 matches_bp = Blueprint('matches', __name__)
 
@@ -24,7 +17,7 @@ def match(match_id):
     m = DotaMatch.query.get(match_id)
     if not m:
         return abort(404)
-    return render_template('dota/match.html', match = m)
+    return render_template('dota/match.html', match=m)
 
 
 @matches_bp.route('/', methods=['GET'])
@@ -34,13 +27,12 @@ def matches_preview():
         abort(400)
     page = int(page)
     m = DotaMatch.query.order_by(desc(DotaMatch.id)).paginate(page,
-        current_app.config['HISTORY_MATCHES_PER_PAGE'], True)
+                                                              current_app.config['HISTORY_MATCHES_PER_PAGE'], True)
     return render_template('dota/matches.html', matches=m)
 
 
 # SERGEY
 def sort_by_pts(players, t=50):
-
     def total_pts(players):
         return sum((players[i][1] for i in range(len(players))))
 
@@ -62,7 +54,7 @@ def sort_by_pts(players, t=50):
     sorted_players = sorted(players, key=lambda a: a[1])
     best_attempt = shuffle(sorted_players)
     best_diff = pts_diff(*best_attempt)
-    
+
     for __ in range(t):
         attempt = shuffle(sorted_players)
         diff = pts_diff(*attempt)

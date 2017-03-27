@@ -16,23 +16,23 @@ from gleague.core import db
 
 class DotaSeason(db.Model):
     __tablename__ = 'dota_season'
-    
+
     id = Column(Integer, primary_key=True)
     number = Column(Integer, nullable=False, unique=True)
     started = Column(DateTime, default=datetime.datetime.utcnow)
     ended = Column(DateTime)
-    season_stats = relationship('DotaSeasonStats', lazy='dynamic', backref='season', order_by="desc(DotaSeasonStats.season_id)")
+    season_stats = relationship('DotaSeasonStats', lazy='dynamic', backref='season',
+                                order_by="desc(DotaSeasonStats.season_id)")
     matches = relationship('DotaMatch', lazy='dynamic', backref='season')
     place_1 = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"))
     place_2 = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"))
     place_3 = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"))
     place_1_player = db.relationship('Player', foreign_keys='DotaSeason.place_1',
-                              backref=db.backref('place_1_seasons', lazy='dynamic'))
+                                     backref=db.backref('place_1_seasons', lazy='dynamic'))
     place_2_player = db.relationship('Player', foreign_keys='DotaSeason.place_2',
-                              backref=db.backref('place_2_seasons', lazy='dynamic'))
+                                     backref=db.backref('place_2_seasons', lazy='dynamic'))
     place_3_player = db.relationship('Player', foreign_keys='DotaSeason.place_3',
-                              backref=db.backref('place_3_seasons', lazy='dynamic'))
-
+                                     backref=db.backref('place_3_seasons', lazy='dynamic'))
 
     def __init__(self, *args, **kwargs):
         if 'number' not in kwargs:
@@ -61,9 +61,12 @@ class DotaSeason(db.Model):
         if date is None:
             date = datetime.datetime.utcnow()
         self.ended = date
-        stats = DotaSeasonStats.query.filter(and_(DotaSeasonStats.season_id==self.id, 
-            (DotaSeasonStats.wins+DotaSeasonStats.losses)>current_app.config.get('SEASON_CALIBRATING_MATCHES_NUM', 0)))\
-            .with_entities(DotaSeasonStats.steam_id,DotaSeasonStats.pts).order_by(desc(DotaSeasonStats.pts)).limit(3).all()
+        stats = DotaSeasonStats.query.filter(and_(DotaSeasonStats.season_id == self.id,
+                                                  (
+                                                  DotaSeasonStats.wins + DotaSeasonStats.losses) > current_app.config.get(
+                                                      'SEASON_CALIBRATING_MATCHES_NUM', 0))) \
+            .with_entities(DotaSeasonStats.steam_id, DotaSeasonStats.pts).order_by(desc(DotaSeasonStats.pts)).limit(
+            3).all()
         for s in stats:
             self.place_1 = stats[0][0]
             self.place_2 = stats[1][0]
@@ -83,7 +86,7 @@ class DotaSeason(db.Model):
 
 class DotaSeasonStats(db.Model):
     __tablename__ = 'dota_season_stats'
-    
+
     id = Column(Integer, primary_key=True)
     season_id = Column(Integer, ForeignKey('dota_season.id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
     steam_id = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"), nullable=False)
@@ -97,7 +100,8 @@ class DotaSeasonStats(db.Model):
 
     @staticmethod
     def get_or_create(steam_id, season_id):
-        s = DotaSeasonStats.query.filter(and_(DotaSeasonStats.season_id==season_id, DotaSeasonStats.steam_id==steam_id)).all()
+        s = DotaSeasonStats.query.filter(
+            and_(DotaSeasonStats.season_id == season_id, DotaSeasonStats.steam_id == steam_id)).all()
         if not s:
             s = DotaSeasonStats(steam_id=steam_id, season_id=season_id)
         else:
@@ -119,6 +123,6 @@ class DotaSeasonStats(db.Model):
                 'loss': self.loss,
                 'pts': self.pts,
                 'streak': self.streak,
-                'longest_streak': self.longest_winstreak 
+                'longest_streak': self.longest_winstreak
             })
         return d

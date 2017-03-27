@@ -1,6 +1,6 @@
 import json
-
 from urllib.request import urlopen
+
 from werkzeug import url_encode
 
 

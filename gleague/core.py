@@ -7,18 +7,19 @@ from flask import g
 from flask import request
 from flask_sqlalchemy import SQLAlchemy
 
-
 db = SQLAlchemy()
+
 
 class FlaskApp(Flask):
     def log_exception(self, exc_info):
         user = ''
         if g.user:
             user = g.user.__repr__()
-        self.logger.error('[%s] %s %s Exception on ' % ( 
+        self.logger.error('[%s] %s %s Exception on ' % (
             user,
             request.method,
-            request.path), exc_info = exc_info)
+            request.path), exc_info=exc_info)
+
 
 def setup_logging(app):
     fmt = '[%(filename)s:%(lineno)d] ' if app.debug else '%(module)-12s '
@@ -34,6 +35,7 @@ def setup_logging(app):
         file_handler.setLevel(loglevel)
         file_handler.setFormatter(formatter)
         app.logger.addHandler(file_handler)
+
 
 def reg_gl_vars(app):
     from .models import Player

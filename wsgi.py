@@ -4,7 +4,6 @@ from werkzeug.wsgi import DispatcherMiddleware
 from gleague import api
 from gleague import frontend
 
-
 application = DispatcherMiddleware(frontend.create_app(), {'/api': api.create_app()})
 
 if __name__ == "__main__":

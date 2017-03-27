@@ -27,7 +27,7 @@ class FlaskTestCaseMixin(object):
 
     def post(self, *args, **kwargs):
         return self._request(self.client.post, *args,
-                              **self._html_data(kwargs))
+                             **self._html_data(kwargs))
 
     def put(self, *args, **kwargs):
         return self._request(self.client.put, *args, **self._html_data(kwargs))

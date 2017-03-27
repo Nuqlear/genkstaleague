@@ -29,10 +29,10 @@ class DotaPlayerMatchStats(db.Model):
     __tablename__ = 'dota_player_match_stats'
 
     id = Column(Integer, primary_key=True)
-    season_stats_id = Column(Integer, ForeignKey('dota_season_stats.id', onupdate="CASCADE", 
-                                                    ondelete="CASCADE"), nullable=False)
-    match_id = Column(BigInteger, ForeignKey('dota_match.id', onupdate="CASCADE", 
-                                                    ondelete="CASCADE"), nullable=False)
+    season_stats_id = Column(Integer, ForeignKey('dota_season_stats.id', onupdate="CASCADE",
+                                                 ondelete="CASCADE"), nullable=False)
+    match_id = Column(BigInteger, ForeignKey('dota_match.id', onupdate="CASCADE",
+                                             ondelete="CASCADE"), nullable=False)
     old_pts = Column(Integer, nullable=False)
     pts_diff = Column(Integer, nullable=False)
     kills = Column(Integer, nullable=False)
@@ -49,8 +49,8 @@ class DotaPlayerMatchStats(db.Model):
     xp_per_min = Column(Integer, nullable=True)
     gold_per_min = Column(Integer, nullable=True)
     damage_taken = Column(Integer, nullable=True)
-    player_match_ratings = relationship('DotaPlayerMatchRating', cascade="all, delete", 
-                                                            backref="player_match_stats")
+    player_match_ratings = relationship('DotaPlayerMatchRating', cascade="all, delete",
+                                        backref="player_match_stats")
 
     def __repr__(self):
         return '%s (%s) -- Match %s' % (self.season_stats.player.nickname, self.season_stats.steam_id, self.match_id)
@@ -87,11 +87,11 @@ class DotaPlayerMatchRating(db.Model):
     __tablename__ = 'dota_player_match_rating'
 
     id = Column(Integer, primary_key=True)
-    rated_by_steam_id = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE", 
-                                                                ondelete="CASCADE"), nullable=False)
+    rated_by_steam_id = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE",
+                                                      ondelete="CASCADE"), nullable=False)
     rating = Column(SmallInteger, default=5)
-    player_match_stats_id = Column(Integer, ForeignKey('dota_player_match_stats.id', onupdate="CASCADE", 
-                                                                ondelete="CASCADE"), nullable=False)
+    player_match_stats_id = Column(Integer, ForeignKey('dota_player_match_stats.id', onupdate="CASCADE",
+                                                       ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (
         CheckConstraint('dota_player_match_rating.rating >= 1'),
@@ -105,20 +105,21 @@ class DotaPlayerMatchRating(db.Model):
         # TODO: pure sqlalchemy
         rated_by_ps = played = None
         if user_id:
-            rated_by_ps = DotaPlayerMatchStats.query.join(DotaSeasonStats).filter(and_(DotaSeasonStats.steam_id==user_id, 
-                DotaPlayerMatchStats.match_id==match_id)).first()
+            rated_by_ps = DotaPlayerMatchStats.query.join(DotaSeasonStats).filter(
+                and_(DotaSeasonStats.steam_id == user_id,
+                     DotaPlayerMatchStats.match_id == match_id)).first()
             played = (rated_by_ps is not None)
         ratings = {}
         m = DotaMatch.query.get(match_id)
         for ps in m.players_stats:
-            avg_rating = DotaPlayerMatchRating.query.join(DotaPlayerMatchStats).filter(DotaPlayerMatchStats.id==ps.id)\
+            avg_rating = DotaPlayerMatchRating.query.join(DotaPlayerMatchStats).filter(DotaPlayerMatchStats.id == ps.id) \
                 .value(func.avg(DotaPlayerMatchRating.rating))
             if avg_rating:
                 avg_rating = float(avg_rating) or 0.0
-            ratings[ps.id] = {'allowed_rate':played and ps.id != rated_by_ps.id and not(
-                    DotaPlayerMatchRating.query.filter(and_(DotaPlayerMatchRating.rated_by_steam_id==user_id, 
-                    DotaPlayerMatchRating.player_match_stats_id==ps.id)).first()),
-                'avg_rating':avg_rating}
+            ratings[ps.id] = {'allowed_rate': played and ps.id != rated_by_ps.id and not (
+                DotaPlayerMatchRating.query.filter(and_(DotaPlayerMatchRating.rated_by_steam_id == user_id,
+                                                        DotaPlayerMatchRating.player_match_stats_id == ps.id)).first()),
+                              'avg_rating': avg_rating}
         return ratings
 
 
@@ -127,16 +128,16 @@ class DotaMatch(db.Model):
 
     id = Column(BigInteger, primary_key=True)
     season_id = Column(Integer, ForeignKey('dota_season.id', onupdate="CASCADE", ondelete="CASCADE"),
-                                                                                nullable=False)
-    players_stats = relationship('DotaPlayerMatchStats', cascade="all,delete", backref="match", 
-         order_by=DotaPlayerMatchStats.player_slot)
+                       nullable=False)
+    players_stats = relationship('DotaPlayerMatchStats', cascade="all,delete", backref="match",
+                                 order_by=DotaPlayerMatchStats.player_slot)
     radiant_win = Column(Boolean)
     duration = Column(Integer)
     game_mode = Column(Integer)
     start_time = Column(Integer)
 
-    game_modes_dict = {1:'All Pick', 2:'Captains Mode', 3:'Random Draft', 4:'Single Draft',
-        5:'All Random', 8:'Reverse Captain Mode', 16:'Captains Draft', 22:'Ranked All Pick'}
+    game_modes_dict = {1: 'All Pick', 2: 'Captains Mode', 3: 'Random Draft', 4: 'Single Draft',
+                       5: 'All Random', 8: 'Reverse Captain Mode', 16: 'Captains Draft', 22: 'Ranked All Pick'}
 
     def __repr__(self):
         return "%s" % self.id
@@ -167,11 +168,11 @@ class DotaMatch(db.Model):
         return 'Radiant' if self.radiant_win else 'Dire'
 
     def duration_string(self):
-        return "{}:{}".format(self.duration//60, self.duration%60)
+        return "{}:{}".format(self.duration // 60, self.duration % 60)
 
     @staticmethod
     def get_batch(amount, offset):
-        q = DotaMatch.query.order_by(desc(DotaMatch.start_time)).limit(amount).offset(amount*offset)
+        q = DotaMatch.query.order_by(desc(DotaMatch.start_time)).limit(amount).offset(amount * offset)
         return q
 
     @staticmethod
@@ -196,7 +197,7 @@ class DotaMatch(db.Model):
         from gleague.models.dota.season import DotaSeason
 
         base_pts_diff = current_app.config.get('MATCH_BASE_PTS_DIFF', 20)
-        
+
         m = DotaMatch()
         m.season_id = DotaSeason.current().id
         m.id = steamdata['match_id']
@@ -235,14 +236,15 @@ class DotaMatch(db.Model):
             db.session.add(player_stats)
             db.session.add(season_stats)
             player_stats.old_pts = season_stats.pts
-        pts = {'radiant': 0, 'dire':0}
+        pts = {'radiant': 0, 'dire': 0}
         for i in range(len(m.players_stats)):
             j = m.players_stats[i]
             if j.player_slot < 5:
                 pts['radiant'] += j.season_stats.pts
-            else: pts['dire'] += j.season_stats.pts
-        pts_diff = abs(pts['radiant'] - pts['dire'])/20
-        if pts_diff > base_pts_diff-5: pts_diff = base_pts_diff-5
+            else:
+                pts['dire'] += j.season_stats.pts
+        pts_diff = abs(pts['radiant'] - pts['dire']) / 20
+        if pts_diff > base_pts_diff - 5: pts_diff = base_pts_diff - 5
         # VERY OLD CODE; NEED REWORK
         if pts['radiant'] > pts['dire']:
             if m.radiant_win:
@@ -267,7 +269,7 @@ class DotaMatch(db.Model):
                     j = m.players_stats[i]
                     if j.player_slot < 5:
                         j.pts_diff = int(base_pts_diff + pts_diff)
-                    else: 
+                    else:
                         j.pts_diff = -int(base_pts_diff + pts_diff)
                     j.season_stats.pts += j.pts_diff
             else:
@@ -275,7 +277,7 @@ class DotaMatch(db.Model):
                     j = m.players_stats[i]
                     if j.player_slot < 5:
                         j.pts_diff = -int(base_pts_diff - pts_diff)
-                    else: 
+                    else:
                         j.pts_diff = int(base_pts_diff - pts_diff)
                     j.season_stats.pts += j.pts_diff
         for i in range(len(m.players_stats)):

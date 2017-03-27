@@ -1,16 +1,13 @@
-import os
 import json
 import operator
+import os
 from functools import reduce
 
-from gleague.core import db
-from gleague import models
 from tests.api import GleagueApiTestCase
-from tests.factories.dota import DotaPlayerMatchStatsFactory
 from tests.factories.dota import DotaMatchFactory
+from tests.factories.dota import DotaPlayerMatchRatingFactory
 from tests.factories.dota import DotaSeasonFactory
 from tests.factories.dota import PlayerFactory
-from tests.factories.dota import DotaPlayerMatchRatingFactory
 
 
 class DotaTestCase(GleagueApiTestCase):
@@ -81,7 +78,7 @@ class DotaTestCase(GleagueApiTestCase):
         response = self.get_ratings(m.id)
         data = json.loads(response.data.decode())
         self.assertEqual(200, response.status_code)
-        avg_rating = reduce(operator.add, [mr.rating for mr in match_ratings])/len(match_ratings)
+        avg_rating = reduce(operator.add, [mr.rating for mr in match_ratings]) / len(match_ratings)
         player_rating = data['ratings'].pop(str(ps.id))
         self.assertEqual(avg_rating, player_rating['avg_rating'])
         for key in data['ratings']:

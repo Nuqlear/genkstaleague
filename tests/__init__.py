@@ -1,8 +1,5 @@
-import os
-
 from unittest import TestCase
 
-from gleague import models
 from gleague.core import db
 from tests.mixin import FlaskTestCaseMixin
 

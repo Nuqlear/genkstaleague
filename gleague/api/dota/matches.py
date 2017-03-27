@@ -1,18 +1,15 @@
-import sqlalchemy
-import json
-
 from flask import Blueprint
-from flask import request
-from flask import g
-from flask import abort
-from flask import jsonify
 from flask import Response
+from flask import abort
+from flask import g
+from flask import jsonify
+from flask import request
 
+from gleague.api import admin_required
+from gleague.api import login_required
+from gleague.core import db
 from gleague.models import DotaMatch
 from gleague.models import DotaPlayerMatchRating
-from gleague.core import db
-from gleague.api import login_required
-from gleague.api import admin_required
 
 matches_bp = Blueprint('dota_matches', __name__)
 
@@ -36,6 +33,7 @@ def get_match(match_id):
         return abort(404)
     return jsonify(m.to_dict()), 200
 
+
 @matches_bp.route('/', methods=['GET'])
 def get_matches_preview():
     amount = request.args.get('amount', 4)
@@ -46,7 +44,7 @@ def get_matches_preview():
     except Exception:
         return abort(406)
     matches = DotaMatch.get_batch(amount, offs)
-    return jsonify({'matches':[m.to_dict(False) for m in matches]}), 200
+    return jsonify({'matches': [m.to_dict(False) for m in matches]}), 200
 
 
 @matches_bp.route('/<int:match_id>/ratings/', methods=['GET'])
@@ -55,7 +53,7 @@ def get_rates(match_id):
         return abort(404)
     steam_id = g.user.steam_id if g.user else None
     ratings = DotaPlayerMatchRating.get_match_ratings(match_id, steam_id)
-    return jsonify({'ratings':ratings}), 200
+    return jsonify({'ratings': ratings}), 200
 
 
 @matches_bp.route('/<int:match_id>/ratings/<int:player_match_stats_id>', methods=['POST'])
@@ -73,7 +71,8 @@ def rate_player(match_id, player_match_stats_id):
         return abort(406)
     if not m.is_played(g.user.steam_id):
         return abort(403)
-    pmr = DotaPlayerMatchRating(player_match_stats_id=player_match_stats_id, rating=rating, rated_by_steam_id=g.user.steam_id)
+    pmr = DotaPlayerMatchRating(player_match_stats_id=player_match_stats_id, rating=rating,
+                                rated_by_steam_id=g.user.steam_id)
     db.session.add(pmr)
     db.session.flush()
     return Response(status=200)

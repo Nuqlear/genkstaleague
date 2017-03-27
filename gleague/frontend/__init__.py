@@ -8,8 +8,8 @@ from flask import url_for
 from flask import redirect
 from flask import render_template
 from flask import send_from_directory
-from flask import request 
-from flask import make_response 
+from flask import request
+from flask import make_response
 from flask_openid import OpenID
 
 from gleague import core
@@ -38,34 +38,34 @@ def create_app(settings_override=None):
     from .auth import auth_bp
     app.register_blueprint(auth_bp)
 
-    @app.route('/sitemap.xml', methods=['GET'])        
-    def sitemap():        
-        base_url = app.config['SITE_ADDRESS']     
-        base_url = 'http://' + base_url       
-        pages = []        
-        ten_days_ago = datetime.now() - timedelta(days=10)        
+    @app.route('/sitemap.xml', methods=['GET'])
+    def sitemap():
+        base_url = app.config['SITE_ADDRESS']
+        base_url = 'http://' + base_url
+        pages = []
+        ten_days_ago = datetime.now() - timedelta(days=10)
         ten_days_ago = ten_days_ago.date().isoformat()
 
-        pages.append([base_url+url_for('dota.seasons.players'), ten_days_ago])
-        pages.append([base_url+url_for('dota.seasons.records'), ten_days_ago])
-        pages.append([base_url+url_for('dota.seasons.heroes'), ten_days_ago])
-        pages.append([base_url+url_for('dota.matches.matches_preview'), ten_days_ago])
-      
-        players = Player.query.order_by(Player.steam_id).all()        
-        for player in players:        
-            url = url_for('dota.players.overview', steam_id=player.steam_id)        
-            pages.append([base_url+url, ten_days_ago])        
-      
-        matches = DotaMatch.query.order_by(DotaMatch.id).all()        
-        for match in matches:     
-            url = url_for('dota.matches.match', match_id=match.id)     
-            modified_time = datetime.fromtimestamp(match.start_time).date().isoformat()       
-            pages.append([base_url+url, modified_time])       
-      
-        sitemap_xml = render_template('sitemap_template.xml', pages=pages)        
-        response = make_response(sitemap_xml)     
-        response.headers["Content-Type"] = "application/xml"          
-      
+        pages.append([base_url + url_for('dota.seasons.players'), ten_days_ago])
+        pages.append([base_url + url_for('dota.seasons.records'), ten_days_ago])
+        pages.append([base_url + url_for('dota.seasons.heroes'), ten_days_ago])
+        pages.append([base_url + url_for('dota.matches.matches_preview'), ten_days_ago])
+
+        players = Player.query.order_by(Player.steam_id).all()
+        for player in players:
+            url = url_for('dota.players.overview', steam_id=player.steam_id)
+            pages.append([base_url + url, ten_days_ago])
+
+        matches = DotaMatch.query.order_by(DotaMatch.id).all()
+        for match in matches:
+            url = url_for('dota.matches.match', match_id=match.id)
+            modified_time = datetime.fromtimestamp(match.start_time).date().isoformat()
+            pages.append([base_url + url, modified_time])
+
+        sitemap_xml = render_template('sitemap_template.xml', pages=pages)
+        response = make_response(sitemap_xml)
+        response.headers["Content-Type"] = "application/xml"
+
         return response
 
     @app.route('/favicon.ico')
@@ -106,4 +106,3 @@ def admin_required(f):
         return f(*args, **kwargs)
 
     return decorated_function
-    

@@ -6,6 +6,7 @@ from gleague import models
 
 app = api.create_app()
 
+
 def reinit_db():
     with app.app_context():
         db.drop_all()
@@ -13,6 +14,7 @@ def reinit_db():
         season = models.DotaSeason()
         db.session.add(season)
         db.session.commit()
+
 
 if __name__ == "__main__":
     commands = ['reinit_db']

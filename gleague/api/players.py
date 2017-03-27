@@ -1,20 +1,12 @@
-import sqlalchemy
 import re
 
 from flask import Blueprint
-from flask import request
 from flask import g
-from flask import abort
-from flask import jsonify
 from flask import redirect
 from flask import session
-from flask import Response
-from flask import abort
 
-from gleague.models import Player
-from gleague.core import db
 from gleague.api import oid
-
+from gleague.models import Player
 
 _steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
 
