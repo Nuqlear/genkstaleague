@@ -4,18 +4,17 @@ import os
 from functools import reduce
 
 from tests.api import GleagueApiTestCase
-from tests.factories.dota import DotaMatchFactory
-from tests.factories.dota import DotaPlayerMatchRatingFactory
-from tests.factories.dota import DotaSeasonFactory
+from tests.factories.dota import MatchFactory
+from tests.factories.dota import PlayerMatchRatingFactory
+from tests.factories.dota import SeasonFactory
 from tests.factories.dota import PlayerFactory
 
 
-class DotaTestCase(GleagueApiTestCase):
-    base_url = '/dota/'
-    matches_url = base_url + 'matches/'
+class MatchesTestCase(GleagueApiTestCase):
+    matches_url = '/matches/'
 
     def _create_fixtures(self):
-        self.season = DotaSeasonFactory()
+        self.season = SeasonFactory()
 
     def add_match(self, json_match):
         return self.jpost(self.matches_url, data=json_match)
@@ -49,7 +48,7 @@ class DotaTestCase(GleagueApiTestCase):
         self.set_user(user.steam_id)
         response = self.rate_player(1, 0, 4)
         self.assertEqual(404, response.status_code)
-        m = DotaMatchFactory.generate_with_all_stats(season_id=self.season.id)
+        m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
         ps = m.players_stats[0]
         user_id = ps.season_stats.steam_id
         self.set_user(user_id)
@@ -62,19 +61,19 @@ class DotaTestCase(GleagueApiTestCase):
         self.assertEqual(406, response.status_code)
         response = self.rate_player(m.id, ps.id, 0)
         self.assertEqual(406, response.status_code)
-        m = DotaMatchFactory.generate_with_all_stats(season_id=self.season.id)
+        m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
         ps = m.players_stats[0]
         rating = 4
         response = self.rate_player(m.id, ps.id, rating)
         self.assertEqual(403, response.status_code)
 
     def test_get_ratings(self, *args):
-        m = DotaMatchFactory.generate_with_all_stats(season_id=self.season.id)
+        m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
         players_id = [ps.season_stats.steam_id for ps in m.players_stats[1:10]]
         match_ratings = []
         ps = m.players_stats[0]
         for pl_id in players_id:
-            match_ratings.append(DotaPlayerMatchRatingFactory(rated_by_steam_id=pl_id, player_match_stats_id=ps.id))
+            match_ratings.append(PlayerMatchRatingFactory(rated_by_steam_id=pl_id, player_match_stats_id=ps.id))
         response = self.get_ratings(m.id)
         data = json.loads(response.data.decode())
         self.assertEqual(200, response.status_code)

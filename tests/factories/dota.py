@@ -14,17 +14,17 @@ class Factory(SQLAlchemyModelFactory):
         sqlalchemy_session = db.session
 
 
-class DotaSeasonFactory(Factory):
+class SeasonFactory(Factory):
     class Meta:
-        model = models.DotaSeason
+        model = models.Season
 
     id = Sequence(lambda n: n)
     number = Sequence(lambda n: n)
 
 
-class DotaSeasonStatsFactory(Factory):
+class SeasonStatsFactory(Factory):
     class Meta:
-        model = models.DotaSeasonStats
+        model = models.SeasonStats
 
     id = Sequence(lambda n: n)
 
@@ -37,9 +37,9 @@ class PlayerFactory(Factory):
     nickname = Sequence(lambda n: 'Player #%s' % n)
 
 
-class DotaMatchFactory(Factory):
+class MatchFactory(Factory):
     class Meta:
-        model = models.DotaMatch
+        model = models.Match
 
     id = Sequence(lambda n: n)
     radiant_win = bool(randrange(0, 2))
@@ -49,17 +49,17 @@ class DotaMatchFactory(Factory):
 
     @staticmethod
     def generate_with_all_stats(*args, **kwargs):
-        match = DotaMatchFactory(*args, **kwargs)
+        match = MatchFactory(*args, **kwargs)
         heroes = list(get_dota2_heroes(current_app.config['STEAM_API_KEY']).values())
         pms = []
         for slot in (list(range(5)) + list(range(128, 133))):
             hero = heroes.pop(slot % len(heroes)).replace('npc_dota_hero_', '')
             player = PlayerFactory()
-            season_stats = DotaSeasonStatsFactory(season_id=match.season_id, steam_id=player.steam_id)
+            season_stats = SeasonStatsFactory(season_id=match.season_id, steam_id=player.steam_id)
             pts_diff = 20 if slot < 6 else -20
             if not match.radiant_win:
                 pts_diff = pts_diff * (-1)
-            pms.append(DotaPlayerMatchStatsFactory(match_id=match.id, hero=hero, pts_diff=pts_diff,
+            pms.append(PlayerMatchStatsFactory(match_id=match.id, hero=hero, pts_diff=pts_diff,
                                                    season_stats_id=season_stats.id, player_slot=slot))
         match.players_stats = pms
         db.session.add(match)
@@ -68,12 +68,12 @@ class DotaMatchFactory(Factory):
 
     @staticmethod
     def generate_batch_with_all_stats(amount, *args, **kwargs):
-        return [DotaMatchFactory.generate_with_all_stats(*args, **kwargs) for i in range(amount)]
+        return [MatchFactory.generate_with_all_stats(*args, **kwargs) for i in range(amount)]
 
 
-class DotaPlayerMatchStatsFactory(Factory):
+class PlayerMatchStatsFactory(Factory):
     class Meta:
-        model = models.DotaPlayerMatchStats
+        model = models.PlayerMatchStats
 
     id = Sequence(lambda n: n)
     old_pts = 1000
@@ -88,9 +88,9 @@ class DotaPlayerMatchStatsFactory(Factory):
     level = randrange(6, 26)
 
 
-class DotaPlayerMatchRatingFactory(Factory):
+class PlayerMatchRatingFactory(Factory):
     class Meta:
-        model = models.DotaPlayerMatchRating
+        model = models.PlayerMatchRating
 
     id = Sequence(lambda n: n)
     rating = randrange(1, 6)

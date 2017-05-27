@@ -11,7 +11,7 @@ def reinit_db():
     with app.app_context():
         db.drop_all()
         db.create_all()
-        season = models.DotaSeason()
+        season = models.Season()
         db.session.add(season)
         db.session.commit()
 

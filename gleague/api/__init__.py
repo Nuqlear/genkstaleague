@@ -24,11 +24,11 @@ def create_app(settings_override=None):
     oid.init_app(app)
     admin.init_admin(app)
 
-    from gleague.api.players import players as players_blueprint
-    app.register_blueprint(players_blueprint, url_prefix='/players')
+    from gleague.api.players import players_bp
+    app.register_blueprint(players_bp, url_prefix='/players')
 
-    from gleague.api.dota.matches import matches as dota_matches_blueprint
-    app.register_blueprint(dota_matches_blueprint, url_prefix='/dota/matches')
+    from gleague.api.matches import matches_bp
+    app.register_blueprint(matches_bp, url_prefix='/matches')
 
     return app
 

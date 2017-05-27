@@ -6,21 +6,21 @@ from flask import redirect
 from flask import session
 
 from gleague.api import oid
-from gleague.models import Player, DotaSeasonStats
+from gleague.models import Player, SeasonStats
 
 _steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
 
-players = Blueprint('players', __name__)
+players_bp = Blueprint('players', __name__)
 
 
-@players.route('/logout')
+@players_bp.route('/logout')
 def logout():
     session.clear()
     g.user = None
     return redirect("/")
 
 
-@players.route('/login')
+@players_bp.route('/login')
 @oid.loginhandler
 def login():
     if g.user is not None:
@@ -36,22 +36,22 @@ def create_or_login(resp):
     return redirect("/")
 
 
-@players.route('/')
+@players_bp.route('/')
 def players_list():
     return jsonify({
         'players': [p.to_dict() for p in Player.query.all()]
     })
 
 
-@players.route('/stats/<int:season_id>')
-@players.route('/stats/')
+@players_bp.route('/stats/<int:season_id>')
+@players_bp.route('/stats/')
 def players_stats(season_id=-1):
     nickname_filter = request.args.get('q', None)
     sort = request.args.get('sort', 'pts')
 
     items = []
 
-    for s in DotaSeasonStats.get_stats(season_id, nickname_filter, sort):
+    for s in SeasonStats.get_stats(season_id, nickname_filter, sort):
         items.append({
             'steam_id': s.player.steam_id,
             'nickname': s.player.nickname,

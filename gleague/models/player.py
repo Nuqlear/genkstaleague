@@ -10,9 +10,9 @@ from sqlalchemy import func
 from sqlalchemy.orm import relationship
 
 from gleague.core import db
-from gleague.models.dota.match import DotaPlayerMatchStats
-from gleague.models.dota.season import DotaSeason
-from gleague.models.dota.season import DotaSeasonStats
+from gleague.models.match import PlayerMatchStats
+from gleague.models.season import Season
+from gleague.models.season import SeasonStats
 from gleague.utils.steam_api import get_steam_user_info
 
 socket.setdefaulttimeout(120)
@@ -25,8 +25,8 @@ class Player(db.Model):
     nickname = Column(String(80))
     avatar = Column(String(255))
     avatar_medium = Column(String(255))
-    dota_season_stats = relationship('DotaSeasonStats', lazy='dynamic', backref='player',
-                                     order_by="desc(DotaSeasonStats.season_id)")
+    season_stats = relationship('SeasonStats', lazy='dynamic', backref='player',
+                                     order_by="desc(SeasonStats.season_id)")
 
     def __repr__(self):
         return '{} ({})'.format(self.nickname, self.steam_id)
@@ -40,7 +40,7 @@ class Player(db.Model):
             d.update({
                 'avatar': self.avatar,
                 'avatar_medium': self.avatar_medium,
-                'dota_season_stats': [ss.to_dict() for ss in self.dota_season_stats]
+                'season_stats': [ss.to_dict() for ss in self.season_stats]
             })
         return d
 
@@ -51,7 +51,7 @@ class Player(db.Model):
             steamdata = get_steam_user_info(steam_id, current_app.config['STEAM_API_KEY'])
             if steamdata == {}:
                 return None
-            p = DotaPlayer()
+            p = Player()
             p.steam_id = steam_id
             p.nickname = steamdata['personaname']
             p.avatar = steamdata['avatar']
@@ -60,6 +60,11 @@ class Player(db.Model):
             db.session.flush()
         else:
             p.update_from_steam()
+        cs = Season.current()
+        last_season_stats = p.season_stats.first()
+        if not last_season_stats or last_season_stats.season_id != cs.id:
+            db.session.add(SeasonStats(season_id=cs.id, steam_id=p.steam_id))
+        db.session.flush()
         return p
 
     def is_admin(self):
@@ -73,36 +78,23 @@ class Player(db.Model):
         self.avatar = steamdata['avatar']
         self.avatar_medium = steamdata['avatarmedium']
 
-
-class DotaPlayer(Player):
-    @staticmethod
-    def get_or_create(steam_id):
-        cs = DotaSeason.current()
-        p = Player.get_or_create(steam_id)
-        p.__class__ = DotaPlayer
-        last_season_stats = p.dota_season_stats.first()
-        if not last_season_stats or last_season_stats.season_id != cs.id:
-            db.session.add(DotaSeasonStats(season_id=cs.id, steam_id=p.steam_id))
-        db.session.flush()
-        return p
-
     def get_avg_rating(self):
-        from gleague.models.dota.match import DotaPlayerMatchRating
-        q_res = DotaPlayerMatchRating.query.join(DotaPlayerMatchStats).join(DotaSeasonStats).filter(
-            DotaSeasonStats.steam_id == self.steam_id).with_entities(func.avg(DotaPlayerMatchRating.rating),
-                                                                     func.count(DotaPlayerMatchRating.id)).all()
+        from gleague.models.match import PlayerMatchRating
+        q_res = PlayerMatchRating.query.join(PlayerMatchStats).join(SeasonStats).filter(
+            SeasonStats.steam_id == self.steam_id).with_entities(func.avg(PlayerMatchRating.rating),
+                                                                     func.count(PlayerMatchRating.id)).all()
         return q_res
 
     def get_heroes(self, cs_id=None):
-        filters = DotaSeasonStats.steam_id == self.steam_id
+        filters = SeasonStats.steam_id == self.steam_id
         if cs_id is not None:
-            filters = and_(filters, DotaSeasonStats.season_id == cs_id)
-        q_res = DotaPlayerMatchStats.query.join(DotaSeasonStats).filter(filters) \
-            .with_entities(DotaPlayerMatchStats.hero.label('hero'), func.count(DotaPlayerMatchStats.id).label('played'),
-                           (100 * func.sum(case([(DotaPlayerMatchStats.pts_diff > 0, 1)], else_=0)) / func.count(
-                               DotaPlayerMatchStats.id)).label('winrate'),
-                           func.sum(DotaPlayerMatchStats.pts_diff).label('pts_diff'),
-                           ((func.avg(DotaPlayerMatchStats.kills) + func.avg(DotaPlayerMatchStats.assists)) /
-                            func.avg(DotaPlayerMatchStats.deaths + 1)).label('kda'),
-                           ).group_by(DotaPlayerMatchStats.hero)
+            filters = and_(filters, SeasonStats.season_id == cs_id)
+        q_res = PlayerMatchStats.query.join(SeasonStats).filter(filters) \
+            .with_entities(PlayerMatchStats.hero.label('hero'), func.count(PlayerMatchStats.id).label('played'),
+                           (100 * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0)) / func.count(
+                               PlayerMatchStats.id)).label('winrate'),
+                           func.sum(PlayerMatchStats.pts_diff).label('pts_diff'),
+                           ((func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists)) /
+                            func.avg(PlayerMatchStats.deaths + 1)).label('kda'),
+                           ).group_by(PlayerMatchStats.hero)
         return q_res

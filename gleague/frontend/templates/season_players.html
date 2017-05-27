@@ -1,4 +1,4 @@
-{% import 'dota/macro.html' as macro with context %}
+{% import 'macro.html' as macro with context %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -31,7 +31,7 @@
     </div>
     {{ macro.render_season_navbar(seasons) }}
     <div class="row" style="padding: 20px 20px;">
-        <form action="{{ url_for('dota.seasons.players') }}">
+        <form action="{{ url_for('seasons.players') }}">
         <div class="input-group row" style="width: 512px; margin:0 auto; padding: 20px">
             <input type="text" name='q' placeholder="nickname" class="form-control" value={{q}}>
             <span class="input-group-btn">
@@ -45,33 +45,33 @@
         <table id="top_players" class="span5 center-table">
             <thead>
                 <tr>
-                <td><a class="order" href={% if q %}"{{ url_for('dota.seasons.players', page=stats.page, q=q, 
+                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q, 
                 sort='nickname', season_number=season_number) }}"
-                    {% else %}"{{ url_for('dota.seasons.players', page=stats.page, 
+                    {% else %}"{{ url_for('seasons.players', page=stats.page, 
                     sort='nickname', season_number=season_number) }}"{% endif %}>Nickname</a>
                     {% if sort == 'nickname' %}
                         <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
                     {% endif %}
                 </td>
-                <td><a class="order" href={% if q %}"{{ url_for('dota.seasons.players', page=stats.page, q=q,
+                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
                 sort='pts', season_number=season_number) }}"
-                    {% else %}"{{ url_for('dota.seasons.players', page=stats.page, sort='pts',
+                    {% else %}"{{ url_for('seasons.players', page=stats.page, sort='pts',
                     season_number=season_number) }}"{% endif %}>PTS</a>
                     {% if sort == 'pts' %}
                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                     {% endif %}
                 </td>
-                <td><a class="order" href={% if q %}"{{ url_for('dota.seasons.players', page=stats.page, q=q, 
+                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q, 
                 sort='wins', season_number=season_number) }}"
-                    {% else %}"{{ url_for('dota.seasons.players', page=stats.page, 
+                    {% else %}"{{ url_for('seasons.players', page=stats.page, 
                     sort='wins', season_number=season_number) }}"{% endif %}>Wins</a>
                     {% if sort == 'wins' %}
                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                     {% endif %}
                 </td>
-                <td><a class="order" href={% if q %}"{{ url_for('dota.seasons.players', page=stats.page, q=q, 
+                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q, 
                 sort='losses', season_number=season_number) }}"
-                    {% else %}"{{ url_for('dota.seasons.players', page=stats.page, 
+                    {% else %}"{{ url_for('seasons.players', page=stats.page, 
                     sort='losses', season_number=season_number) }}"{% endif %}>Losses</a>
                     {% if sort == 'losses' %}
                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -82,7 +82,7 @@
             {% for s in stats.items %}
             <tbody>
                 <td>
-                    <a class="link" href="{{ url_for('dota.players.overview', steam_id=s.steam_id)}}">
+                    <a class="link" href="{{ url_for('players.overview', steam_id=s.steam_id)}}">
                     {{ s.player.nickname }} 
                     </a>
                 </td>
@@ -95,13 +95,13 @@
         <div id="pagination">
             <ul class="pagination">
             {% if stats.has_prev %}
-                <li><a href="{{ url_for('dota.seasons.players', page=stats.prev_num, q=q, 
+                <li><a href="{{ url_for('seasons.players', page=stats.prev_num, q=q, 
                     sort=sort, season_number=season_number)}}"><</a></li>
             {% endif %}
             {%- for _page in stats.iter_pages() %}
                 {% if _page %}
                   {% if _page != stats.page %}
-                    <li><a href="{{ url_for('dota.seasons.players', page=_page, 
+                    <li><a href="{{ url_for('seasons.players', page=_page, 
                         sort=sort, season_number=season_number) }}">{{ _page }}</a></li>
                   {% else %}
                     <li class="active"><a>{{ _page }}</strong></a></li>
@@ -111,7 +111,7 @@
                 {% endif %}
               {%- endfor %}
               {% if stats.has_next %}
-                <li><a href="{{ url_for('dota.seasons.players', page=stats.next_num, q=q, 
+                <li><a href="{{ url_for('seasons.players', page=stats.next_num, q=q, 
                     sort=sort, season_number=season_number)}}">></a></li>
               {% endif %}
             </ul>
@@ -123,7 +123,7 @@
 <script>
 $(document).ready(function() {
     $("#select_season").on('change', function (e) {
-        window.location.href = '/dota/seasons/'+this.value+'/{{ endpoint[-1] }}';
+        window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
     });
 });
 </script>

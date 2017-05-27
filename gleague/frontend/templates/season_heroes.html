@@ -1,4 +1,4 @@
-{% import 'dota/macro.html' as macro with context %}
+{% import 'macro.html' as macro with context %}
 
 <!DOCTYPE html>
 <html lang="en">
@@ -37,7 +37,7 @@
                    <thead>
                     <tr>
                         <th>
-                            <a class="link_alt" href="{{ url_for('dota.seasons.heroes', sort='hero', 
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero', 
                             desc='no', season_number=season_number) }}">Hero
                             {% if sort == 'hero' %}
                                 <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
@@ -45,7 +45,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('dota.seasons.heroes', sort='played', 
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='played', 
                             desc='yes', season_number=season_number) }}">Matches
                             {% if not sort or sort == 'played' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -53,7 +53,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('dota.seasons.heroes', sort='winrate',
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='winrate',
                             desc='yes', season_number=season_number) }}">Winrate
                             {% if sort == 'winrate' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -61,7 +61,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('dota.seasons.heroes', sort='pts_diff', 
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff', 
                             desc='yes', season_number=season_number) }}">PTS diff
                             {% if sort == 'pts_diff' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -69,7 +69,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('dota.seasons.heroes', sort='kda', 
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='kda', 
                             desc='yes', season_number=season_number) }}">KDA
                             {% if sort == 'kda' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -101,16 +101,16 @@
 $(document).ready(function() {
     $('.in_match_records_table tr').each(function() {
         $(this).click(function() {
-            window.location.href = '/dota/matches/' + $(this).attr('match_id');
+            window.location.href = '/matches/' + $(this).attr('match_id');
         });
     });
     $('.in_season_records_table tr').each(function() {
         $(this).click(function() {
-            window.location.href = '/dota/players/' + $(this).attr('player_id') + '/overview';
+            window.location.href = '/players/' + $(this).attr('player_id') + '/overview';
         });
     });
     $("#select_season").on('change', function (e) {
-        window.location.href = '/dota/seasons/'+this.value+'/{{ endpoint[-1] }}';
+        window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
     });
 });
 </script>
