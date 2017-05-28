@@ -1,6 +1,6 @@
 *.pyc
 *.db
-config.py
+*/configuration/customs.py
 bower_components
 __pycache__
 

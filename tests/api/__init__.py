@@ -7,7 +7,7 @@ from tests import GleagueAppTestCase
 class GleagueApiTestCase(GleagueAppTestCase):
     @classmethod
     def _create_app(cls):
-        return create_app('gleague.config.gleague_api_tests')
+        return create_app('gleague_api_tests')
 
     def setUp(self):
         super(GleagueApiTestCase, self).setUp()

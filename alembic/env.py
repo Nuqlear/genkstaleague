@@ -8,7 +8,7 @@ import os, sys
 sys.path.append(os.getcwd())
 
 from gleague.core import db
-from gleague.config import BaseConfig
+from gleague.configuration.customs import BaseConfig
 from gleague.models import *
 
 # this is the Alembic Config object, which provides

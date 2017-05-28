@@ -64,7 +64,11 @@ def reg_rollback_on_exc(app):
 def create_app(name):
     app = FlaskApp(name, instance_relative_config=True)
     cfg_class = name.replace('.', '_')
-    app.config.from_object('gleague.config.%s' % cfg_class)
+    app.config.from_object('gleague.configuration.defaults.%s' % cfg_class)
+    try:
+        app.config.from_object('gleague.configuration.customs.%s' % cfg_class)
+    except ImportError:
+        pass
     setup_logging(app)
     reg_gl_vars(app)
     db.init_app(app)
