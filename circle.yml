@@ -1,0 +1,19 @@
+machine:
+  python:
+    version: 3.5.1
+  services:
+    - postgresql
+database:
+  override:
+    - createdb gleague_test
+    - echo "CREATE USER genksta WITH UNENCRYPTED PASSWORD '1';" | psql -U postgres
+    - echo "GRANT ALL privileges on database gleague_test to genksta" | psql -U postgres
+test:
+  override:
+    - py.test tests/api/*
+deployment:
+  push_to_server:
+    branch: master
+    commands:
+      - ssh circleci@nuqlya.ddns.net -p 36000 'cd /home/circleci/proj/genkstaleague && git pull && /home/circleci/.virtualenvs/gleague/bin/pip install -r requirements.txt && alembic upgrade head && supervisorctl restart gleague:':
+          timeout: 1800
