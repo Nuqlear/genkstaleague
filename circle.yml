@@ -15,5 +15,5 @@ deployment:
   push_to_server:
     branch: master
     commands:
-      - ssh circleci@nuqlya.ddns.net -p 36000 'cd /home/circleci/proj/genkstaleague && git pull && /home/circleci/.virtualenvs/gleague/bin/pip install -r requirements.txt && alembic upgrade head && supervisorctl restart gleague:':
+      - ssh circleci@nuqlya.ddns.net -p 36000 'cd /home/circleci/proj/genkstaleague && git pull && /home/circleci/.virtualenvs/gleague/bin/pip install -r requirements.txt && alembic upgrade head && cd gleague/frontend/static/lib && bower install && supervisorctl restart gleague:':
           timeout: 1800
