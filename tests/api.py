@@ -2,19 +2,40 @@ import json
 import operator
 import os
 from functools import reduce
+from unittest import mock
 
-from tests.api import GleagueApiTestCase
+from gleague.api import create_app
+from tests import GleagueAppTestCase
 from tests.factories.dota import MatchFactory
 from tests.factories.dota import PlayerMatchRatingFactory
 from tests.factories.dota import SeasonFactory
 from tests.factories.dota import PlayerFactory
 
 
-class MatchesTestCase(GleagueApiTestCase):
+class GleagueApiTestCase(GleagueAppTestCase):
+
     matches_url = '/matches/'
+
+    @classmethod
+    def _create_app(cls):
+        return create_app('gleague_api_tests')
 
     def _create_fixtures(self):
         self.season = SeasonFactory()
+
+    def setUp(self):
+        super(GleagueApiTestCase, self).setUp()
+        self.patches = [
+            mock.patch('gleague.core.db.session.commit', side_effect=None), 
+            mock.patch('gleague.core.db.session.remove', side_effect=None)
+        ]
+        for patch in self.patches:
+            patch.start()
+
+    def tearDown(self):
+        super(GleagueApiTestCase, self).tearDown()
+        for patch in self.patches:
+            patch.stop()
 
     def add_match(self, json_match):
         return self.jpost(self.matches_url, data=json_match)
