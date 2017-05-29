@@ -19,10 +19,8 @@ from gleague.models import *
 oid = OpenID()
 
 
-def create_app(settings_override=None):
-    app = core.create_app(__name__)
-    if settings_override:
-        app.config.from_object(settings_override)
+def create_app(name=__name__):
+    app = core.create_app(name)
     oid.init_app(app)
     admin.init_admin(app)
 
