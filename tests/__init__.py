@@ -2,7 +2,7 @@ from unittest import TestCase
 
 from gleague.core import db
 from tests.mixin import FlaskTestCaseMixin
-from tests.factories.dota import SeasonFactory
+from tests.factories import SeasonFactory
 
 
 class GleagueTestCase(TestCase):

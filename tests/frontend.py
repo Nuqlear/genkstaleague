@@ -7,9 +7,9 @@ from unittest import mock
 
 from gleague.frontend import create_app
 from tests import GleagueAppTestCase
-from tests.factories.dota import MatchFactory
-from tests.factories.dota import PlayerMatchRatingFactory
-from tests.factories.dota import PlayerFactory
+from tests.factories import MatchFactory
+from tests.factories import PlayerMatchRatingFactory
+from tests.factories import PlayerFactory
 
 
 class GleagueFrontendTestCase(GleagueAppTestCase):
