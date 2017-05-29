@@ -36,12 +36,6 @@ class GleagueApiTestCase(GleagueAppTestCase):
     def add_match(self, json_match):
         return self.jpost(self.matches_url, data=json_match)
 
-    def get_match(self, match_id):
-        return self.jget(self.matches_url + '%i/' % match_id)
-
-    def get_matches(self, amount, offset):
-        return self.jget(self.matches_url + '?amount=%s&offset=%s' % (amount, offset))
-
     def rate_player(self, match_id, player_match_stats_id, rating):
         return self.post(self.matches_url + '%i/ratings/%i?rating=%i' % (match_id, player_match_stats_id, rating))
 
