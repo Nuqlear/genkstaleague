@@ -1,5 +1,6 @@
 import logging
 import logging.handlers
+import os
 
 from flask import Flask
 from flask import session
@@ -69,6 +70,9 @@ def create_app(name):
         app.config.from_object('gleague.configuration.customs.%s' % cfg_class)
     except ImportError:
         pass
+    frontend_folder = os.path.join(os.path.dirname(__file__), 'frontend')
+    app.template_folder = os.path.join(frontend_folder, 'templates')
+    app.static_folder = os.path.join(frontend_folder, 'static')
     setup_logging(app)
     reg_gl_vars(app)
     db.init_app(app)

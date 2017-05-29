@@ -1,4 +1,4 @@
-from os import path, environ
+from os import environ
 
 
 class BaseConfig(object):
@@ -19,8 +19,6 @@ class gleague_api(BaseConfig):
 
 
 class gleague_frontend(BaseConfig):
-    TEMPLATE_FOLDER = path.join(path.dirname(__file__), 'templates')
-    STATIC_FOLDER = path.join(path.dirname(__file__), 'static')
     SEASON_CALIBRATING_MATCHES_NUM = 3
     HISTORY_MATCHES_PER_PAGE = 4
     TOP_PLAYERS_PER_PAGE = 22
@@ -31,5 +29,9 @@ class gleague_frontend(BaseConfig):
 
 
 class gleague_api_tests(gleague_api):
+    SQLALCHEMY_DATABASE_URI = 'postgresql://genksta:1@localhost/gleague_test'
+    ADMINS_STEAM_ID = [123456789, ]
+
+class gleague_frontend_tests(gleague_frontend):
     SQLALCHEMY_DATABASE_URI = 'postgresql://genksta:1@localhost/gleague_test'
     ADMINS_STEAM_ID = [123456789, ]
