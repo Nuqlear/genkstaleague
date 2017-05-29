@@ -41,21 +41,25 @@ class GleagueFrontendTestCase(GleagueAppTestCase):
         return self.get(self.matches_url + '?page=%s' % page)
 
     def test_get_match(self, *args):
-        # response = self.get_match(randint(0, 100))
-        # self.assertEqual(404, response.status_code)
+        response = self.get_match(randint(0, 100))
+        self.assertEqual(404, response.status_code)
         m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
         response = self.get_match(m.id)
         self.assertEqual(200, response.status_code)
 
     def test_get_matches(self, *args):
-        # response = self.get_matches()
-        # self.assertEqual(404, response.status_code)
+        response = self.get_matches()
+        self.assertEqual(200, response.status_code)
+        response = self.get_matches(2)
+        self.assertEqual(404, response.status_code)
         m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
         response = self.get_matches()
         self.assertEqual(200, response.status_code)
-        # response = self.get_matches(2)
-        # self.assertEqual(404, response.status_code)
+        response = self.get_matches(2)
+        self.assertEqual(404, response.status_code)
         matches_per_page = self.app.config['HISTORY_MATCHES_PER_PAGE']
         matches = MatchFactory.generate_batch_with_all_stats(matches_per_page, season_id=self.season.id)
         response = self.get_matches(2)
         self.assertEqual(200, response.status_code)
+        response = self.get_matches(3)
+        self.assertEqual(404, response.status_code)
