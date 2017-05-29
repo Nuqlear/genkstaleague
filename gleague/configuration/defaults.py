@@ -5,7 +5,7 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = 'sqlite:///'
     DEBUG = False
     PROPAGATE_EXCEPTIONS = False
-    TRAP_HTTP_EXCEPTIONS = True
+    TRAP_HTTP_EXCEPTIONS = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     SECRET_KEY = 'YOUR SECRET KEY'
     LOGFILE = None
