@@ -9,7 +9,6 @@ from gleague.frontend import create_app
 from tests import GleagueAppTestCase
 from tests.factories.dota import MatchFactory
 from tests.factories.dota import PlayerMatchRatingFactory
-from tests.factories.dota import SeasonFactory
 from tests.factories.dota import PlayerFactory
 
 
@@ -20,9 +19,6 @@ class GleagueFrontendTestCase(GleagueAppTestCase):
     @classmethod
     def _create_app(cls):
         return create_app('gleague_frontend_tests')
-
-    def _create_fixtures(self):
-        self.season = SeasonFactory()
 
     def setUp(self):
         super(GleagueFrontendTestCase, self).setUp()

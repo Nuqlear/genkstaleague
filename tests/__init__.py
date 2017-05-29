@@ -2,12 +2,13 @@ from unittest import TestCase
 
 from gleague.core import db
 from tests.mixin import FlaskTestCaseMixin
+from tests.factories.dota import SeasonFactory
 
 
 class GleagueTestCase(TestCase):
     def setUp(self):
         super(GleagueTestCase, self).setUp()
-        self._create_fixtures()
+        self.season = SeasonFactory()
         db.session.flush()
 
     def tearDown(self):

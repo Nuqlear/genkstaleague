@@ -8,7 +8,6 @@ from gleague.api import create_app
 from tests import GleagueAppTestCase
 from tests.factories.dota import MatchFactory
 from tests.factories.dota import PlayerMatchRatingFactory
-from tests.factories.dota import SeasonFactory
 from tests.factories.dota import PlayerFactory
 
 
@@ -19,9 +18,6 @@ class GleagueApiTestCase(GleagueAppTestCase):
     @classmethod
     def _create_app(cls):
         return create_app('gleague_api_tests')
-
-    def _create_fixtures(self):
-        self.season = SeasonFactory()
 
     def setUp(self):
         super(GleagueApiTestCase, self).setUp()
