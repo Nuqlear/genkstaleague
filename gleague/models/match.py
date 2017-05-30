@@ -188,7 +188,7 @@ class Match(db.Model):
         finally:
             os.remove(path)
         json_data = json.loads(output.decode("utf-8"))
-        Match.create_from_dict(json_data['result'])
+        return Match.create_from_dict(json_data['result'])
 
     @staticmethod
     def create_from_dict(steamdata):

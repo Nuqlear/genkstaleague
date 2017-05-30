@@ -1,6 +1,5 @@
 import json
 import operator
-import os
 from functools import reduce
 from unittest import mock
 
@@ -14,6 +13,7 @@ from tests.factories import PlayerFactory
 class GleagueApiTestCase(GleagueAppTestCase):
 
     matches_url = '/matches/'
+    replay_url = 'http://replay123.valve.net/570/3214622621_845489484.dem.bz2'
 
     @classmethod
     def _create_app(cls):
@@ -33,8 +33,8 @@ class GleagueApiTestCase(GleagueAppTestCase):
         for patch in self.patches:
             patch.stop()
 
-    def add_match(self, json_match):
-        return self.jpost(self.matches_url, data=json_match)
+    def add_match(self):
+        return self.post(self.matches_url)
 
     def rate_player(self, match_id, player_match_stats_id, rating):
         return self.post(self.matches_url + '%i/ratings/%i?rating=%i' % (match_id, player_match_stats_id, rating))
@@ -42,17 +42,22 @@ class GleagueApiTestCase(GleagueAppTestCase):
     def get_ratings(self, match_id):
         return self.get(self.matches_url + '%i/ratings/' % (match_id))
 
-    def test_add_match(self, *args):
-        json_file_path = os.path.join(os.path.dirname(os.path.dirname(__file__)), 'fixtures/test_create_match.json')
+    def download_replay(self):
+        response = urlopen(self.replay_url)
+        data = response.read()
+        data = BytesIO(bz2.decompress(data))
+        data.seek(0)
+        return data
+
+    def test_add_match_rights(self, *args):
         user = PlayerFactory()
         self.set_user(user.steam_id)
-        response = self.add_match(None)
+        response = self.add_match()
         self.assertEqual(403, response.status_code)
         user = PlayerFactory(steam_id=self.app.config['ADMINS_STEAM_ID'][0])
         self.set_user(user.steam_id)
-        response = self.add_match(None)
+        response = self.add_match()
         self.assertEqual(400, response.status_code)
-        # TODO: test DEMO
 
     def test_rate_player(self, *args):
         user = PlayerFactory()
