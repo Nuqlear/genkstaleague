@@ -1,6 +1,9 @@
 import bz2
+import os
 from io import BytesIO
 from urllib.request import urlopen
+from unittest import mock
+from subprocess import Popen, PIPE
 
 from gleague.api import create_app
 from gleague.models import Match
@@ -22,7 +25,16 @@ class GleagueDem2jsonTestCase(GleagueAppTestCase):
         data.seek(0)
         return data
 
-    def test_create_match_from_replay(self):
+    @mock.patch('gleague.models.match.Popen')
+    def test_create_match_from_replay(self, mocked_popen):
+
+        def mocked_popen_fn(args, **kwargs):
+            go_files = ('dem2json', 'heroes', 'parser')
+            new_args = ['go', 'run'] + [os.path.join(os.getcwd(), 'dem2json/%s.go' % f) for f in go_files]
+            new_args.append(args[-1])
+            return Popen(new_args, stdout=PIPE)
+
+        mocked_popen.side_effect = mocked_popen_fn
         match = Match.create_from_replay_fs(self.download_replay())
         self.assertNotEqual(match, None)
         for field in ['radiant_win', 'duration', 'game_mode', 'start_time', 'season_id']:
