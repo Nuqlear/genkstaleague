@@ -1,4 +1,5 @@
 from unittest import TestCase
+from unittest import mock
 
 from gleague.core import db
 from tests.mixin import FlaskTestCaseMixin
@@ -10,11 +11,19 @@ class GleagueTestCase(TestCase):
         super(GleagueTestCase, self).setUp()
         self.season = SeasonFactory()
         db.session.flush()
+        self.patches = [
+            mock.patch('gleague.core.db.session.commit', side_effect=None), 
+            mock.patch('gleague.core.db.session.remove', side_effect=None)
+        ]
+        for patch in self.patches:
+            patch.start()
 
     def tearDown(self):
         super(GleagueTestCase, self).tearDown()
         db.session.rollback()
         db.session.expunge_all()
+        for patch in self.patches:
+            patch.stop()
 
     @classmethod
     def setUpClass(cls):

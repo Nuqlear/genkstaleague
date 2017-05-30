@@ -3,7 +3,6 @@ import operator
 import os
 from random import randint
 from functools import reduce
-from unittest import mock
 
 from gleague.frontend import create_app
 from tests import GleagueAppTestCase
@@ -22,20 +21,6 @@ class GleagueFrontendTestCase(GleagueAppTestCase):
     @classmethod
     def _create_app(cls):
         return create_app('gleague_frontend_tests')
-
-    def setUp(self):
-        super(GleagueFrontendTestCase, self).setUp()
-        self.patches = [
-            mock.patch('gleague.core.db.session.commit', side_effect=None), 
-            mock.patch('gleague.core.db.session.remove', side_effect=None)
-        ]
-        for patch in self.patches:
-            patch.start()
-
-    def tearDown(self):
-        super(GleagueFrontendTestCase, self).tearDown()
-        for patch in self.patches:
-            patch.stop()
 
     def get_player_overview(self, steam_id):
         return self.get(self.players_url + '%i/overview' % steam_id)

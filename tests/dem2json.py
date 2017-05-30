@@ -1,6 +1,5 @@
 import bz2
 from io import BytesIO
-from unittest import mock
 from urllib.request import urlopen
 
 from gleague.api import create_app
@@ -15,20 +14,6 @@ class GleagueDem2jsonTestCase(GleagueAppTestCase):
     @classmethod
     def _create_app(cls):
         return create_app('gleague_api_tests')
-
-    def setUp(self):
-        super(GleagueDem2jsonTestCase, self).setUp()
-        self.patches = [
-            mock.patch('gleague.core.db.session.commit', side_effect=None), 
-            mock.patch('gleague.core.db.session.remove', side_effect=None)
-        ]
-        for patch in self.patches:
-            patch.start()
-
-    def tearDown(self):
-        super(GleagueDem2jsonTestCase, self).tearDown()
-        for patch in self.patches:
-            patch.stop()
 
     def download_replay(self):
         response = urlopen(self.replay_url)
