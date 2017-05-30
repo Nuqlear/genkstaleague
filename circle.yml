@@ -8,9 +8,14 @@ database:
     - createdb gleague_test
     - echo "CREATE USER genksta WITH UNENCRYPTED PASSWORD '1';" | psql -U postgres
     - echo "GRANT ALL privileges on database gleague_test to genksta" | psql -U postgres
+dependencies:
+  pre:
+    - go get github.com/dotabuff/manta
 test:
+  pre:
+    - cd dem2json && go build dem2json.go heroes.go parser.go 
   override:
-    - py.test tests/api/*
+    - py.test tests/*
 deployment:
   push_to_server:
     branch: master
