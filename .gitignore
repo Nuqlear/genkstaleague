@@ -3,22 +3,23 @@
 */configuration/customs.py
 bower_components
 __pycache__
-
+dem2json/dem2json
+.idea/
+deploy.retry
 
 ### OSX ###
 .DS_Store
 .AppleDouble
 .LSOverride
 Icon
-
 # Thumbnails
 ._*
-
 # Files that might appear on external disk
 .Spotlight-V100
 .Trashes
 
-### Windows ###
+
+### WINDOWS ###
 # Windows image file caches
 Thumbs.db
 ehthumbs.db
@@ -28,7 +29,3 @@ Desktop.ini
 
 # Recycle Bin used on file shares
 $RECYCLE.BIN/
-
-# IntellijIDEA
-.idea/
-dem2json/dem2json
