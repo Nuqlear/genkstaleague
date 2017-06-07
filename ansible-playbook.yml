@@ -1,0 +1,36 @@
+---
+# This is ansible-playbook which deploys the whole application.
+
+- name: deploy application
+  hosts: nuqlya.ddns.net
+  remote_user: circleci
+
+  vars:
+    project_name: gleague
+    project_folder: /home/circleci/proj/genkstaleague
+    git_repo: https://github.com/Nuqlear/genkstaleague.git
+    virtualenv: /home/circleci/.virtualenvs/{{ project_name }}/bin
+    gopath: /home/circleci/.go
+  tasks:
+    - name: git pull
+      git: repo={{ git_repo }} dest={{ project_folder }}
+    - name: install python dependencies
+      pip: requirements={{ project_folder }}/requirements.txt executable={{ virtualenv }}/pip
+    # Normally I would install golang dependencies here,
+    # but it requires more RAM than my cubieboard has.
+    # To compensate it there is a need to
+    # create swap space -> install dependencies -> remove swap space
+    # I wont do it cuz it will take too much time for nothing
+    # dependencies already installed (should be)
+    - name: build dem2json
+      shell: export GOPATH={{ gopath }}; go build dem2json.go heroes.go parser.go
+      args:
+        chdir: "{{ project_folder }}/dem2json"
+    - name: migrate database
+      command: "{{ virtualenv }}/alembic upgrade head"
+      args:
+        chdir: "{{ project_folder }}"
+    - name: restart supervisorctl
+      supervisorctl:
+        name: "{{ project_name }}"
+        state: restarted
