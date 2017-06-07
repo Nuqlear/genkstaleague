@@ -28,10 +28,14 @@ class gleague_frontend(BaseConfig):
     SITE_ADDRESS = 'localhost'
 
 
-class gleague_api_tests(gleague_api):
+class BaseTestingConfig(BaseConfig):
     SQLALCHEMY_DATABASE_URI = 'postgresql://genksta:1@localhost/gleague_test'
-    ADMINS_STEAM_ID = [123456789, ]
+    ADMINS_STEAM_ID = [123456789, ]    
 
-class gleague_frontend_tests(gleague_frontend):
-    SQLALCHEMY_DATABASE_URI = 'postgresql://genksta:1@localhost/gleague_test'
-    ADMINS_STEAM_ID = [123456789, ]
+
+class gleague_api_tests(gleague_api, BaseTestingConfig):
+    pass
+
+
+class gleague_frontend_tests(gleague_frontend, BaseTestingConfig):
+    pass
