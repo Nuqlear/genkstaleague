@@ -38,15 +38,12 @@ def get_match(match_id):
 def get_matches_preview():
     amount = request.args.get('amount', 4)
     offs = request.args.get('offset', 0)
-
     try:
         amount = int(amount)
         offs = int(offs)
     except Exception:
         return abort(406)
-
     matches = Match.get_batch(amount, offs)
-
     return jsonify({'matches': [m.to_dict(False) for m in matches]}), 200
 
 
@@ -54,10 +51,8 @@ def get_matches_preview():
 def get_rates(match_id):
     if not Match.is_exists(match_id):
         return abort(404)
-
     steam_id = g.user.steam_id if g.user else None
     ratings = PlayerMatchRating.get_match_ratings(match_id, steam_id)
-
     return jsonify({'ratings': ratings}), 200
 
 
@@ -65,23 +60,17 @@ def get_rates(match_id):
 @login_required
 def rate_player(match_id, player_match_stats_id):
     rating = request.args.get('rating', None)
-
     try:
         rating = int(rating)
     except Exception:
         return abort(400)
-
     m = Match.query.get(match_id)
-
     if not m:
         return abort(404)
-
     if rating not in range(1, 6):
         return abort(406)
-
     if not m.is_played(g.user.steam_id):
         return abort(403)
-
     db.session.add(PlayerMatchRating(
         player_match_stats_id=player_match_stats_id,
         rating=rating,

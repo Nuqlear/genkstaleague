@@ -9,7 +9,12 @@ from flask import current_app
 from flask import url_for
 
 from gleague.core import db
-from gleague.models import Player, Match, PlayerMatchRating, PlayerMatchStats, Season, SeasonStats
+from gleague.models import Player
+from gleague.models import Match
+from gleague.models import PlayerMatchRating
+from gleague.models import PlayerMatchStats
+from gleague.models import Season
+from gleague.models import SeasonStats
 
 
 class AdminAccessMixin(object):
@@ -54,7 +59,7 @@ class PlayerMatchRatingView(BaseModelView):
     can_edit = False
     column_list = ['rated_by', 'rating', 'player_match_stats']
 
-    column_formatters = dict(rated_by=lambda v, c, m, p: Player.query.get(m.rated_by_steam_id))
+    column_formatters = {'rated_by':lambda v, c, m, p: Player.query.get(m.rated_by_steam_id)}
 
     def __init__(self, *args, **kwargs):
         super(PlayerMatchRatingView, self).__init__(PlayerMatchRating, *args, **kwargs)

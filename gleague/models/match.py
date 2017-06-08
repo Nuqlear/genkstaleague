@@ -28,9 +28,11 @@ class PlayerMatchStats(db.Model):
     __tablename__ = 'player_match_stats'
 
     id = Column(Integer, primary_key=True)
-    season_stats_id = Column(Integer, ForeignKey('season_stats.id', onupdate="CASCADE",
+    season_stats_id = Column(Integer, ForeignKey('season_stats.id', 
+                                                 onupdate="CASCADE",
                                                  ondelete="CASCADE"), nullable=False)
-    match_id = Column(BigInteger, ForeignKey('match.id', onupdate="CASCADE",
+    match_id = Column(BigInteger, ForeignKey('match.id',
+                                             onupdate="CASCADE",
                                              ondelete="CASCADE"), nullable=False)
     old_pts = Column(Integer, nullable=False)
     pts_diff = Column(Integer, nullable=False)
@@ -48,11 +50,14 @@ class PlayerMatchStats(db.Model):
     xp_per_min = Column(Integer, nullable=True)
     gold_per_min = Column(Integer, nullable=True)
     damage_taken = Column(Integer, nullable=True)
-    player_match_ratings = relationship('PlayerMatchRating', cascade="all, delete",
+    player_match_ratings = relationship('PlayerMatchRating', 
+                                        cascade="all, delete",
                                         backref="player_match_stats")
 
     def __repr__(self):
-        return '%s (%s) -- Match %s' % (self.season_stats.player.nickname, self.season_stats.steam_id, self.match_id)
+        return '%s (%s) -- Match %s' % (self.season_stats.player.nickname,
+                                        self.season_stats.steam_id,
+                                        self.match_id)
 
     def to_dict(self, extensive=True, **kwargs):
         with_season_stats = kwargs.get('with_season_stats', False)
@@ -86,10 +91,12 @@ class PlayerMatchRating(db.Model):
     __tablename__ = 'player_match_rating'
 
     id = Column(Integer, primary_key=True)
-    rated_by_steam_id = Column(BigInteger, ForeignKey('player.steam_id', onupdate="CASCADE",
+    rated_by_steam_id = Column(BigInteger, ForeignKey('player.steam_id',
+                                                      onupdate="CASCADE",
                                                       ondelete="CASCADE"), nullable=False)
     rating = Column(SmallInteger, default=5)
-    player_match_stats_id = Column(Integer, ForeignKey('player_match_stats.id', onupdate="CASCADE",
+    player_match_stats_id = Column(Integer, ForeignKey('player_match_stats.id',
+                                                       onupdate="CASCADE",
                                                        ondelete="CASCADE"), nullable=False)
 
     __table_args__ = (
@@ -107,17 +114,20 @@ class PlayerMatchRating(db.Model):
             rated_by_ps = PlayerMatchStats.query.join(SeasonStats).filter(
                 and_(SeasonStats.steam_id == user_id,
                      PlayerMatchStats.match_id == match_id)).first()
-            played = (rated_by_ps is not None)
+            played = rated_by_ps is not None
         ratings = {}
         m = Match.query.get(match_id)
         for ps in m.players_stats:
-            avg_rating = PlayerMatchRating.query.join(PlayerMatchStats).filter(PlayerMatchStats.id == ps.id) \
-                .value(func.avg(PlayerMatchRating.rating))
+            avg_rating = (PlayerMatchRating.query.join(PlayerMatchStats)
+                          .filter(PlayerMatchStats.id == ps.id)
+                          .value(func.avg(PlayerMatchRating.rating)))
             if avg_rating:
                 avg_rating = float(avg_rating) or 0.0
-            ratings[ps.id] = {'allowed_rate': played and ps.id != rated_by_ps.id and not (
-                PlayerMatchRating.query.filter(and_(PlayerMatchRating.rated_by_steam_id == user_id,
-                                                        PlayerMatchRating.player_match_stats_id == ps.id)).first()),
+            rated_already = (PlayerMatchRating.query
+                             .filter(and_(PlayerMatchRating.rated_by_steam_id == user_id,
+                                          PlayerMatchRating.player_match_stats_id == ps.id)).exists())
+            allowed_rate = played and ps.id != rated_by_ps.id and not rated_already
+            ratings[ps.id] = {'allowed_rate': allowed_rate,
                               'avg_rating': avg_rating}
         return ratings
 
@@ -126,17 +136,26 @@ class Match(db.Model):
     __tablename__ = 'match'
 
     id = Column(BigInteger, primary_key=True)
-    season_id = Column(Integer, ForeignKey('season.id', onupdate="CASCADE", ondelete="CASCADE"),
-                       nullable=False)
-    players_stats = relationship('PlayerMatchStats', cascade="all,delete", backref="match",
+    season_id = Column(Integer, ForeignKey('season.id',
+                                            onupdate="CASCADE",
+                                            ondelete="CASCADE"), nullable=False)
+    players_stats = relationship('PlayerMatchStats',
+                                 cascade="all,delete",
+                                 backref="match",
                                  order_by=PlayerMatchStats.player_slot)
     radiant_win = Column(Boolean)
     duration = Column(Integer)
     game_mode = Column(Integer)
     start_time = Column(Integer)
 
-    game_modes_dict = {1: 'All Pick', 2: 'Captains Mode', 3: 'Random Draft', 4: 'Single Draft',
-                       5: 'All Random', 8: 'Reverse Captain Mode', 16: 'Captains Draft', 22: 'Ranked All Pick'}
+    game_modes_dict = {1: 'All Pick',
+                       2: 'Captains Mode',
+                       3: 'Random Draft',
+                       4: 'Single Draft',
+                       5: 'All Random',
+                       8: 'Reverse Captain Mode',
+                       16: 'Captains Draft',
+                       22: 'Ranked All Pick'}
 
     def __repr__(self):
         return "%s" % self.id

@@ -8,6 +8,7 @@ from flask import session
 from gleague.api import oid
 from gleague.models import Player, SeasonStats
 
+
 _steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
 
 players_bp = Blueprint('players', __name__)
@@ -48,9 +49,7 @@ def players_list():
 def players_stats(season_id=-1):
     nickname_filter = request.args.get('q', None)
     sort = request.args.get('sort', 'pts')
-
     items = []
-
     for s in SeasonStats.get_stats(season_id, nickname_filter, sort):
         items.append({
             'steam_id': s.player.steam_id,
@@ -60,5 +59,4 @@ def players_stats(season_id=-1):
             'loses': s.losses,
             'win_rate': s.wins / max(s.wins + s.losses, 1) * 100,
         })
-
     return jsonify({'players': items})

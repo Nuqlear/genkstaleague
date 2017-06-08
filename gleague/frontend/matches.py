@@ -9,6 +9,7 @@ from sqlalchemy import desc
 
 from gleague.models import Match
 
+
 matches_bp = Blueprint('matches', __name__)
 
 
@@ -26,8 +27,8 @@ def matches_preview():
     if not page.isdigit():
         abort(400)
     page = int(page)
-    m = Match.query.order_by(desc(Match.id)).paginate(page,
-                                                              current_app.config['HISTORY_MATCHES_PER_PAGE'], True)
+    m = Match.query.order_by(desc(Match.id)).paginate(
+        page, current_app.config['HISTORY_MATCHES_PER_PAGE'], True)
     return render_template('matches.html', matches=m)
 
 
