@@ -266,7 +266,7 @@ class Match(db.Model):
         if pts_deviation > base_pts_diff - 5:
             pts_deviation = base_pts_diff - 5
         pts_diff = base_pts_diff
-        if pts['radiant'] > pts['dire']:
+        if (pts['dire'] > pts['radiant']) == m.radiant_win:
             pts_diff += pts_deviation
         else:
             pts_diff -= pts_deviation
