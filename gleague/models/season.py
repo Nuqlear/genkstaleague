@@ -79,10 +79,9 @@ class Season(db.Model):
                  .with_entities(SeasonStats.steam_id,
                                 SeasonStats.pts)
                  .order_by(desc(SeasonStats.pts)).limit(3).all())
-        for s in stats:
-            self.place_1 = stats[0][0]
-            self.place_2 = stats[1][0]
-            self.place_3 = stats[2][0]
+        self.place_1 = stats[0][0]
+        self.place_2 = stats[1][0]
+        self.place_3 = stats[2][0]
 
     @staticmethod
     def start_new():
