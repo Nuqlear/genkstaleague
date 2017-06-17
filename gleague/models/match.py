@@ -59,6 +59,9 @@ class PlayerMatchStats(db.Model):
                                         self.season_stats.steam_id,
                                         self.match_id)
 
+    def is_winner(self):
+        return self.match.radiant_win == (self.player_slot < 5)
+
     def to_dict(self, extensive=True, **kwargs):
         with_season_stats = kwargs.get('with_season_stats', False)
         d = {
@@ -255,51 +258,26 @@ class Match(db.Model):
             db.session.add(season_stats)
             player_stats.old_pts = season_stats.pts
         pts = {'radiant': 0, 'dire': 0}
-        for i in range(len(m.players_stats)):
-            j = m.players_stats[i]
-            if j.player_slot < 5:
-                pts['radiant'] += j.season_stats.pts
+        for stats in m.players_stats:
+            if stats.player_slot < 5:
+                pts['radiant'] += stats.season_stats.pts
             else:
-                pts['dire'] += j.season_stats.pts
-        pts_diff = abs(pts['radiant'] - pts['dire']) / 20
-        if pts_diff > base_pts_diff - 5: pts_diff = base_pts_diff - 5
-        # VERY OLD CODE; NEED REWORK
+                pts['dire'] += stats.season_stats.pts
+        pts_deviation = int(abs(pts['radiant'] - pts['dire']) / 20)
+        if pts_deviation > base_pts_diff - 5:
+            pts_deviation = base_pts_diff - 5
+        pts_diff = base_pts_diff
         if pts['radiant'] > pts['dire']:
-            if m.radiant_win:
-                for i in range(len(m.players_stats)):
-                    j = m.players_stats[i]
-                    if j.player_slot < 5:
-                        j.pts_diff = int(base_pts_diff - pts_diff)
-                    else:
-                        j.pts_diff = -int(base_pts_diff - pts_diff)
-                    j.season_stats.pts += j.pts_diff
-            else:
-                for i in range(len(m.players_stats)):
-                    j = m.players_stats[i]
-                    if j.player_slot < 5:
-                        j.pts_diff = -int(base_pts_diff + pts_diff)
-                    else:
-                        j.pts_diff = int(base_pts_diff + pts_diff)
-                    j.season_stats.pts += j.pts_diff
+            pts_diff += pts_deviation
         else:
-            if m.radiant_win:
-                for i in range(len(m.players_stats)):
-                    j = m.players_stats[i]
-                    if j.player_slot < 5:
-                        j.pts_diff = int(base_pts_diff + pts_diff)
-                    else:
-                        j.pts_diff = -int(base_pts_diff + pts_diff)
-                    j.season_stats.pts += j.pts_diff
+            pts_diff -= pts_deviation
+        for stats in m.players_stats:
+            if stats.is_winner():
+                stats.pts_diff = pts_diff
             else:
-                for i in range(len(m.players_stats)):
-                    j = m.players_stats[i]
-                    if j.player_slot < 5:
-                        j.pts_diff = -int(base_pts_diff - pts_diff)
-                    else:
-                        j.pts_diff = int(base_pts_diff - pts_diff)
-                    j.season_stats.pts += j.pts_diff
-        for i in range(len(m.players_stats)):
-            stats = m.players_stats[i]
+                stats.pts_diff = -pts_diff
+            stats.season_stats.pts += stats.pts_diff
+        for stats in m.players_stats:
             season_stats = stats.season_stats
             if stats.pts_diff > 0:
                 season_stats.wins += 1
