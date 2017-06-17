@@ -17,9 +17,9 @@ from gleague.models import SeasonStats
 players_bp = Blueprint('players', __name__)
 
 
-def get_season_stats(cs_id, player):
+def get_season_stats(current_season_id, player):
     stats = player.season_stats[0]
-    if player.season_stats[0].season_id != cs_id:
+    if player.season_stats[0].season_id != current_season_id:
         return {'wins': 0, 'losses': 0, 'pts': 1000}
     else:
         return stats
@@ -31,22 +31,22 @@ def overview(steam_id):
     p = Player.get_or_create(steam_id)
     if not p:
         return abort(404)
-    cs_id = Season.current().id
+    current_season_id = Season.current().id
     stats = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.steam_id == steam_id) \
         .order_by(desc(PlayerMatchStats.match_id)).limit(8)
     pts_seq = PlayerMatchStats.query.join(SeasonStats).filter(
-        and_(SeasonStats.season_id == cs_id, SeasonStats.steam_id == steam_id))\
+        and_(SeasonStats.season_id == current_season_id, SeasonStats.steam_id == steam_id))\
         .order_by(PlayerMatchStats.match_id) \
         .values(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)
-    pts_hist = [[0, 1000]]
+    pts_history = [[0, 1000]]
     for index, el in enumerate(pts_seq):
-        pts_hist.append([index + 1, el[0]])
+        pts_history.append([index + 1, el[0]])
     rating_info = p.get_avg_rating()[0]
     avg_rating = rating_info[0] or 0
     rating_amount = rating_info[1]
-    signature_heroes = p.get_heroes(cs_id).order_by(desc('played')).limit(3).all()
+    signature_heroes = p.get_heroes(current_season_id).order_by(desc('played')).limit(3).all()
     matches_stats = stats.all()
-    season_stats = get_season_stats(cs_id, p)
+    season_stats = get_season_stats(current_season_id, p)
     return render_template('player_overview.html', 
                            player=p,
                            season_stats=season_stats,
@@ -54,7 +54,7 @@ def overview(steam_id):
                            rating_amount=rating_amount,
                            signature_heroes=signature_heroes,
                            matches_stats=matches_stats,
-                           pts_history=json.dumps(pts_hist))
+                           pts_history=json.dumps(pts_history))
 
 
 @players_bp.route('/<int:steam_id>/matches', methods=['GET'])
@@ -66,7 +66,7 @@ def matches(steam_id):
     if not page.isdigit():
         abort(400)
     page = int(page)
-    cs_id = Season.current().id
+    current_season_id = Season.current().id
     matches_stats = PlayerMatchStats.query.order_by(desc(PlayerMatchStats.match_id)) \
         .join(SeasonStats).filter(SeasonStats.steam_id == steam_id)
     template_context = {'player': p}
@@ -79,7 +79,7 @@ def matches(steam_id):
     rating_info = p.get_avg_rating()[0]
     template_context['avg_rating'] = rating_info[0] or 0
     template_context['rating_amount'] = rating_info[1]
-    template_context['season_stats'] = get_season_stats(cs_id, p)
+    template_context['season_stats'] = get_season_stats(current_season_id, p)
     return render_template('player_matches.html', **template_context)
 
 
@@ -97,12 +97,12 @@ def heroes(steam_id):
         is_desc = 'yes'
         order_by = desc(order_by)
     hero_filter = request.args.get('hero', None)
-    cs_id = Season.current().id
-    heroes_stats = p.get_heroes(cs_id).order_by(order_by).all()
+    current_season_id = Season.current().id
+    heroes_stats = p.get_heroes(current_season_id).order_by(order_by).all()
     template_context = {'player': p, 'sort': sort_value, 'desc': is_desc}
     template_context['heroes_stats'] = heroes_stats
     rating_info = p.get_avg_rating()[0]
     template_context['avg_rating'] = rating_info[0] or 0
     template_context['rating_amount'] = rating_info[1]
-    template_context['season_stats'] = get_season_stats(cs_id, p)
+    template_context['season_stats'] = get_season_stats(current_season_id, p)
     return render_template('player_heroes.html', **template_context)

@@ -50,13 +50,13 @@ def players_stats(season_id=-1):
     nickname_filter = request.args.get('q', None)
     sort = request.args.get('sort', 'pts')
     items = []
-    for s in SeasonStats.get_stats(season_id, nickname_filter, sort):
+    for season_stats in SeasonStats.get_stats(season_id, nickname_filter, sort):
         items.append({
-            'steam_id': s.player.steam_id,
-            'nickname': s.player.nickname,
-            'pts': s.pts,
-            'wins': s.wins,
-            'loses': s.losses,
-            'win_rate': s.wins / max(s.wins + s.losses, 1) * 100,
+            'steam_id': season_stats.player.steam_id,
+            'nickname': season_stats.player.nickname,
+            'pts': season_stats.pts,
+            'wins': season_stats.wins,
+            'loses': season_stats.losses,
+            'win_rate': season_stats.wins / max(season_stats.wins + season_stats.losses, 1) * 100,
         })
     return jsonify({'players': items})

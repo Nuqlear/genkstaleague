@@ -89,10 +89,10 @@ class Player(db.Model):
                                func.count(PlayerMatchRating.id)).all())
         return query
 
-    def get_heroes(self, cs_id=None):
+    def get_heroes(self, current_season_id=None):
         filters = SeasonStats.steam_id == self.steam_id
-        if cs_id is not None:
-            filters = and_(filters, SeasonStats.season_id == cs_id)
+        if current_season_id is not None:
+            filters = and_(filters, SeasonStats.season_id == current_season_id)
         query = (PlayerMatchStats.query.join(SeasonStats).filter(filters)
                  .with_entities(PlayerMatchStats.hero.label('hero'),
                                 func.count(PlayerMatchStats.id).label('played'),

@@ -228,9 +228,9 @@ class Match(db.Model):
         m.start_time = steamdata['start_time']
         db.session.add(m)
         heroes = get_dota2_heroes(current_app.config['STEAM_API_KEY'])
-        for i in steamdata['players']:
+        for player_data in steamdata['players']:
             player_stats = PlayerMatchStats()
-            account_id = '765' + str(i['account_id'] + 61197960265728)
+            account_id = '765' + str(player_data['account_id'] + 61197960265728)
             player = Player.get_or_create(account_id)
             if player is None:
                 db.session.rollback()
@@ -238,21 +238,20 @@ class Match(db.Model):
             db.session.flush()
             season_stats = SeasonStats.get_or_create(account_id, m.season_id)
             player_stats.season_stats_id = season_stats.id
-            player_stats.kills = i['kills']
-            # player_stats.hero_healing = i['hero_healing']
-            player_stats.assists = i['assists']
-            player_stats.level = i['level']
+            player_stats.kills = player_data['kills']
+            player_stats.assists = player_data['assists']
+            player_stats.level = player_data['level']
             player_stats.pts_diff = 20
-            player_stats.deaths = i['deaths']
-            player_stats.hero_damage = i['hero_damage']
-            player_stats.last_hits = i['last_hits']
-            player_stats.player_slot = i['player_slot']
-            player_stats.denies = i['denies']
-            player_stats.tower_damage = i['tower_damage']
-            player_stats.damage_taken = i['damage_taken']
-            player_stats.xp_per_min = i['xp_per_min']
-            player_stats.gold_per_min = i['gold_per_min']
-            player_stats.hero = heroes[i['hero_id']].replace('npc_dota_hero_', '')
+            player_stats.deaths = player_data['deaths']
+            player_stats.hero_damage = player_data['hero_damage']
+            player_stats.last_hits = player_data['last_hits']
+            player_stats.player_slot = player_data['player_slot']
+            player_stats.denies = player_data['denies']
+            player_stats.tower_damage = player_data['tower_damage']
+            player_stats.damage_taken = player_data['damage_taken']
+            player_stats.xp_per_min = player_data['xp_per_min']
+            player_stats.gold_per_min = player_data['gold_per_min']
+            player_stats.hero = heroes[player_data['hero_id']].replace('npc_dota_hero_', '')
             player_stats.match_id = m.id
             db.session.add(player_stats)
             db.session.add(season_stats)
