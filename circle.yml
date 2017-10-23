@@ -10,7 +10,9 @@ database:
     - echo "GRANT ALL privileges on database gleague_test to genksta" | psql -U postgres
 dependencies:
   pre:
+    - pip install --upgrade setuptools
     - pip install ansible
+    - ansible-galaxy install gantsign.golang
     - go get github.com/dotabuff/manta
 test:
   override:
@@ -19,5 +21,7 @@ deployment:
   push_to_server:
     branch: master
     commands:
-      - ansible-playbook -i ./ansible-hosts ansible-playbook.yml:
+      - git clone git@gitlab.com:Nuqlear/deploy.git
+      - ansible-playbook -i hosts projects/genkstaleague/playbook.yml:
+          pwd: deploy
           timeout: 1800
