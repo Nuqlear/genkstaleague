@@ -3,8 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
     {{ macro.load_js_lib([
         'bootstrap/dist/js/bootstrap.js'
     ]) }}
@@ -45,9 +45,9 @@
         <table id="top_players" class="span5 center-table">
             <thead>
                 <tr>
-                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q, 
+                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
                 sort='nickname', season_number=season_number) }}"
-                    {% else %}"{{ url_for('seasons.players', page=stats.page, 
+                    {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='nickname', season_number=season_number) }}"{% endif %}>Nickname</a>
                     {% if sort == 'nickname' %}
                         <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
@@ -61,17 +61,17 @@
                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                     {% endif %}
                 </td>
-                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q, 
+                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
                 sort='wins', season_number=season_number) }}"
-                    {% else %}"{{ url_for('seasons.players', page=stats.page, 
+                    {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='wins', season_number=season_number) }}"{% endif %}>Wins</a>
                     {% if sort == 'wins' %}
                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                     {% endif %}
                 </td>
-                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q, 
+                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
                 sort='losses', season_number=season_number) }}"
-                    {% else %}"{{ url_for('seasons.players', page=stats.page, 
+                    {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='losses', season_number=season_number) }}"{% endif %}>Losses</a>
                     {% if sort == 'losses' %}
                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -83,7 +83,7 @@
             <tbody>
                 <td>
                     <a class="link" href="{{ url_for('players.overview', steam_id=s.steam_id)}}">
-                    {{ s.player.nickname }} 
+                    {{ s.player.nickname }}
                     </a>
                 </td>
                 <td> {{ s.pts }} </td>
@@ -95,13 +95,13 @@
         <div id="pagination">
             <ul class="pagination">
             {% if stats.has_prev %}
-                <li><a href="{{ url_for('seasons.players', page=stats.prev_num, q=q, 
+                <li><a href="{{ url_for('seasons.players', page=stats.prev_num, q=q,
                     sort=sort, season_number=season_number)}}"><</a></li>
             {% endif %}
             {%- for _page in stats.iter_pages() %}
                 {% if _page %}
                   {% if _page != stats.page %}
-                    <li><a href="{{ url_for('seasons.players', page=_page, 
+                    <li><a href="{{ url_for('seasons.players', page=_page,
                         sort=sort, season_number=season_number) }}">{{ _page }}</a></li>
                   {% else %}
                     <li class="active"><a>{{ _page }}</strong></a></li>
@@ -111,7 +111,7 @@
                 {% endif %}
               {%- endfor %}
               {% if stats.has_next %}
-                <li><a href="{{ url_for('seasons.players', page=stats.next_num, q=q, 
+                <li><a href="{{ url_for('seasons.players', page=stats.next_num, q=q,
                     sort=sort, season_number=season_number)}}">></a></li>
               {% endif %}
             </ul>

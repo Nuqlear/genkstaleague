@@ -1,8 +1,8 @@
 {% extends 'admin/master.html' %}
 
 {% block head %}
-<script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-<link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+<script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+<link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
 {% endblock %}
 
 {% block body %}
@@ -40,8 +40,8 @@ $(document).ready(function() {
             url: '/api/matches/',
             data: formData,
             cache: false,
-            processData: false,  
-            contentType: false, 
+            processData: false,
+            contentType: false,
             async: true,
             success: function(data) {
                 btn.button('reset');

@@ -3,8 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
     {{ macro.load_js_lib([
         'bootstrap/dist/js/bootstrap.js'
     ]) }}
@@ -37,7 +37,7 @@
                    <thead>
                     <tr>
                         <th>
-                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero', 
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero',
                             desc='no', season_number=season_number) }}">Hero
                             {% if sort == 'hero' %}
                                 <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
@@ -45,7 +45,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='played', 
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='played',
                             desc='yes', season_number=season_number) }}">Matches
                             {% if not sort or sort == 'played' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -61,7 +61,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff', 
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff',
                             desc='yes', season_number=season_number) }}">PTS diff
                             {% if sort == 'pts_diff' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -69,7 +69,7 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='kda', 
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='kda',
                             desc='yes', season_number=season_number) }}">KDA
                             {% if sort == 'kda' %}
                                 <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
@@ -81,7 +81,7 @@
                     <tbody>
                     {% for h in in_season_heroes %}
                     <tr>
-                        <td><img class="steam_img" 
+                        <td><img class="steam_img"
                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ h.hero }}_sb.png></td>
                         <td>{{ h.played }}</td>
                         <td>{{ '%i' % h.winrate }}%</td>

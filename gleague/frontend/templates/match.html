@@ -3,8 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="http://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
     {{ macro.load_js_lib([
         'bootstrap/dist/js/bootstrap.js',
         'raty/lib/jquery.raty.js',
@@ -28,7 +28,7 @@
 <div class="row">
     <div class="row">
         <div class="col-md-5">
-            <h2 class="match_winner"> 
+            <h2 class="match_winner">
                 {% if match.radiant_win == 1 %}
                     <span class="radiant_text_color" style="text-decoration: underline;">Radiant</span> won
                 {% else %}
@@ -61,7 +61,7 @@
     {% if not g.user %}
         <div id="warning" class="alert alert-warning alert-dismissable text-center">
           <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-          <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;" 
+          <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;"
           src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
           to rate players if you played in this match.
         </div>
@@ -101,7 +101,7 @@
                         </td>
                         <td style="text-align:left">
                             {% if s.season_stats.player.nickname %}
-                                <a class="link" href="{{ url_for('players.overview', 
+                                <a class="link" href="{{ url_for('players.overview',
                                     steam_id=s.season_stats.player.steam_id) }}">
                                 {{ s.season_stats.player.nickname }}</a>
                             {% else %}
@@ -126,7 +126,7 @@
                         {% if s.pts_diff > 0 %}<span style="color:green">+{% else %}
                         <span style="color:red">{% endif %}{{ s.pts_diff }}</span>
                         </td>
-                        <td style="cursor:default"> 
+                        <td style="cursor:default">
                             <div class="rating" match_player_stats_id="{{s.id}}">
                             </div>
                         </td>
@@ -147,7 +147,7 @@ $(document).ready(function() {
                 var d = data['ratings'][$(this).attr('match_player_stats_id')]
                 console.log(d['allowed_rate']);
                 $(this).raty({ readOnly: !d['allowed_rate'],
-                    path: '/static/lib/bower_components/raty/lib/img', score: d['avg_rating'], 
+                    path: '/static/lib/bower_components/raty/lib/img', score: d['avg_rating'],
                     click: function(score, evt) {
                         $.post('/api/matches/{{match.id}}/ratings/'+$(this).parent().find('.rating').attr('match_player_stats_id')
                             +'?rating='+score);

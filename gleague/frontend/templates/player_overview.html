@@ -3,8 +3,8 @@
 <!DOCTYPE html>
 <html lang="en">
 <head>
-    <script src="//ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link href='http://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
     {{ macro.load_js_lib([
         'bootstrap/dist/js/bootstrap.js',
         'raty/lib/jquery.raty.js',
@@ -48,8 +48,8 @@
         </div>
         <div class="col-md-3" style="padding:20px; text-align:right;">
             <h2 style="padding-top:15px">
-                <span class="radiant_text_color">{{ season_stats.wins }}</span> 
-                / 
+                <span class="radiant_text_color">{{ season_stats.wins }}</span>
+                /
                 <span class="dire_text_color">{{ season_stats.losses }}</span>
                 <span style="padding-left:10px">{{ season_stats.pts }} pts</span>
             </h2>
@@ -73,7 +73,7 @@
                     <tbody id="signature_heroes">
                     {% for s in signature_heroes %}
                     <tr hero={{ s.hero }}>
-                        <td><img class="steam_img" 
+                        <td><img class="steam_img"
                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png></td>
                         <td>{{ s.played }}</td>
                         <td>{{ '%i' % s.winrate }}%</td>
@@ -84,7 +84,7 @@
                     {% endfor %}
                     </tbody>
                 </table>
-            </div> 
+            </div>
             <div class="panel panel-default">
                 <div class="panel-heading">Seasons played</div>
                 <table class="table">
@@ -105,14 +105,14 @@
                     {% endfor %}
                     </tbody>
                 </table>
-            </div> 
+            </div>
         </div>
         <div class="col-md-6">
             <div class="panel panel-default">
                 <div class="panel-heading">Pts trends</div>
                 <div id="pts_history_plot">
                 </div>
-            </div> 
+            </div>
         </div>
     </div>
     <div class="player_matches table-responsive">
@@ -171,12 +171,12 @@
                         <td>{{ s.tower_damage }}</td>
                         <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
                         <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
-                        <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>                        
+                        <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
                     </tr>
                 {% endfor %}
             </tbody>
         </table>
-        <h3 class="text-center"><a class="link" 
+        <h3 class="text-center"><a class="link"
             href="{{ url_for('players.matches', steam_id=player.steam_id) }}">Show all matches</a></h3>
     </div>
 </div>
@@ -205,15 +205,15 @@ $(document).ready(function() {
         tick = parseInt(pts_array.length/8);
     }
     console.log(tick);
-    $.jqplot('pts_history_plot', [pts_array], {  
+    $.jqplot('pts_history_plot', [pts_array], {
         series:[{showMarker:false}],
         axes:{
             xaxis:{
                 labelRenderer: $.jqplot.CanvasAxisLabelRenderer,
-                min: 0,  
-                tickInterval: tick, 
-                tickOptions: { 
-                    formatString: '%d' 
+                min: 0,
+                tickInterval: tick,
+                tickOptions: {
+                    formatString: '%d'
                 },
                 pad: 0
             },
