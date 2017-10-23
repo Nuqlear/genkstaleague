@@ -22,6 +22,6 @@ deployment:
     branch: master
     commands:
       - git clone git@gitlab.com:Nuqlear/deploy.git
-      - ansible-playbook -i hosts projects/genkstaleague/playbook.yml:
-          pwd: deploy
+      - ansible-playbook -i hosts playbook.yml:
+          pwd: deploy/projects/genkstaleague
           timeout: 1800
