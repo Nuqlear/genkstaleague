@@ -1,163 +1,147 @@
-{% import 'macro.html' as macro with context %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
-    {{ macro.load_js_lib([
-        'bootstrap/dist/js/bootstrap.js',
-        'raty/lib/jquery.raty.js',
-        'moment/moment.js'
-    ]) }}
-    {{ macro.load_css_lib([
-        'bootstrap/dist/css/bootstrap.css',
-        'bootstrap/dist/css/bootstrap-theme.css',
-    ]) }}
-    {{ macro.load_css([
-        'main.css',
-        'match_table.css'
-    ]) }}
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+{% block head %}
     {{ macro.render_site_title(match.id ~ ' match') }}
-</head>
-<body>
-<div class="container">
-{{ macro.render_navbar() }}
-<div class="row">
-    <div class="row">
-        <div class="col-md-5">
-            <h2 class="match_winner">
-                {% if match.radiant_win == 1 %}
-                    <span class="radiant_text_color" style="text-decoration: underline;">Radiant</span> won
-                {% else %}
-                    <span class="dire_text_color" style="text-decoration: underline;">
-                    Dire</span> won
-                {% endif %}
-            </h2>
-        </div>
-        <div class="col-md-7">
-            <table class="match_info_table">
-                <thead>
-                    <tr>
-                    <td>Match id</td>
-                    <td>Season</td>
-                    <td>Game Mode</td>
-                    <td>Duration</td>
-                    <td>Date</td>
-                    </tr>
-                </thead>
-                <tbody>
-                    <td>{{ match.id }}</td>
-                    <td>{{ match.season.number }}</td>
-                    <td>{{ match.game_mode_string() }}</td>
-                    <td>{{ match.duration_string() }}</td>
-                    <td id="start_time">{{ match.start_time }}</td>
-                </tbody>
-            </table>
-        </div>
-    </div>
-    {% if not g.user %}
-        <div id="warning" class="alert alert-warning alert-dismissable text-center">
-          <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-          <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;"
-          src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
-          to rate players if you played in this match.
-        </div>
-    {% endif %}
-    <div class="match_players_table table-responsive">
-        <table class="table">
-            <thead>
-                <tr class="header_table">
-                    <th></th>
-                    <th style="text-align:left">Player</th>
-                    <th style="text-align:left">Hero</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Level">L</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Kills">K</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Deaths">D</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Assists">A</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Last Hits">LH</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Hero Damage">HD</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Tower Damage">TD</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Damage Taken">DT</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
-                    <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
-                    <th>PTS</th>
-                    <th>Rating</th>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in match.players_stats %}
-                    {% if s.player_slot < 5 %}
-                        <tr class="radiant_table">
-                    {% else %}
-                        <tr class="dire_table">
-                    {% endif %}
-                        <td>
-                            {% if s.season_stats.player.avatar %}
-                                <img class="steam_img" src={{ s.season_stats.player.avatar }}>
-                            {% endif %}
-                        </td>
-                        <td style="text-align:left">
-                            {% if s.season_stats.player.nickname %}
-                                <a class="link" href="{{ url_for('players.overview',
-                                    steam_id=s.season_stats.player.steam_id) }}">
-                                {{ s.season_stats.player.nickname }}</a>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {{ macro.render_navbar() }}
+        <div class="row">
+            <div class="row">
+                <div class="col-md-5">
+                    <h2 class="match_winner">
+                        {% if match.radiant_win == 1 %}
+                            <span class="radiant_text_color" style="text-decoration: underline;">Radiant</span> won
+                        {% else %}
+                            <span class="dire_text_color" style="text-decoration: underline;">
+                            Dire</span> won
+                        {% endif %}
+                    </h2>
+                </div>
+                <div class="col-md-7">
+                    <table class="match_info_table">
+                        <thead>
+                            <tr>
+                            <td>Match id</td>
+                            <td>Season</td>
+                            <td>Game Mode</td>
+                            <td>Duration</td>
+                            <td>Date</td>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <td>{{ match.id }}</td>
+                            <td>{{ match.season.number }}</td>
+                            <td>{{ match.game_mode_string() }}</td>
+                            <td>{{ match.duration_string() }}</td>
+                            <td id="start_time">{{ match.start_time }}</td>
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% if not g.user %}
+                <div id="warning" class="alert alert-warning alert-dismissable text-center">
+                  <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                  <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;"
+                  src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
+                  to rate players if you played in this match.
+                </div>
+            {% endif %}
+            <div class="match_players_table table-responsive">
+                <table class="table">
+                    <thead>
+                        <tr class="header_table">
+                            <th></th>
+                            <th style="text-align:left">Player</th>
+                            <th style="text-align:left">Hero</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Level">L</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Kills">K</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Deaths">D</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Assists">A</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Last Hits">LH</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Hero Damage">HD</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Tower Damage">TD</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Damage Taken">DT</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
+                            <th>PTS</th>
+                            <th>Rating</th>
+                        </tr>
+                    </thead>
+                    <tbody>
+                        {% for s in match.players_stats %}
+                            {% if s.player_slot < 5 %}
+                                <tr class="radiant_table">
                             {% else %}
-                                <span style="color: gray;">Anonymous</span>
+                                <tr class="dire_table">
                             {% endif %}
-                        </td>
-                        <td style="text-align:left" class="avatar_table">
-                            <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png>
-                        </td>
-                        <td>{{ s.level }}</td>
-                        <td>{{ s.kills }}</td>
-                        <td>{{ s.deaths }}</td>
-                        <td>{{ s.assists }}</td>
-                        <td>{{ s.last_hits }}</td>
-                        <td>{{ s.hero_damage }}</td>
-                        <td>{{ s.tower_damage }}</td>
-                        <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
-                        <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
-                        <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
-                        <td>
-                        {{ s.pts }}
-                        {% if s.pts_diff > 0 %}<span style="color:green">+{% else %}
-                        <span style="color:red">{% endif %}{{ s.pts_diff }}</span>
-                        </td>
-                        <td style="cursor:default">
-                            <div class="rating" match_player_stats_id="{{s.id}}">
-                            </div>
-                        </td>
-                    </tr>
-                {% endfor %}
-            </tbody>
-        </table>
+                                <td>
+                                    {% if s.season_stats.player.avatar %}
+                                        <img class="steam_img" src={{ s.season_stats.player.avatar }}>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:left">
+                                    {% if s.season_stats.player.nickname %}
+                                        <a class="link" href="{{ url_for('players.overview',
+                                            steam_id=s.season_stats.player.steam_id) }}">
+                                        {{ s.season_stats.player.nickname }}</a>
+                                    {% else %}
+                                        <span style="color: gray;">Anonymous</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:left" class="avatar_table">
+                                    <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png>
+                                </td>
+                                <td>{{ s.level }}</td>
+                                <td>{{ s.kills }}</td>
+                                <td>{{ s.deaths }}</td>
+                                <td>{{ s.assists }}</td>
+                                <td>{{ s.last_hits }}</td>
+                                <td>{{ s.hero_damage }}</td>
+                                <td>{{ s.tower_damage }}</td>
+                                <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
+                                <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
+                                <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
+                                <td>
+                                {{ s.pts }}
+                                {% if s.pts_diff > 0 %}<span style="color:green">+{% else %}
+                                <span style="color:red">{% endif %}{{ s.pts_diff }}</span>
+                                </td>
+                                <td style="cursor:default">
+                                    <div class="rating" match_player_stats_id="{{s.id}}">
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
     </div>
-</div>
-</body>
-<script>
-$(document).ready(function() {
-    $("[data-toggle=tooltip]").tooltip({container:'body'});
-    function update_rating() {
-        var url = '/api/matches/{{match.id}}/ratings/';
-        $.getJSON(url, function(data) {
-            $('.rating').each(function(){
-                var d = data['ratings'][$(this).attr('match_player_stats_id')]
-                console.log(d['allowed_rate']);
-                $(this).raty({ readOnly: !d['allowed_rate'],
-                    path: '/static/lib/bower_components/raty/lib/img', score: d['avg_rating'],
-                    click: function(score, evt) {
-                        $.post('/api/matches/{{match.id}}/ratings/'+$(this).parent().find('.rating').attr('match_player_stats_id')
-                            +'?rating='+score);
-                        update_rating();
-                    }
+{% endblock %}
+
+{% block script %}
+    $(document).ready(function() {
+        $("[data-toggle=tooltip]").tooltip({container:'body'});
+        function update_rating() {
+            var url = '/api/matches/{{match.id}}/ratings/';
+            $.getJSON(url, function(data) {
+                $('.rating').each(function(){
+                    var d = data['ratings'][$(this).attr('match_player_stats_id')]
+                    console.log(d['allowed_rate']);
+                    $(this).raty({ readOnly: !d['allowed_rate'],
+                        path: '/static/lib/bower_components/raty/lib/img', score: d['avg_rating'],
+                        click: function(score, evt) {
+                            $.post('/api/matches/{{match.id}}/ratings/'+$(this).parent().find('.rating').attr('match_player_stats_id')
+                                +'?rating='+score);
+                            update_rating();
+                        }
+                    });
                 });
             });
-        });
-    }
-    update_rating();
-    $('#start_time').html(moment(moment.unix("{{ match.start_time }}")).format('MMMM Do YYYY, HH:mm'));
-});
-</script>
+        }
+        update_rating();
+        $('#start_time').html(moment(moment.unix("{{ match.start_time }}")).format('MMMM Do YYYY, HH:mm'));
+    });
+{% endblock %}

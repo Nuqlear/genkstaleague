@@ -1,52 +1,10 @@
-{% import 'macro.html' as macro with context %}
+{% extends 'player/base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
-    {{ macro.load_js_lib([
-        'bootstrap/dist/js/bootstrap.js',
-        'raty/lib/jquery.raty.js',
-        'moment/moment.js',
-        'jqplot/jquery.jqplot.min.js'
-    ]) }}
-    {{ macro.load_css_lib([
-        'bootstrap/dist/css/bootstrap.css',
-        'bootstrap/dist/css/bootstrap-theme.css',
-        'jqplot/jquery.jqplot.min.css'
-    ]) }}
-    {{ macro.load_css([
-        'main.css',
-        'player.css'
-    ])}}
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+{% block head %}
     {{ macro.render_site_title(player.nickname ~ ' matches') }}
-</head>
-<body>
-<div class="container">
-{{ macro.render_navbar() }}
-<div class="row">
-    <div class="row">
-        <div class="col-md-9" style="padding:20px">
-            <h1>
-                <img style="border: 3px solid white" src={{ player.avatar_medium }}>
-                <a class="link"
-                    href="{{ url_for('players.overview', steam_id=player.steam_id) }}">{{player.nickname}}</a>
-                <span id="avg_rating"></span> <span style="font-size:12pt">({{ rating_amount }} votes)</span>
-            </h1>
-        </div>
-        <div class="col-md-3" style="padding:20px; text-align:right;">
-            <h2 style="padding-top:15px">
-                <span class="radiant_text_color">{{ season_stats.wins }}</span>
-                /
-                <span class="dire_text_color">{{ season_stats.losses }}</span>
-                <span style="padding-left:10px">{{ season_stats.pts }} pts</span>
-            </h2>
-        </div>
-    </div>
-    {{ macro.render_player_page_navbar() }}
+{% endblock %}
+
+{% block player_body %}
     <div class="player_matches table-responsive">
         <table class="table table-hover">
             <thead>
@@ -114,20 +72,20 @@
     {% else %}
         {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id) }}
     {% endif %}
-</div>
-</div>
-</body>
-<script>
-$(document).ready(function() {
-    $('#avg_rating').raty({ readOnly: true, path: '/static/lib/bower_components/raty/lib/img', score: parseFloat("{{ avg_rating }}")});
-    $("[data-toggle=tooltip]").tooltip({container:'body'});
-    $('.start_time').each(function() {
-        $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
-    });
-    $('.player_matches tbody tr').each(function() {
-        $(this).click(function() {
-            window.location.href = '/matches/' + $(this).attr('match_id');
+{% endblock %}
+
+{% block script %}
+    $(document).ready(function() {
+        $('#avg_rating').raty({ readOnly: true, path: '/static/lib/bower_components/raty/lib/img', score: parseFloat("{{ avg_rating }}")});
+        $("[data-toggle=tooltip]").tooltip({container:'body'});
+        $('.start_time').each(function() {
+            $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
+        });
+        $('.player_matches tbody tr').each(function() {
+            $(this).click(function() {
+                window.location.href = '/matches/' + $(this).attr('match_id');
+            });
         });
     });
-});
-</script>
+{% endblock %}
+

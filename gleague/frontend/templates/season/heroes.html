@@ -1,34 +1,10 @@
-{% import 'macro.html' as macro with context %}
+{% extends 'season/base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
-    {{ macro.load_js_lib([
-        'bootstrap/dist/js/bootstrap.js'
-    ]) }}
-    {{ macro.load_css_lib([
-        'bootstrap/dist/css/bootstrap.css',
-        'bootstrap/dist/css/bootstrap-theme.css',
-    ]) }}
-    {{ macro.load_css([
-        'main.css',
-        'players.css'
-    ])}}
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
-    {{ macro.render_google_meta() }}
+{% block head %}
     {{ macro.render_site_title("heroes") }}
-</head>
-<body>
-<div class="container">
-{{ macro.render_navbar() }}
-<div class="row">
-    <div style="padding: 0px 20px 20px 20px">
-        {{ macro.render_season_number_navbar(seasons) }}
-    </div>
-    {{ macro.render_season_navbar(seasons) }}
+{% endblock %}
+
+{% block season_body %}
     <div class="row" style="padding: 20px 20px; color:black">
         <div class="col-md-8 col-md-offset-2">
             <div class="panel panel-default">
@@ -94,23 +70,22 @@
             </div>
         </div>
     </div>
-</div>
-</div>
-</body>
-<script>
-$(document).ready(function() {
-    $('.in_match_records_table tr').each(function() {
-        $(this).click(function() {
-            window.location.href = '/matches/' + $(this).attr('match_id');
+{% endblock %}
+
+{% block script %}
+    $(document).ready(function() {
+        $('.in_match_records_table tr').each(function() {
+            $(this).click(function() {
+                window.location.href = '/matches/' + $(this).attr('match_id');
+            });
+        });
+        $('.in_season_records_table tr').each(function() {
+            $(this).click(function() {
+                window.location.href = '/players/' + $(this).attr('player_id') + '/overview';
+            });
+        });
+        $("#select_season").on('change', function (e) {
+            window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
         });
     });
-    $('.in_season_records_table tr').each(function() {
-        $(this).click(function() {
-            window.location.href = '/players/' + $(this).attr('player_id') + '/overview';
-        });
-    });
-    $("#select_season").on('change', function (e) {
-        window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
-    });
-});
-</script>
+{% endblock %}

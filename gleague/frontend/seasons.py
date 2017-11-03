@@ -38,7 +38,7 @@ def players(season_number=-1):
     stats = stats.paginate(page, current_app.config['TOP_PLAYERS_PER_PAGE'], True)
     seasons = [e[0] for e in db.session.query(Season.number).all()]
     return render_template(
-        'season_players.html',
+        'season/players.html',
         stats=stats,
         sort=sort,
         seasons=seasons,
@@ -80,7 +80,7 @@ def records(season_number=-1):
                 .with_entities(func.min(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff))
                 .as_scalar())
         min_pts_pms = db.session.query(PlayerMatchStats).join(SeasonStats)\
-                      .filter(and_(SeasonStats.season_id == s_id, 
+                      .filter(and_(SeasonStats.season_id == s_id,
                                   (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == subq)) \
                       .order_by(PlayerMatchStats.id).first()
 
@@ -95,7 +95,7 @@ def records(season_number=-1):
 
         subq = (PlayerMatchStats.query.join(SeasonStats)
                 .filter(SeasonStats.season_id == s_id)
-                .with_entities(func.max((PlayerMatchStats.kills + PlayerMatchStats.assists) / 
+                .with_entities(func.max((PlayerMatchStats.kills + PlayerMatchStats.assists) /
                                         (PlayerMatchStats.deaths + 1))).as_scalar())
         max_kda_pms = db.session.query(PlayerMatchStats).join(SeasonStats) \
             .filter(and_(SeasonStats.season_id == s_id,
@@ -164,7 +164,7 @@ def records(season_number=-1):
         in_season_player_records.append(['Max pts ever',
                                          max_pts_pms.season_stats.player,
                                          max_pts_pms.old_pts + max_pts_pms.pts_diff])
-        in_season_player_records.append(['Min pts ever', 
+        in_season_player_records.append(['Min pts ever',
                                          min_pts_pms.season_stats.player,
                                          min_pts_pms.old_pts + min_pts_pms.pts_diff])
         in_match_records.append([max_kda_pms.match_id,
@@ -234,7 +234,7 @@ def records(season_number=-1):
                             'avg_match_duration': avg_match_duration,
                             'side_winrates': side_winrates}
 
-    return render_template('season_records.html', **template_context)
+    return render_template('season/records.html', **template_context)
 
 
 @seasons_bp.route('/current/heroes', methods=['GET'])
@@ -253,7 +253,7 @@ def heroes(season_number=-1):
     in_season_heroes = (PlayerMatchStats.query.join(SeasonStats)
         .filter(SeasonStats.season_id == s_id)
         .with_entities(PlayerMatchStats.hero, func.count(PlayerMatchStats.id).label('played'),
-                       (100 * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0)) / 
+                       (100 * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0)) /
                         func.count(PlayerMatchStats.id)).label('winrate'),
                        func.sum(PlayerMatchStats.pts_diff).label('pts_diff'),
                        ((func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists)) /
@@ -262,7 +262,7 @@ def heroes(season_number=-1):
 
     seasons = [e[0] for e in db.session.query(Season.number).all()]
 
-    return render_template('season_heroes.html', 
+    return render_template('season/heroes.html',
                            in_season_heroes=in_season_heroes,
                            sort=sort_arg,
                            is_desc=desc,

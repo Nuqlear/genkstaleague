@@ -1,0 +1,15 @@
+{% extends 'base.html' %}
+
+{% block body %}
+    <div class="container">
+        {{ macro.render_navbar() }}
+        <div class="row">
+            <div style="padding: 0px 20px 20px 20px">
+                {{ macro.render_season_number_navbar(seasons) }}
+            </div>
+            {{ macro.render_season_navbar(seasons) }}
+            {% block season_body %}
+            {% endblock %}
+        </div>
+    </div>
+{% endblock %}

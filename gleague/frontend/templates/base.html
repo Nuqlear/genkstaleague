@@ -1,0 +1,39 @@
+{% import 'macro.html' as macro with context %}
+
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
+    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
+    {{ macro.load_js_lib([
+        'bootstrap/dist/js/bootstrap.js',
+        'raty/lib/jquery.raty.js',
+        'moment/moment.js',
+        'jqplot/jquery.jqplot.min.js'
+    ]) }}
+    {{ macro.load_css_lib([
+        'bootstrap/dist/css/bootstrap.css',
+        'bootstrap/dist/css/bootstrap-theme.css',
+        'jqplot/jquery.jqplot.min.css'
+    ]) }}
+    {{ macro.load_css([
+        'main.css',
+        'match_table.css',
+        'matches.css',
+        'player.css',
+        'players.css'
+    ])}}
+    {{ macro.render_google_meta() }}
+    <meta charset="utf-8">
+    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+    {% block head %}
+    {% endblock %}
+</head>
+<body>
+    {% block body %}
+    {% endblock %}
+</body>
+<script>
+{% block script %}
+{% endblock %}
+</script>

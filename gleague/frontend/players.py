@@ -47,7 +47,7 @@ def overview(steam_id):
     signature_heroes = p.get_heroes(current_season_id).order_by(desc('played')).limit(3).all()
     matches_stats = stats.all()
     season_stats = get_season_stats(current_season_id, p)
-    return render_template('player_overview.html', 
+    return render_template('player/overview.html',
                            player=p,
                            season_stats=season_stats,
                            avg_rating=avg_rating,
@@ -80,7 +80,7 @@ def matches(steam_id):
     template_context['avg_rating'] = rating_info[0] or 0
     template_context['rating_amount'] = rating_info[1]
     template_context['season_stats'] = get_season_stats(current_season_id, p)
-    return render_template('player_matches.html', **template_context)
+    return render_template('player/matches.html', **template_context)
 
 
 @players_bp.route('/<int:steam_id>/heroes', methods=['GET'])
@@ -105,4 +105,4 @@ def heroes(steam_id):
     template_context['avg_rating'] = rating_info[0] or 0
     template_context['rating_amount'] = rating_info[1]
     template_context['season_stats'] = get_season_stats(current_season_id, p)
-    return render_template('player_heroes.html', **template_context)
+    return render_template('player/heroes.html', **template_context)

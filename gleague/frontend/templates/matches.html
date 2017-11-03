@@ -1,143 +1,127 @@
-{% import 'macro.html' as macro with context %}
+{% extends 'base.html' %}
 
-<!DOCTYPE html>
-<html lang="en">
-<head>
-    <script src="https://ajax.googleapis.com/ajax/libs/jquery/1.11.1/jquery.min.js"></script>
-    <link href='https://fonts.googleapis.com/css?family=Gafata' rel='stylesheet' type='text/css'>
-    {{ macro.load_js_lib([
-        'bootstrap/dist/js/bootstrap.js',
-        'moment/moment.js'
-    ]) }}
-    {{ macro.load_css_lib([
-        'bootstrap/dist/css/bootstrap.css',
-        'bootstrap/dist/css/bootstrap-theme.css',
-    ]) }}
-    {{ macro.load_css([
-        'main.css',
-        'matches.css'
-    ])}}
-    <meta charset="utf-8">
-    <meta http-equiv="X-UA-Compatible" content="IE=edge">
+{% block head %}
     {{ macro.render_site_title('MATCHES') }}
-</head>
-<body>
-<div class="container">
-{{ macro.render_navbar() }}
-<div class="row">
-    {% for m in matches.items %}
-    <div class="matches_table row">
-        <div class="col-md-4 table-responsive">
-            <table class="table">
-                <caption class="radiant_text_color">
-                    Radiant
-                </caption>
-                <thead>
-                    <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for p in m.players_stats[:5] %}
-                    <tr>
-                        <td>
-                            {% if p.season_stats.player.avatar %}
-                                <img class="steam_img" src={{ p.season_stats.player.avatar }}>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a class="link_alt" href="{{ url_for('players.overview', steam_id=p.season_stats.steam_id) }}">
-                            {{ p.season_stats.player.nickname }}
-                            </a>
-                        </td>
-                        <td>
-                            <img class="steam_img"
-                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
-        </div>
-        <div class="col-md-4 table-responsive text-center">
-                <caption>
-                </caption>
-                <table class="table">
-                <thead>
-                    <tr><th></th></tr>
-                </thead>
-                <tbody>
-                <tr>
-                    <td class="start_time">{{ m.start_time }}</td>
-                </tr>
-                <tr>
-                    <td>Season #{{ m.season.number }}</td>
-                </tr>
-                <tr>
-                    <td>{{ m.game_mode_string() }}</td>
-                </tr>
-                <tr>
-                    <td>duration: {{ m.duration_string() }}</td>
-                </tr>
-                <tr>
-                    <td>{% set winner=m.winner_string() %}
-                        winner: <span class="{% if winner=="Dire"%} dire_text_color {% else %} radiant_text_color {% endif %}">
-                        {{ winner }}</span><td>
-                </tr>
-                </tbody>
-            </table>
-            <a href="{{ url_for('matches.match', match_id=m.id) }}" style="padding-right: 20px">
-                <button type="button" class="btn btn-success">View Match</button>
-            </a>
-        </div>
-        <div class="col-md-4 table-responsive">
-            <table class="table">
-                <caption class="dire_text_color" style="text-align: left; font-weight: bold; font-size: 16pt">
-                    Dire
-                </caption>
-                <thead>
-                    <tr>
-                    <th></th>
-                    <th></th>
-                    <th></th>
-                    </tr>
-                </thead>
-                <tbody>
-                {% for p in m.players_stats[5:] %}
-                    <tr>
-                        <td>
-                            <img class="steam_img"
-                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
-                        </td>
-                        <td>
-                            {% if p.season_stats.player.avatar %}
-                                <img class="steam_img" src={{ p.season_stats.player.avatar }}>
-                            {% endif %}
-                        </td>
-                        <td>
-                            <a class="link_alt" href="{{ url_for('players.overview', steam_id=p.season_stats.steam_id) }}">
-                            {{ p.season_stats.player.nickname }}
-                            </a>
-                        </td>
-                    </tr>
-                {% endfor %}
-                </tbody>
-            </table>
+{% endblock %}
+
+{% block body %}
+    <div class="container">
+        {{ macro.render_navbar() }}
+        <div class="row">
+            {% for m in matches.items %}
+            <div class="matches_table row">
+                <div class="col-md-4 table-responsive">
+                    <table class="table">
+                        <caption class="radiant_text_color">
+                            Radiant
+                        </caption>
+                        <thead>
+                            <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for p in m.players_stats[:5] %}
+                            <tr>
+                                <td>
+                                    {% if p.season_stats.player.avatar %}
+                                        <img class="steam_img" src={{ p.season_stats.player.avatar }}>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a class="link_alt" href="{{ url_for('players.overview', steam_id=p.season_stats.steam_id) }}">
+                                    {{ p.season_stats.player.nickname }}
+                                    </a>
+                                </td>
+                                <td>
+                                    <img class="steam_img"
+                                    src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+                <div class="col-md-4 table-responsive text-center">
+                        <caption>
+                        </caption>
+                        <table class="table">
+                        <thead>
+                            <tr><th></th></tr>
+                        </thead>
+                        <tbody>
+                        <tr>
+                            <td class="start_time">{{ m.start_time }}</td>
+                        </tr>
+                        <tr>
+                            <td>Season #{{ m.season.number }}</td>
+                        </tr>
+                        <tr>
+                            <td>{{ m.game_mode_string() }}</td>
+                        </tr>
+                        <tr>
+                            <td>duration: {{ m.duration_string() }}</td>
+                        </tr>
+                        <tr>
+                            <td>{% set winner=m.winner_string() %}
+                                winner: <span class="{% if winner=="Dire"%} dire_text_color {% else %} radiant_text_color {% endif %}">
+                                {{ winner }}</span>
+                            </td>
+                        </tr>
+                        </tbody>
+                    </table>
+                    <a href="{{ url_for('matches.match', match_id=m.id) }}" style="padding-right: 20px">
+                        <button type="button" class="btn btn-success">View Match</button>
+                    </a>
+                </div>
+                <div class="col-md-4 table-responsive">
+                    <table class="table">
+                        <caption class="dire_text_color" style="text-align: left; font-weight: bold; font-size: 16pt">
+                            Dire
+                        </caption>
+                        <thead>
+                            <tr>
+                            <th></th>
+                            <th></th>
+                            <th></th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        {% for p in m.players_stats[5:] %}
+                            <tr>
+                                <td>
+                                    <img class="steam_img"
+                                    src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
+                                </td>
+                                <td>
+                                    {% if p.season_stats.player.avatar %}
+                                        <img class="steam_img" src={{ p.season_stats.player.avatar }}>
+                                    {% endif %}
+                                </td>
+                                <td>
+                                    <a class="link_alt" href="{{ url_for('players.overview', steam_id=p.season_stats.steam_id) }}">
+                                    {{ p.season_stats.player.nickname }}
+                                    </a>
+                                </td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+            {% endfor %}
+
+            {{ macro.render_pagination(matches, 'matches.matches_preview')}}
         </div>
     </div>
-    {% endfor %}
+{% endblock %}
 
-
-    {{ macro.render_pagination(matches, 'matches.matches_preview')}}
-</div>
-</div>
-</body>
-<script>
-$(document).ready(function() {
-    $('.start_time').each(function() {
-        $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
+{% block script %}
+    $(document).ready(function() {
+        $('.start_time').each(function() {
+            $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
+        });
     });
-});
-</script>
+{% endblock %}
