@@ -7,3 +7,7 @@ a.order {
     color: white;
     text-decoration: underline;
 }
+
+tr.calibrating, tr.calibrating > td > a {
+    color: grey;
+}

@@ -54,18 +54,21 @@
                 </td>
                 </tr>
             </thead>
-            {% for s in stats.items %}
             <tbody>
-                <td>
-                    <a class="link" href="{{ url_for('players.overview', steam_id=s.steam_id)}}">
-                    {{ s.player.nickname }}
-                    </a>
-                </td>
-                <td> {{ s.pts }} </td>
-                <td> {{ s.wins }} </td>
-                <td> {{ s.losses }} </td>
+                {% for s in stats.items %}
+                <tr {% if not s.calibrated() %}class="calibrating"{% endif %}>
+                    <td>
+                        <a class="link"
+                        href="{{ url_for('players.overview', steam_id=s.steam_id)}}">
+                            {{ s.player.nickname }}
+                        </a>
+                    </td>
+                    <td> {{ s.pts }} </td>
+                    <td> {{ s.wins }} </td>
+                    <td> {{ s.losses }} </td>
+                </tr>
+                {% endfor %}
             </tbody>
-            {% endfor %}
         </table>
         <div id="pagination">
             <ul class="pagination">
