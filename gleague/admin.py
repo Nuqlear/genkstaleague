@@ -19,7 +19,9 @@ from gleague.models import SeasonStats
 
 class AdminAccessMixin(object):
     def is_accessible(self):
-        return g.user and g.user.steam_id in current_app.config['ADMINS_STEAM_ID']
+        return (
+            g.user and g.user.steam_id in current_app.config['ADMINS_STEAM_ID']
+        )
 
 
 class IndexView(AdminAccessMixin, AdminIndexView):
@@ -59,10 +61,14 @@ class PlayerMatchRatingView(BaseModelView):
     can_edit = False
     column_list = ['rated_by', 'rating', 'player_match_stats']
 
-    column_formatters = {'rated_by':lambda v, c, m, p: Player.query.get(m.rated_by_steam_id)}
+    column_formatters = {
+        'rated_by': lambda v, c, m, p: Player.query.get(m.rated_by_steam_id)
+    }
 
     def __init__(self, *args, **kwargs):
-        super(PlayerMatchRatingView, self).__init__(PlayerMatchRating, *args, **kwargs)
+        super(PlayerMatchRatingView, self).__init__(
+            PlayerMatchRating, *args, **kwargs
+        )
 
 
 class PlayerMatchStatsView(BaseModelView):
@@ -70,7 +76,9 @@ class PlayerMatchStatsView(BaseModelView):
     can_delete = False
 
     def __init__(self, *args, **kwargs):
-        super(PlayerMatchStatsView, self).__init__(PlayerMatchStats, *args, **kwargs)
+        super(PlayerMatchStatsView, self).__init__(
+            PlayerMatchStats, *args, **kwargs
+        )
 
 
 class SeasonView(BaseModelView):
@@ -94,7 +102,9 @@ class SeasonStatsView(BaseModelView):
 
 
 def init_admin(app):
-    admin = Admin(app, index_view=IndexView(name="Add Match"), name="genkstaADMIN")
+    admin = Admin(
+        app, index_view=IndexView(name="Add Match"), name="genkstaADMIN"
+    )
     admin.add_view(PlayerView())
     admin.add_view(SeasonView())
     admin.add_view(SeasonStatsView())

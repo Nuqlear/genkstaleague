@@ -38,13 +38,19 @@ class GleagueFrontendTestCase(GleagueAppTestCase):
         return self.get(self.matches_url + '?page=%s' % page)
 
     def get_season_records(self, season_id='current'):
-        return self.get(self.seasons_url+ '%s/records' % season_id)
+        return self.get(
+            self.seasons_url + '%s/records' % season_id
+        )
 
     def get_season_players(self, season_id='current'):
-        return self.get(self.seasons_url+ '%s/players' % season_id)
+        return self.get(
+            self.seasons_url + '%s/players' % season_id
+        )
 
     def get_season_heroes(self, season_id='current'):
-        return self.get(self.seasons_url+ '%s/heroes' % season_id)
+        return self.get(
+            self.seasons_url + '%s/heroes' % season_id
+        )
 
     def test_get_match(self, *args):
         response = self.get_match(randint(0, 100))
@@ -58,13 +64,15 @@ class GleagueFrontendTestCase(GleagueAppTestCase):
         self.assertEqual(200, response.status_code)
         response = self.get_matches(2)
         self.assertEqual(404, response.status_code)
-        m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
+        MatchFactory.generate_with_all_stats(season_id=self.season.id)
         response = self.get_matches()
         self.assertEqual(200, response.status_code)
         response = self.get_matches(2)
         self.assertEqual(404, response.status_code)
         matches_per_page = self.app.config['HISTORY_MATCHES_PER_PAGE']
-        matches = MatchFactory.generate_batch_with_all_stats(matches_per_page, season_id=self.season.id)
+        MatchFactory.generate_batch_with_all_stats(
+            matches_per_page, season_id=self.season.id
+        )
         response = self.get_matches(2)
         self.assertEqual(200, response.status_code)
         response = self.get_matches(3)
@@ -73,18 +81,26 @@ class GleagueFrontendTestCase(GleagueAppTestCase):
     def test_get_player_pages(self, *args):
         invalid_id = randint(0, 99)
         valid_id = 100
-        user = PlayerFactory(steam_id=valid_id)
-        for steam_id, expectable_status_code in [(invalid_id, 404), (valid_id, 200)]:            
-            for response in [self.get_player_overview(steam_id),
-                             self.get_player_matches(steam_id),
-                             self.get_player_heroes(steam_id)]:
+        PlayerFactory(steam_id=valid_id)
+        for steam_id, expectable_status_code in [
+            (invalid_id, 404), (valid_id, 200)
+        ]:
+            for response in [
+                self.get_player_overview(steam_id),
+                self.get_player_matches(steam_id),
+                self.get_player_heroes(steam_id)
+            ]:
                 self.assertEqual(expectable_status_code, response.status_code)
 
     def test_get_season_pages(self, *args):
         def test_season_pages(season_id):
-            for response in [self.get_season_records(season_id),
-                             self.get_season_heroes(season_id),
-                             self.get_season_players(season_id)]:
+            for response in [
+                self.get_season_records(season_id),
+                self.get_season_heroes(season_id),
+                self.get_season_players(season_id)
+            ]:
                 self.assertEqual(200, response.status_code)
-        for season_number in [self.season.number, SeasonFactory().number, 'current']:
+        for season_number in [
+            self.season.number, SeasonFactory().number, 'current'
+        ]:
             test_season_pages(season_number)

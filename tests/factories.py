@@ -50,17 +50,28 @@ class MatchFactory(Factory):
     @staticmethod
     def generate_with_all_stats(*args, **kwargs):
         match = MatchFactory(*args, **kwargs)
-        heroes = list(get_dota2_heroes(current_app.config['STEAM_API_KEY']).values())
+        heroes = list(
+            get_dota2_heroes(current_app.config['STEAM_API_KEY']).values()
+        )
         pms = []
         for slot in (list(range(5)) + list(range(128, 133))):
             hero = heroes.pop(slot % len(heroes)).replace('npc_dota_hero_', '')
             player = PlayerFactory()
-            season_stats = SeasonStatsFactory(season_id=match.season_id, steam_id=player.steam_id)
+            season_stats = SeasonStatsFactory(
+                season_id=match.season_id, steam_id=player.steam_id
+            )
             pts_diff = 20 if slot < 6 else -20
             if not match.radiant_win:
                 pts_diff = pts_diff * (-1)
-            pms.append(PlayerMatchStatsFactory(match_id=match.id, hero=hero, pts_diff=pts_diff,
-                                                   season_stats_id=season_stats.id, player_slot=slot))
+            pms.append(
+                PlayerMatchStatsFactory(
+                    match_id=match.id,
+                    hero=hero,
+                    pts_diff=pts_diff,
+                    season_stats_id=season_stats.id,
+                    player_slot=slot
+                )
+            )
         match.players_stats = pms
         db.session.add(match)
         db.session.flush()
@@ -68,7 +79,10 @@ class MatchFactory(Factory):
 
     @staticmethod
     def generate_batch_with_all_stats(amount, *args, **kwargs):
-        return [MatchFactory.generate_with_all_stats(*args, **kwargs) for i in range(amount)]
+        return [
+            MatchFactory.generate_with_all_stats(*args, **kwargs)
+            for i in range(amount)
+        ]
 
 
 class PlayerMatchStatsFactory(Factory):

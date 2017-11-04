@@ -28,12 +28,22 @@ class PlayerMatchStats(db.Model):
     __tablename__ = 'player_match_stats'
 
     id = Column(Integer, primary_key=True)
-    season_stats_id = Column(Integer, ForeignKey('season_stats.id', 
-                                                 onupdate="CASCADE",
-                                                 ondelete="CASCADE"), nullable=False)
-    match_id = Column(BigInteger, ForeignKey('match.id',
-                                             onupdate="CASCADE",
-                                             ondelete="CASCADE"), nullable=False)
+    season_stats_id = Column(
+        Integer,
+        ForeignKey(
+            'season_stats.id', onupdate="CASCADE", ondelete="CASCADE"
+        ),
+        nullable=False
+    )
+    match_id = Column(
+        BigInteger,
+        ForeignKey(
+            'match.id',
+            onupdate="CASCADE",
+            ondelete="CASCADE"
+        ),
+        nullable=False
+    )
     old_pts = Column(Integer, nullable=False)
     pts_diff = Column(Integer, nullable=False)
     kills = Column(Integer, nullable=False)
@@ -50,14 +60,18 @@ class PlayerMatchStats(db.Model):
     xp_per_min = Column(Integer, nullable=True)
     gold_per_min = Column(Integer, nullable=True)
     damage_taken = Column(Integer, nullable=True)
-    player_match_ratings = relationship('PlayerMatchRating', 
-                                        cascade="all, delete",
-                                        backref="player_match_stats")
+    player_match_ratings = relationship(
+        'PlayerMatchRating',
+        cascade="all, delete",
+        backref="player_match_stats"
+    )
 
     def __repr__(self):
-        return '%s (%s) -- Match %s' % (self.season_stats.player.nickname,
-                                        self.season_stats.steam_id,
-                                        self.match_id)
+        return '%s (%s) -- Match %s' % (
+            self.season_stats.player.nickname,
+            self.season_stats.steam_id,
+            self.match_id
+        )
 
     def is_winner(self):
         return self.match.radiant_win == (self.player_slot < 5)
@@ -94,18 +108,26 @@ class PlayerMatchRating(db.Model):
     __tablename__ = 'player_match_rating'
 
     id = Column(Integer, primary_key=True)
-    rated_by_steam_id = Column(BigInteger, ForeignKey('player.steam_id',
-                                                      onupdate="CASCADE",
-                                                      ondelete="CASCADE"), nullable=False)
+    rated_by_steam_id = Column(
+        BigInteger,
+        ForeignKey('player.steam_id', onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False
+    )
     rating = Column(SmallInteger, default=5)
-    player_match_stats_id = Column(Integer, ForeignKey('player_match_stats.id',
-                                                       onupdate="CASCADE",
-                                                       ondelete="CASCADE"), nullable=False)
+    player_match_stats_id = Column(
+        Integer,
+        ForeignKey(
+            'player_match_stats.id', onupdate="CASCADE", ondelete="CASCADE"
+        ),
+        nullable=False
+    )
 
     __table_args__ = (
         CheckConstraint('player_match_rating.rating >= 1'),
         CheckConstraint('player_match_rating.rating <= 5'),
-        UniqueConstraint('rated_by_steam_id', 'player_match_stats_id', name='rated_once')
+        UniqueConstraint(
+            'rated_by_steam_id', 'player_match_stats_id', name='rated_once'
+        )
     )
 
     @staticmethod
@@ -126,12 +148,21 @@ class PlayerMatchRating(db.Model):
                           .value(func.avg(PlayerMatchRating.rating)))
             if avg_rating:
                 avg_rating = float(avg_rating) or 0.0
-            rated_already = (PlayerMatchRating.query
-                             .filter(and_(PlayerMatchRating.rated_by_steam_id == user_id,
-                                          PlayerMatchRating.player_match_stats_id == ps.id)).exists())
-            allowed_rate = played and ps.id != rated_by_ps.id and not rated_already
-            ratings[ps.id] = {'allowed_rate': allowed_rate,
-                              'avg_rating': avg_rating}
+            rated_already = db.session.query(
+                PlayerMatchRating.query
+                .filter(
+                    and_(
+                        PlayerMatchRating.rated_by_steam_id == user_id,
+                        PlayerMatchRating.player_match_stats_id == ps.id
+                    )
+                ).exists()
+            ).scalar()
+            ratings[ps.id] = {
+                'allowed_rate': (
+                    played and ps.id != rated_by_ps.id and not rated_already
+                ),
+                'avg_rating': avg_rating
+            }
         return ratings
 
 
@@ -139,26 +170,34 @@ class Match(db.Model):
     __tablename__ = 'match'
 
     id = Column(BigInteger, primary_key=True)
-    season_id = Column(Integer, ForeignKey('season.id',
-                                            onupdate="CASCADE",
-                                            ondelete="CASCADE"), nullable=False)
-    players_stats = relationship('PlayerMatchStats',
-                                 cascade="all,delete",
-                                 backref="match",
-                                 order_by=PlayerMatchStats.player_slot)
+    season_id = Column(
+        Integer,
+        ForeignKey(
+            'season.id', onupdate="CASCADE", ondelete="CASCADE"
+        ),
+        nullable=False
+    )
+    players_stats = relationship(
+        'PlayerMatchStats',
+        cascade="all,delete",
+        backref="match",
+        order_by=PlayerMatchStats.player_slot
+    )
     radiant_win = Column(Boolean)
     duration = Column(Integer)
     game_mode = Column(Integer)
     start_time = Column(Integer)
 
-    game_modes_dict = {1: 'All Pick',
-                       2: 'Captains Mode',
-                       3: 'Random Draft',
-                       4: 'Single Draft',
-                       5: 'All Random',
-                       8: 'Reverse Captain Mode',
-                       16: 'Captains Draft',
-                       22: 'Ranked All Pick'}
+    game_modes_dict = {
+        1: 'All Pick',
+        2: 'Captains Mode',
+        3: 'Random Draft',
+        4: 'Single Draft',
+        5: 'All Random',
+        8: 'Reverse Captain Mode',
+        16: 'Captains Draft',
+        22: 'Ranked All Pick'
+    }
 
     def __repr__(self):
         return "%s" % self.id
@@ -171,7 +210,9 @@ class Match(db.Model):
             'game_mode': self.game_mode,
             'duration': self.duration,
             'radiant_win': self.radiant_win,
-            'players_stats': [ps.to_dict(extensive) for ps in self.players_stats]
+            'players_stats': [
+                ps.to_dict(extensive) for ps in self.players_stats
+            ]
         }
         return d
 
@@ -180,7 +221,9 @@ class Match(db.Model):
         return bool(Match.query.get(id))
 
     def is_played(self, steam_id):
-        return steam_id in (ps.season_stats.steam_id for ps in self.players_stats)
+        return steam_id in (
+            ps.season_stats.steam_id for ps in self.players_stats
+        )
 
     def game_mode_string(self):
         return self.game_modes_dict.get(self.game_mode, 'unknown')
@@ -193,7 +236,10 @@ class Match(db.Model):
 
     @staticmethod
     def get_batch(amount, offset):
-        q = Match.query.order_by(desc(Match.start_time)).limit(amount).offset(amount * offset)
+        q = (
+            Match.query.order_by(desc(Match.start_time))
+            .limit(amount).offset(amount * offset)
+        )
         return q
 
     @staticmethod
@@ -204,9 +250,12 @@ class Match(db.Model):
         try:
             with os.fdopen(fd, 'wb') as tmp:
                 tmp.write(replay_fs.read())
-            process = Popen([os.path.join(os.getcwd(), "dem2json/dem2json"), path], stdout=PIPE)
+            process = Popen(
+                [os.path.join(os.getcwd(), "dem2json/dem2json"), path],
+                stdout=PIPE
+            )
             (output, err) = process.communicate()
-            exit_code = process.wait()
+            process.wait()
         finally:
             os.remove(path)
         json_data = json.loads(output.decode("utf-8"))
@@ -230,7 +279,9 @@ class Match(db.Model):
         heroes = get_dota2_heroes(current_app.config['STEAM_API_KEY'])
         for player_data in steamdata['players']:
             player_stats = PlayerMatchStats()
-            account_id = '765' + str(player_data['account_id'] + 61197960265728)
+            account_id = '765' + str(
+                player_data['account_id'] + 61197960265728
+            )
             player = Player.get_or_create(account_id)
             if player is None:
                 db.session.rollback()
@@ -251,7 +302,9 @@ class Match(db.Model):
             player_stats.damage_taken = player_data['damage_taken']
             player_stats.xp_per_min = player_data['xp_per_min']
             player_stats.gold_per_min = player_data['gold_per_min']
-            player_stats.hero = heroes[player_data['hero_id']].replace('npc_dota_hero_', '')
+            player_stats.hero = (
+                heroes[player_data['hero_id']].replace('npc_dota_hero_', '')
+            )
             player_stats.match_id = m.id
             db.session.add(player_stats)
             db.session.add(season_stats)

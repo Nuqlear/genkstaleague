@@ -22,7 +22,10 @@ class GleagueApiTestCase(GleagueAppTestCase):
         return self.post(self.matches_url)
 
     def rate_player(self, match_id, player_match_stats_id, rating):
-        return self.post(self.matches_url + '%i/ratings/%i?rating=%i' % (match_id, player_match_stats_id, rating))
+        return self.post(
+            self.matches_url + '%i/ratings/%i?rating=%i' %
+            (match_id, player_match_stats_id, rating)
+        )
 
     def get_ratings(self, match_id):
         return self.get(self.matches_url + '%i/ratings/' % (match_id))
@@ -57,7 +60,9 @@ class GleagueApiTestCase(GleagueAppTestCase):
         response = self.rate_player(m.id, player_stats.id, rating)
         self.assertEqual(200, response.status_code)
         self.assertEqual(player_stats.player_match_ratings[0].rating, rating)
-        self.assertEqual(user_id, player_stats.player_match_ratings[0].rated_by_steam_id)
+        self.assertEqual(
+            user_id, player_stats.player_match_ratings[0].rated_by_steam_id
+        )
         response = self.rate_player(m.id, player_stats.id, 6)
         self.assertEqual(406, response.status_code)
         response = self.rate_player(m.id, player_stats.id, 0)
@@ -70,16 +75,26 @@ class GleagueApiTestCase(GleagueAppTestCase):
 
     def test_get_ratings(self, *args):
         m = MatchFactory.generate_with_all_stats(season_id=self.season.id)
-        players_id = [player_stats.season_stats.steam_id for player_stats in m.players_stats[1:10]]
+        players_id = [
+            player_stats.season_stats.steam_id
+            for player_stats in m.players_stats[1:10]
+        ]
         match_ratings = []
         player_stats = m.players_stats[0]
         for player_id in players_id:
-            match_ratings.append(PlayerMatchRatingFactory(rated_by_steam_id=player_id,
-                                                          player_match_stats_id=player_stats.id))
+            match_ratings.append(
+                PlayerMatchRatingFactory(
+                    rated_by_steam_id=player_id,
+                    player_match_stats_id=player_stats.id
+                )
+            )
         response = self.get_ratings(m.id)
         data = json.loads(response.data.decode())
         self.assertEqual(200, response.status_code)
-        avg_rating = reduce(operator.add, [mr.rating for mr in match_ratings]) / len(match_ratings)
+        avg_rating = reduce(
+            operator.add,
+            [mr.rating for mr in match_ratings]
+        ) / len(match_ratings)
         player_rating = data['ratings'].pop(str(player_stats.id))
         self.assertEqual(avg_rating, player_rating['avg_rating'])
         for key in data['ratings']:

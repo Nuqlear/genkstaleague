@@ -11,6 +11,15 @@
                         <a class="link"
                             href="{{ url_for('players.overview', steam_id=player.steam_id) }}">{{player.nickname}}</a>
                         <span id="avg_rating"></span> <span style="font-size:12pt">({{ rating_amount }} votes)</span>
+                        {% for s in player.place_1_seasons %}
+                            {{ macro.render_trophy(1, s) }}
+                        {% endfor %}
+                        {% for s in player.place_2_seasons %}
+                            {{ macro.render_trophy(2, s) }}
+                        {% endfor %}
+                        {% for s in player.place_3_seasons %}
+                            {{ macro.render_trophy(3, s) }}
+                        {% endfor %}
                     </h1>
                 </div>
                 <div class="col-md-3" style="padding:20px; text-align:right;">

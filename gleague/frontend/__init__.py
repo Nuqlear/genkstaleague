@@ -34,35 +34,32 @@ def create_app(name=__name__):
 
     @app.route('/sitemap.xml', methods=['GET'])
     def sitemap():
-
         base_url = app.config['SITE_ADDRESS']
-        base_url = 'http://' + base_url
+        base_url = 'https://' + base_url
         pages = []
         ten_days_ago = datetime.now() - timedelta(days=10)
         ten_days_ago = ten_days_ago.date().isoformat()
-
-        pages.append([base_url + url_for('seasons.players'), ten_days_ago])
-        pages.append([base_url + url_for('seasons.records'), ten_days_ago])
-        pages.append([base_url + url_for('seasons.heroes'), ten_days_ago])
-        pages.append([base_url + url_for('matches.matches_preview'), ten_days_ago])
-
+        for page_name in [
+            'seasons.players',
+            'seasons.records',
+            'seasons.heroes',
+            'matches.matches_preview'
+        ]:
+            pages.append([base_url + url_for(page_name), ten_days_ago])
         players = Player.query.order_by(Player.steam_id).all()
-
         for player in players:
             url = url_for('players.overview', steam_id=player.steam_id)
             pages.append([base_url + url, ten_days_ago])
-
         matches = Match.query.order_by(Match.id).all()
-
         for match in matches:
             url = url_for('matches.match', match_id=match.id)
-            modified_time = datetime.fromtimestamp(match.start_time).date().isoformat()
+            modified_time = (
+                datetime.fromtimestamp(match.start_time).date().isoformat()
+            )
             pages.append([base_url + url, modified_time])
-
         sitemap_xml = render_template('sitemap_template.xml', pages=pages)
         response = make_response(sitemap_xml)
         response.headers["Content-Type"] = "application/xml"
-
         return response
 
     @app.route('/favicon.ico')
@@ -77,7 +74,9 @@ def create_app(name=__name__):
     @app.context_processor
     def inject_globals():
         return {
-            'GOOGLE_SITE_VERIFICATION_CODE': app.config['GOOGLE_SITE_VERIFICATION_CODE'],
+            'GOOGLE_SITE_VERIFICATION_CODE': app.config.get(
+                'GOOGLE_SITE_VERIFICATION_CODE'
+            ),
             'SITE_NAME': app.config['SITE_NAME'],
             'endpoint': request.endpoint.split('.')
         }
@@ -91,14 +90,15 @@ def login_required(f):
         if not g.user:
             return Response(status=401)
         return f(*args, **kwargs)
-
     return decorated_function
 
 
 def admin_required(f):
     @wraps(f)
     def decorated_function(*args, **kwargs):
-        if not g.user or g.user.steam_id not in current_app.config['ADMINS_STEAM_ID']:
+        if not g.user or (
+            g.user.steam_id not in current_app.config['ADMINS_STEAM_ID']
+        ):
             return Response(status=403)
         return f(*args, **kwargs)
 

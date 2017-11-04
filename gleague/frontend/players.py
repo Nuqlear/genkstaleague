@@ -32,29 +32,42 @@ def overview(steam_id):
     if not p:
         return abort(404)
     current_season_id = Season.current().id
-    stats = PlayerMatchStats.query.join(SeasonStats).filter(SeasonStats.steam_id == steam_id) \
+    stats = (
+        PlayerMatchStats.query.join(SeasonStats)
+        .filter(SeasonStats.steam_id == steam_id)
         .order_by(desc(PlayerMatchStats.match_id)).limit(8)
-    pts_seq = PlayerMatchStats.query.join(SeasonStats).filter(
-        and_(SeasonStats.season_id == current_season_id, SeasonStats.steam_id == steam_id))\
-        .order_by(PlayerMatchStats.match_id) \
+    )
+    pts_seq = (
+        PlayerMatchStats.query.join(SeasonStats).filter(
+            and_(
+                SeasonStats.season_id == current_season_id,
+                SeasonStats.steam_id == steam_id
+            )
+        )
+        .order_by(PlayerMatchStats.match_id)
         .values(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)
+    )
     pts_history = [[0, 1000]]
     for index, el in enumerate(pts_seq):
         pts_history.append([index + 1, el[0]])
     rating_info = p.get_avg_rating()[0]
     avg_rating = rating_info[0] or 0
     rating_amount = rating_info[1]
-    signature_heroes = p.get_heroes(current_season_id).order_by(desc('played')).limit(3).all()
+    signature_heroes = (
+        p.get_heroes(current_season_id).order_by(desc('played')).limit(3).all()
+    )
     matches_stats = stats.all()
     season_stats = get_season_stats(current_season_id, p)
-    return render_template('player/overview.html',
-                           player=p,
-                           season_stats=season_stats,
-                           avg_rating=avg_rating,
-                           rating_amount=rating_amount,
-                           signature_heroes=signature_heroes,
-                           matches_stats=matches_stats,
-                           pts_history=json.dumps(pts_history))
+    return render_template(
+        'player/overview.html',
+        player=p,
+        season_stats=season_stats,
+        avg_rating=avg_rating,
+        rating_amount=rating_amount,
+        signature_heroes=signature_heroes,
+        matches_stats=matches_stats,
+        pts_history=json.dumps(pts_history)
+    )
 
 
 @players_bp.route('/<int:steam_id>/matches', methods=['GET'])
@@ -67,13 +80,17 @@ def matches(steam_id):
         abort(400)
     page = int(page)
     current_season_id = Season.current().id
-    matches_stats = PlayerMatchStats.query.order_by(desc(PlayerMatchStats.match_id)) \
+    matches_stats = (
+        PlayerMatchStats.query.order_by(desc(PlayerMatchStats.match_id))
         .join(SeasonStats).filter(SeasonStats.steam_id == steam_id)
+    )
     template_context = {'player': p}
     hero_filter = request.args.get('hero', None)
     if hero_filter:
         template_context['hero_filter'] = hero_filter
-        matches_stats = matches_stats.filter(PlayerMatchStats.hero == hero_filter)
+        matches_stats = matches_stats.filter(
+            PlayerMatchStats.hero == hero_filter
+        )
     template_context['matches_stats'] = matches_stats.paginate(
         page, current_app.config['PLAYER_HISTORY_MATCHES_PER_PAGE'], True)
     rating_info = p.get_avg_rating()[0]

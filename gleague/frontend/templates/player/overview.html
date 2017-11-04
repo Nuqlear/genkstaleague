@@ -142,7 +142,7 @@
                 window.location.href = '/matches/' + $(this).attr('match_id');
             });
         });
-        $('#signature_heroes tbody > tr').each(function() {
+        $('#signature_heroes tr').each(function() {
             $(this).click(function() {
                 window.location.href = '/players/{{ player.steam_id }}/matches?hero=' + $(this).attr('hero');
             });

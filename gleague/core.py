@@ -16,9 +16,14 @@ class FlaskApp(Flask):
         user = ''
         if g.user:
             user = g.user.__repr__()
-        self.logger.error('[%s] %s %s Exception on ' % (user,
-                                                        request.method,
-                                                        request.path), exc_info=exc_info)
+        self.logger.error(
+            '[%s] %s %s Exception on ' % (
+                user,
+                request.method,
+                request.path
+            ),
+            exc_info=exc_info
+        )
 
 
 def setup_logging(app):
@@ -30,9 +35,11 @@ def setup_logging(app):
 
     if app.config['LOGFILE']:
         app.logger.debug("doing file logging to %s" % app.config['LOGFILE'])
-        file_handler = logging.handlers.RotatingFileHandler(app.config['LOGFILE'], 
-                                                            maxBytes=500000,
-                                                            backupCount=5)
+        file_handler = logging.handlers.RotatingFileHandler(
+            app.config['LOGFILE'],
+            maxBytes=500000,
+            backupCount=5
+        )
         file_handler.setLevel(loglevel)
         file_handler.setFormatter(formatter)
         app.logger.addHandler(file_handler)

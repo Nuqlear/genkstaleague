@@ -11,6 +11,7 @@ from gleague.core import db
 from gleague.models import Match
 from gleague.models import PlayerMatchRating
 
+
 matches_bp = Blueprint('matches', __name__)
 
 
@@ -19,7 +20,7 @@ matches_bp = Blueprint('matches', __name__)
 def create_match():
     replay = request.files['file']
     if replay:
-        m = Match.create_from_replay_fs(replay)
+        Match.create_from_replay_fs(replay)
         # if m is None:
         #     return abort(500)
         return Response(status=201)
@@ -56,7 +57,9 @@ def get_rates(match_id):
     return jsonify({'ratings': ratings}), 200
 
 
-@matches_bp.route('/<int:match_id>/ratings/<int:player_match_stats_id>', methods=['POST'])
+@matches_bp.route(
+    '/<int:match_id>/ratings/<int:player_match_stats_id>', methods=['POST']
+)
 @login_required
 def rate_player(match_id, player_match_stats_id):
     rating = request.args.get('rating', None)
@@ -71,10 +74,12 @@ def rate_player(match_id, player_match_stats_id):
         return abort(406)
     if not m.is_played(g.user.steam_id):
         return abort(403)
-    db.session.add(PlayerMatchRating(
-        player_match_stats_id=player_match_stats_id,
-        rating=rating,
-        rated_by_steam_id=g.user.steam_id
-    ))
+    db.session.add(
+        PlayerMatchRating(
+            player_match_stats_id=player_match_stats_id,
+            rating=rating,
+            rated_by_steam_id=g.user.steam_id
+        )
+    )
     db.session.flush()
     return Response(status=200)

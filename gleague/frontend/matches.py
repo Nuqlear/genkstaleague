@@ -1,5 +1,3 @@
-import random
-
 from flask import Blueprint
 from flask import abort
 from flask import current_app
@@ -28,5 +26,6 @@ def matches_preview():
         abort(400)
     page = int(page)
     m = Match.query.order_by(desc(Match.id)).paginate(
-        page, current_app.config['HISTORY_MATCHES_PER_PAGE'], True)
+        page, current_app.config['HISTORY_MATCHES_PER_PAGE'], True
+    )
     return render_template('matches.html', matches=m)

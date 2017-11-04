@@ -30,14 +30,20 @@ class GleagueDem2jsonTestCase(GleagueAppTestCase):
 
         def mocked_popen_fn(args, **kwargs):
             go_files = ('dem2json', 'heroes', 'parser')
-            new_args = ['go', 'run'] + [os.path.join(os.getcwd(), 'dem2json/%s.go' % f) for f in go_files]
+            new_args = ['go', 'run'] + [
+                os.path.join(
+                    os.getcwd(), 'dem2json/%s.go' % f
+                ) for f in go_files
+            ]
             new_args.append(args[-1])
             return Popen(new_args, stdout=PIPE)
 
         mocked_popen.side_effect = mocked_popen_fn
         match = Match.create_from_replay_fs(self.download_replay())
         self.assertNotEqual(match, None)
-        for field in ['radiant_win', 'duration', 'game_mode', 'start_time', 'season_id']:
+        for field in [
+            'radiant_win', 'duration', 'game_mode', 'start_time', 'season_id'
+        ]:
             # TODO: these fields should be with nullable=False
             self.assertNotEqual(getattr(match, field), None)
         self.assertLength(10, match.players_stats)
