@@ -32,7 +32,7 @@ class GleagueDem2jsonTestCase(GleagueAppTestCase):
             go_files = ('dem2json', 'heroes', 'parser')
             new_args = ['go', 'run'] + [
                 os.path.join(
-                    os.getcwd(), 'dem2json/%s.go' % f
+                    os.getcwd(), 'dem2json/src/dem2json/%s.go' % f
                 ) for f in go_files
             ]
             new_args.append(args[-1])

@@ -14,6 +14,7 @@ dependencies:
     - pip install ansible
     - ansible-galaxy install gantsign.golang
     - go get github.com/dotabuff/manta
+    - cd /home/ubuntu/.go_workspace/src/github.com/dotabuff/manta && git checkout "the-big-one"
 test:
   override:
     - py.test tests/*

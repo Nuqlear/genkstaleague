@@ -1,13 +1,8 @@
-import json
-import operator
-import os
 from random import randint
-from functools import reduce
 
 from gleague.frontend import create_app
 from tests import GleagueAppTestCase
 from tests.factories import MatchFactory
-from tests.factories import PlayerMatchRatingFactory
 from tests.factories import PlayerFactory
 from tests.factories import SeasonFactory
 

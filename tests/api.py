@@ -30,13 +30,6 @@ class GleagueApiTestCase(GleagueAppTestCase):
     def get_ratings(self, match_id):
         return self.get(self.matches_url + '%i/ratings/' % (match_id))
 
-    def download_replay(self):
-        response = urlopen(self.replay_url)
-        data = response.read()
-        data = BytesIO(bz2.decompress(data))
-        data.seek(0)
-        return data
-
     def test_add_match_rights(self, *args):
         user = PlayerFactory()
         self.set_user(user.steam_id)

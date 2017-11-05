@@ -2,6 +2,8 @@
 *.db
 */configuration/customs.py
 bower_components
+dem2json/src/dem2json/vendor
+dem2json/pkg
 __pycache__
 dem2json/dem2json
 .idea/

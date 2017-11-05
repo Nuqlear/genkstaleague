@@ -41,62 +41,62 @@ type MatchData struct {
 
 
 
-func (matchData *MatchData) TryToUpdatePlayersData(pe *manta.PacketEntity) {
+func (matchData *MatchData) TryToUpdatePlayersData(pe *manta.Entity) {
     count := 0
-    if pe.ClassName == "CDOTA_PlayerResource" {
+    if pe.GetClassName() == "CDOTA_PlayerResource" {
         for count < 10 {
             matchPlayerData := matchData.Players[count]
             if count > 4 {
-                matchPlayerData.PlayerSlot = count + 123          
+                matchPlayerData.PlayerSlot = count + 123
             } else {
                 matchPlayerData.PlayerSlot = count
             }
             fetchFrom := "m_vecPlayerData.000" + strconv.Itoa(count)
-            if result, ok := pe.FetchUint64(fetchFrom + ".m_iPlayerSteamID"); ok && matchPlayerData.AccountId == 0 {
+            if result, ok := pe.GetUint64(fetchFrom + ".m_iPlayerSteamID"); ok && matchPlayerData.AccountId == 0 {
                 matchPlayerData.AccountIdOrig = result
                 // format account_id to match Web API version
                 matchPlayerData.AccountId, _ = strconv.ParseUint(strconv.FormatUint(result, 10)[3:], 10, 64)
                 matchPlayerData.AccountId -= 61197960265728
             }
             fetchFrom = "m_vecPlayerTeamData.000" + strconv.Itoa(count)
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_nSelectedHeroID"); ok {
+            if result, ok := pe.GetInt32(fetchFrom + ".m_nSelectedHeroID"); ok {
                 matchPlayerData.HeroId = result
             }
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_iKills"); ok {
-                matchPlayerData.Kills = result            
+            if result, ok := pe.GetInt32(fetchFrom + ".m_iKills"); ok {
+                matchPlayerData.Kills = result
             }
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_iDeaths"); ok {
-                matchPlayerData.Deaths = result            
+            if result, ok := pe.GetInt32(fetchFrom + ".m_iDeaths"); ok {
+                matchPlayerData.Deaths = result
             }
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_iAssists"); ok {
-                matchPlayerData.Assists = result            
+            if result, ok := pe.GetInt32(fetchFrom + ".m_iAssists"); ok {
+                matchPlayerData.Assists = result
             }
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_iLevel"); ok {
+            if result, ok := pe.GetInt32(fetchFrom + ".m_iLevel"); ok {
                 matchPlayerData.Level = result
             }
             matchData.Players[count] = matchPlayerData
             count++
         }
     }
-    if pe.ClassName == "CDOTA_DataRadiant" || pe.ClassName == "CDOTA_DataDire" {
+    if pe.GetClassName() == "CDOTA_DataRadiant" || pe.GetClassName() == "CDOTA_DataDire" {
         for count < 5 {
             realCount := count
-            if pe.ClassName == "CDOTA_DataDire" {
+            if pe.GetClassName() == "CDOTA_DataDire" {
                 realCount += 5
             }
             matchPlayerData := matchData.Players[realCount]
             fetchFrom := "m_vecDataTeam.000" + strconv.Itoa(count)
             duration := int32(matchData.Duration/60)
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_iTotalEarnedGold"); ok && duration != 0 {
+            if result, ok := pe.GetInt32(fetchFrom + ".m_iTotalEarnedGold"); ok && duration != 0 {
                 matchPlayerData.GoldPerMin = result/duration
             }
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_iTotalEarnedXP"); ok && duration != 0 {
+            if result, ok := pe.GetInt32(fetchFrom + ".m_iTotalEarnedXP"); ok && duration != 0 {
                 matchPlayerData.XpPerMin = result/duration
             }
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_iDenyCount"); ok {
+            if result, ok := pe.GetInt32(fetchFrom + ".m_iDenyCount"); ok {
                 matchPlayerData.Denies = result
             }
-            if result, ok := pe.FetchInt32(fetchFrom + ".m_iLastHitCount"); ok {
+            if result, ok := pe.GetInt32(fetchFrom + ".m_iLastHitCount"); ok {
                 matchPlayerData.LastHits = result
             }
             matchData.Players[realCount] = matchPlayerData
@@ -130,11 +130,11 @@ func ParseDemo(p* manta.Parser) string {
         return nil
     })
 
-    p.OnPacketEntity(func(pe *manta.PacketEntity, pet manta.EntityEventType) error {
+    p.OnEntity(func(pe *manta.Entity, pet manta.EntityOp) error {
         // calculating game duration
-        if pe.ClassName == "CDOTAGamerulesProxy" {
-            gameEndTime, _ = pe.FetchFloat32("CDOTAGamerules.m_flGameEndTime")
-            gameStartTime, _ = pe.FetchFloat32("CDOTAGamerules.m_flGameStartTime")
+        if pe.GetClassName() == "CDOTAGamerulesProxy" {
+            gameEndTime, _ = pe.GetFloat32("m_pGameRules.m_flGameEndTime")
+            gameStartTime, _ = pe.GetFloat32("m_pGameRules.m_flGameStartTime")
             matchData.Duration = gameEndTime - gameStartTime
         }
         // updating players data
@@ -174,7 +174,7 @@ func ParseDemo(p* manta.Parser) string {
                     towerDamageMap[attacker] += damage
                 } else {
                     towerDamageMap[attacker] = damage
-                }        
+                }
             }
         }
         return nil
@@ -189,19 +189,19 @@ func ParseDemo(p* manta.Parser) string {
         matchData.Players[index].HeroName = heroName
 
         if val, ok := heroDamageMap[heroName]; ok {
-            matchData.Players[index].HeroDamage = val            
+            matchData.Players[index].HeroDamage = val
         } else {
             matchData.Players[index].HeroDamage = 0
         }
 
         if val, ok := damageTakenMap[heroName]; ok {
-            matchData.Players[index].DamageTaken = val            
+            matchData.Players[index].DamageTaken = val
         } else {
             matchData.Players[index].DamageTaken = 0
         }
 
         if val, ok := towerDamageMap[heroName]; ok {
-            matchData.Players[index].TowerDamage = val            
+            matchData.Players[index].TowerDamage = val
         } else {
             matchData.Players[index].TowerDamage = 0
         }
