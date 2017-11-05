@@ -85,6 +85,7 @@ class SeasonView(BaseModelView):
     can_delete = False
     can_create = True
     list_template = "/admin/season_list.html"
+    form_columns = ('number', 'started', 'ended')
 
     def __init__(self, *args, **kwargs):
         super(SeasonView, self).__init__(Season, *args, **kwargs)
@@ -93,7 +94,7 @@ class SeasonView(BaseModelView):
     def start_new(self):
         Season.start_new()
         db.session.commit()
-        return redirect(url_for("Season.edit_view"))
+        return redirect(url_for("season.edit_view"))
 
 
 class SeasonStatsView(BaseModelView):
