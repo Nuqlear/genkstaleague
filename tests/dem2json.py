@@ -29,7 +29,7 @@ class GleagueDem2jsonTestCase(GleagueAppTestCase):
     def test_create_match_from_replay(self, mocked_popen):
 
         def mocked_popen_fn(args, **kwargs):
-            go_files = ('dem2json', 'heroes', 'parser')
+            go_files = ('dem2json', 'heroes', 'matchdata')
             new_args = ['go', 'run'] + [
                 os.path.join(
                     os.getcwd(), 'dem2json/src/dem2json/%s.go' % f

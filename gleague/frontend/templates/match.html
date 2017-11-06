@@ -66,6 +66,9 @@
                             <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
                             <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
                             <th>PTS</th>
+                            {% if match.players_stats[0].player_match_items %}
+                                <th>Items</th>
+                            {% endif %}
                             <th>Rating</th>
                         </tr>
                     </thead>
@@ -108,6 +111,13 @@
                                 {% if s.pts_diff > 0 %}<span style="color:green">+{% else %}
                                 <span style="color:red">{% endif %}{{ s.pts_diff }}</span>
                                 </td>
+                                {% if s.player_match_items %}
+                                    <td>
+                                    {% for item in s.player_match_items %}
+                                        <img class="steam_img" src="{{ item.image_url }}"/>
+                                    {% endfor %}
+                                    </td>
+                                {% endif %}
                                 <td style="cursor:default">
                                     <div class="rating" match_player_stats_id="{{s.id}}">
                                     </div>

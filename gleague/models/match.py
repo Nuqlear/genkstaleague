@@ -18,10 +18,33 @@ from sqlalchemy import func
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.schema import UniqueConstraint
+from werkzeug.utils import cached_property
 
 from gleague.core import db
 from gleague.models.season import SeasonStats
-from gleague.utils.steam_api import get_dota2_heroes
+
+
+class PlayerMatchItem(db.Model):
+    __tablename__ = 'player_match_item'
+    id = Column(Integer, primary_key=True)
+    player_match_stats_id = Column(
+        Integer,
+        ForeignKey(
+            'player_match_stats.id', onupdate="CASCADE", ondelete="CASCADE"
+        ),
+        nullable=False
+    )
+    name = Column(String(255), nullable=False)
+
+    def __repr__(self):
+        return self.name
+
+    @cached_property
+    def image_url(self):
+        return (
+            'http://cdn.dota2.com/apps/dota2/images/items/%s_lg.png' %
+            self.name.replace('item_', '')
+        )
 
 
 class PlayerMatchStats(db.Model):
@@ -62,6 +85,11 @@ class PlayerMatchStats(db.Model):
     damage_taken = Column(Integer, nullable=True)
     player_match_ratings = relationship(
         'PlayerMatchRating',
+        cascade="all, delete",
+        backref="player_match_stats"
+    )
+    player_match_items = relationship(
+        'PlayerMatchItem',
         cascade="all, delete",
         backref="player_match_stats"
     )
@@ -276,7 +304,6 @@ class Match(db.Model):
         m.game_mode = steamdata['game_mode']
         m.start_time = steamdata['start_time']
         db.session.add(m)
-        heroes = get_dota2_heroes(current_app.config['STEAM_API_KEY'])
         for player_data in steamdata['players']:
             player_stats = PlayerMatchStats()
             account_id = '765' + str(
@@ -303,8 +330,15 @@ class Match(db.Model):
             player_stats.xp_per_min = player_data['xp_per_min']
             player_stats.gold_per_min = player_data['gold_per_min']
             player_stats.hero = (
-                heroes[player_data['hero_id']].replace('npc_dota_hero_', '')
+                player_data['hero_name'].replace('npc_dota_hero_', '')
             )
+            for item in player_data['items']:
+                db.session.add(
+                    PlayerMatchItem(
+                        name=item,
+                        player_match_stats=player_stats
+                    )
+                )
             player_stats.match_id = m.id
             db.session.add(player_stats)
             db.session.add(season_stats)

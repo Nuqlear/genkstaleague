@@ -50,4 +50,5 @@
 
 .steam_img {
     border: 1px solid white;
+    max-height: 24px;
 }

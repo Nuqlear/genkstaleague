@@ -3,7 +3,27 @@ package main
 import (
     "fmt"
     "os"
+    "io"
+    "encoding/json"
+
+    "github.com/dotabuff/manta"
 )
+
+
+func ParseFromStream(stream io.Reader) string {
+    parser, _ := manta.NewStreamParser(stream)
+    var matchData = MatchData{}
+    matchData.init(parser)
+
+    parser.Callbacks.OnCDemoFileInfo(matchData.OnCDemoFileInfo)
+    parser.OnEntity(matchData.OnEntity)
+    parser.Callbacks.OnCMsgDOTACombatLogEntry(matchData.OnCMsgDOTACombatLogEntry)
+    parser.Start()
+
+    matchData.finalize()
+    jsonOutput, _ := json.Marshal(map[string]MatchData{"result":matchData})
+    return string(jsonOutput)
+}
 
 
 func main() {
