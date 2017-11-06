@@ -14,6 +14,7 @@ from gleague.models import PlayerMatchStats
 from gleague.models import Season
 from gleague.models import SeasonStats
 
+
 seasons_bp = Blueprint('seasons', __name__)
 
 
@@ -61,14 +62,12 @@ def records(season_number=-1):
     longest_match = Match.query.filter(
         and_(Match.duration == subq, Match.season_id == s_id)
     ).first()
-
     seasons = [e[0] for e in db.session.query(Season.number).all()]
     template_context = {
         'longest_match': longest_match,
         'season_number': season_number,
         'seasons': seasons
     }
-
     if longest_match:
         subq = (
             SeasonStats.query
@@ -254,60 +253,63 @@ def records(season_number=-1):
             .order_by(PlayerMatchStats.id).first()
         )
 
-        in_season_player_records = []
-        in_match_records = []
-
-        in_season_player_records.append([
-            'Longest winstreak',
-            win_streak_ss.player,
-            win_streak_ss.longest_winstreak
-        ])
-        in_season_player_records.append([
-            'Longest losestreak',
-            lose_streak_ss.player,
-            lose_streak_ss.longest_losestreak
-        ])
-        in_season_player_records.append([
-            'Max pts ever',
-            max_pts_pms.season_stats.player,
-            max_pts_pms.old_pts + max_pts_pms.pts_diff
-        ])
-        in_season_player_records.append([
-            'Min pts ever',
-            min_pts_pms.season_stats.player,
-            min_pts_pms.old_pts + min_pts_pms.pts_diff
-        ])
-        in_match_records.append([
-            max_kda_pms.match_id,
-            'Best KDA',
-            max_kda_pms.season_stats.player,
-            max_kda_pms.hero,
+        in_season_player_records = [
             (
-                (max_kda_pms.kills + max_kda_pms.assists) /
-                (max_kda_pms.deaths + 1)
+                'Longest winstreak',
+                win_streak_ss.player,
+                win_streak_ss.longest_winstreak
+            ),
+            (
+                'Longest losestreak',
+                lose_streak_ss.player,
+                lose_streak_ss.longest_losestreak
+            ),
+            (
+                'Max pts ever',
+                max_pts_pms.season_stats.player,
+                max_pts_pms.old_pts + max_pts_pms.pts_diff
+            ),
+            (
+                'Min pts ever',
+                min_pts_pms.season_stats.player,
+                min_pts_pms.old_pts + min_pts_pms.pts_diff
             )
-        ])
-        in_match_records.append([
-            max_kills_pms.match_id,
-            'Max kills',
-            max_kills_pms.season_stats.player,
-            max_kills_pms.hero,
-            max_kills_pms.kills
-        ])
-        in_match_records.append([
-            max_deaths_pms.match_id,
-            'Max deaths',
-            max_deaths_pms.season_stats.player,
-            max_deaths_pms.hero,
-            max_deaths_pms.deaths
-        ])
-        in_match_records.append([
-            most_lasthits_pms.match_id,
-            'Most last hits',
-            most_lasthits_pms.season_stats.player,
-            most_lasthits_pms.hero,
-            most_lasthits_pms.last_hits
-        ])
+        ]
+
+        in_match_records = [
+            (
+                max_kda_pms.match_id,
+                'Best KDA',
+                max_kda_pms.season_stats.player,
+                max_kda_pms.hero,
+                (
+                    (max_kda_pms.kills + max_kda_pms.assists) /
+                    (max_kda_pms.deaths + 1)
+                )
+            ),
+            (
+                max_kills_pms.match_id,
+                'Max kills',
+                max_kills_pms.season_stats.player,
+                max_kills_pms.hero,
+                max_kills_pms.kills
+            ),
+            (
+                max_deaths_pms.match_id,
+                'Max deaths',
+                max_deaths_pms.season_stats.player,
+                max_deaths_pms.hero,
+                max_deaths_pms.deaths
+            ),
+            (
+                most_lasthits_pms.match_id,
+                'Most last hits',
+                most_lasthits_pms.season_stats.player,
+                most_lasthits_pms.hero,
+                most_lasthits_pms.last_hits
+            )
+        ]
+
         if most_herodamage_pms:
             in_match_records.append([
                 most_herodamage_pms.match_id,
@@ -365,6 +367,38 @@ def records(season_number=-1):
             .with_entities(radiant_winrate, dire_winrate).first()
         )
 
+        def get_duos(is_desc=True, limit=3):
+            duos_result = db.session.execute(
+                '''
+                SELECT p1.nickname, p2.nickname, result.sum FROM (
+                    SELECT ss1.steam_id as steam_id_1, ss2.steam_id as steam_id_2,
+                    (
+                        SELECT SUM(pms1.pts_diff)
+                        FROM player_match_stats pms1
+                        WHERE pms1.season_stats_id=ss1.id
+                        AND EXISTS(
+                            SELECT * FROM player_match_stats pms2
+                            WHERE pms2.match_id=pms1.match_id AND pms2.pts_diff=pms1.pts_diff
+                            AND pms2.season_stats_id=ss2.id
+                        )
+                    ) as sum
+                    FROM season_stats ss1
+                    JOIN season_stats ss2 ON ss1.steam_id < ss2.steam_id
+                    AND ss1.season_id=ss2.season_id AND ss1.season_id=:season_id
+                    ORDER BY sum {order_direction_desc}
+                ) result
+                JOIN player p1 ON p1.steam_id=result.steam_id_1
+                JOIN player p2 ON p2.steam_id=result.steam_id_2
+                WHERE result.sum is not NULL
+                LIMIT :limit;
+                '''.format(order_direction_desc=('DESC' if is_desc else 'ASC')),
+                {
+                    'season_id': s_id,
+                    'limit': limit
+                }
+            )
+            return duos_result.fetchall()
+
         template_context = {
             'in_season_player_records': in_season_player_records,
             'in_match_records': in_match_records,
@@ -373,7 +407,9 @@ def records(season_number=-1):
             'seasons': seasons,
             'season_number': season_number,
             'avg_match_duration': avg_match_duration,
-            'side_winrates': side_winrates
+            'side_winrates': side_winrates,
+            'powerfull_duos': get_duos(),
+            'powerless_duos': get_duos(False)
         }
 
     return render_template('season/records.html', **template_context)

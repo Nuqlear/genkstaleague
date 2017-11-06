@@ -65,8 +65,8 @@ func (matchData *MatchData) finalize() {
         heroName := heroesMap[player.HeroId]
         matchData.Players[index].HeroName = heroName
         matchData.Players[index].HeroDamage = matchData.heroDamageMap[heroName]
-        matchData.Players[index].DamageTaken = matchData.heroDamageMap[heroName]
-        matchData.Players[index].TowerDamage = matchData.heroDamageMap[heroName]
+        matchData.Players[index].DamageTaken = matchData.damageTakenMap[heroName]
+        matchData.Players[index].TowerDamage = matchData.towerDamageMap[heroName]
     }
 }
 
