@@ -72,8 +72,10 @@ class PlayerMatchRatingView(BaseModelView):
 
 
 class PlayerMatchStatsView(BaseModelView):
-    can_edit = False
+    can_edit = True
     can_delete = False
+    column_searchable_list = ("match_id",)
+    column_filters = ("match_id", "season_stats.player")
 
     def __init__(self, *args, **kwargs):
         super(PlayerMatchStatsView, self).__init__(
@@ -98,6 +100,8 @@ class SeasonView(BaseModelView):
 
 
 class SeasonStatsView(BaseModelView):
+    column_filters = ("player", "season")
+
     def __init__(self, *args, **kwargs):
         super(SeasonStatsView, self).__init__(SeasonStats, *args, **kwargs)
 
