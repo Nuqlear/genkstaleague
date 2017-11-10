@@ -38,6 +38,9 @@
                     <li {% if endpoint[0]=="matches" %} class="active" {% endif %}>
                         <a href="{{ url_for('matches.matches_preview') }}">MATCH HISTORY</a>
                     </li>
+                    <li {% if endpoint[0]=="team_builder" %} class="active" {% endif %}>
+                        <a href="{{ url_for('matches.team_builder') }}">TEAM BUILDER</a>
+                    </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
                     {% if g.user %}
@@ -74,7 +77,7 @@
     Season #
     <select id="select_season" name="season">
         {% for number in seasons %}
-            <option {% if number==season_number %} selected="selected" {% endif %} 
+            <option {% if number==season_number %} selected="selected" {% endif %}
                 value={{ number }}>{{ number }}</option>
         {% endfor %}
     </select>

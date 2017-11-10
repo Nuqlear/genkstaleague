@@ -8,6 +8,7 @@ __pycache__
 dem2json/dem2json
 .idea/
 deploy.retry
+.vscode
 
 ### OSX ###
 .DS_Store

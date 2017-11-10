@@ -1,0 +1,13 @@
+.team_builder_row {
+    padding: 5px;
+    text-align: center;
+    margin: 0 auto;
+    width: 420px;
+}
+
+textarea.random_result {
+    width: 420px;
+    height: 560px;
+    resize: none;
+    color: black;
+}
