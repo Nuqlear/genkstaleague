@@ -18,17 +18,17 @@ players_bp = Blueprint('players', __name__)
 
 
 def get_season_stats(current_season_id, player):
-    stats = player.season_stats[0]
-    if player.season_stats[0].season_id != current_season_id:
+    stats = player.season_stats.all()
+    if not stats or stats[0].season_id != current_season_id:
         return {'wins': 0, 'losses': 0, 'pts': 1000}
     else:
-        return stats
+        return stats[0]
 
 
 @players_bp.route('/<int:steam_id>/', methods=['GET'])
 @players_bp.route('/<int:steam_id>/overview', methods=['GET'])
 def overview(steam_id):
-    p = Player.get_or_create(steam_id)
+    p = Player.query.filter(Player.steam_id==steam_id).first()
     if not p:
         return abort(404)
     current_season_id = Season.current().id
