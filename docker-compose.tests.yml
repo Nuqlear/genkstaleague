@@ -1,0 +1,14 @@
+version: '3'
+services:
+  gleague:
+    command: ["bash", "./wait-for-postgres.sh", "py.test ./tests/*"]
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql://gleague:1@postgres/gleague-test
+      - STEAM_API_KEY=${STEAM_API_KEY}
+    env_file:
+      - .env
+  postgres:
+    environment:
+      - POSTGRES_PASSWORD=1
+      - POSTGRES_USER=gleague
+      - POSTGRES_DB=gleague-test

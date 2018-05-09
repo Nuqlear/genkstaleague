@@ -1,7 +1,7 @@
 """empty message
 
 Revision ID: 311d1f1983e
-Revises: 
+Revises:
 Create Date: 2015-03-06 17:56:23.030633
 
 """
@@ -65,7 +65,7 @@ def upgrade():
         )
     op.drop_column('season_stats', 'longest_streak')
 
-    
+
     ### end Alembic commands ###
 
 

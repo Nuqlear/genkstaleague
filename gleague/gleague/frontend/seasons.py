@@ -460,4 +460,4 @@ def heroes(season_number=-1):
         is_desc=desc,
         seasons=seasons,
         season_number=season_number
-   )
+    )

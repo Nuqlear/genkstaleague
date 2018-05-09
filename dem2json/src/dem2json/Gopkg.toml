@@ -1,3 +1,7 @@
 [[constraint]]
-  branch = "the-big-one"
   name = "github.com/dotabuff/manta"
+  branch = "the-big-one"
+
+[[constraint]]
+  name = "github.com/gin-gonic/gin"
+  version = "v1.2"

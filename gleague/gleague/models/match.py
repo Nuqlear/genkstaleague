@@ -1,9 +1,4 @@
-import json
-import os
-import tempfile
-from subprocess import PIPE
-from subprocess import Popen
-
+import requests
 from flask import current_app
 from sqlalchemy import BigInteger
 from sqlalchemy import Boolean
@@ -272,22 +267,12 @@ class Match(db.Model):
 
     @staticmethod
     def create_from_replay_fs(replay_fs):
-        # parsing should be done asynchronously, but whatever
-        output = None
-        fd, path = tempfile.mkstemp()
-        try:
-            with os.fdopen(fd, 'wb') as tmp:
-                tmp.write(replay_fs.read())
-            process = Popen(
-                [os.path.join(os.getcwd(), "dem2json/dem2json"), path],
-                stdout=PIPE
-            )
-            (output, err) = process.communicate()
-            process.wait()
-        finally:
-            os.remove(path)
-        json_data = json.loads(output.decode("utf-8"))
-        return Match.create_from_dict(json_data['result'])
+        resp = requests.post(
+            url='http://dem2json:5222',
+            data=replay_fs.read(),
+            headers={'Content-Type': 'application/octet-stream'}
+        )
+        return Match.create_from_dict(resp.json()['result'])
 
     @staticmethod
     def create_from_dict(steamdata):

@@ -1,0 +1,33 @@
+version: '3'
+services:
+  gleague:
+    command: ["bash", "./wait-for-postgres.sh", "python wsgi.py"]
+    volumes:
+      - ./gleague/gleague:/gleague
+      - ./gleague/alembic:/alembic
+      - ./gleague/tests:/tests
+      - ./gleague/cli.py:/cli.py
+      - ./gleague/wsgi.py:/wsgi.py
+    ports:
+      - ${GLEAGUE_PORT}:5000
+    environment:
+      - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
+      - SECRET_KEY=${SECRET_KEY}
+      - STEAM_API_KEY=${STEAM_API_KEY}
+      - ADMIN_STEAM_ID=${ADMIN_STEAM_ID}
+      - TOP_PLAYERS_PER_PAGE=${TOP_PLAYERS_PER_PAGE}
+      - HISTORY_MATCHES_PER_PAGE=${HISTORY_MATCHES_PER_PAGE}
+      - GOOGLE_SITE_VERIFICATION_CODE=${GOOGLE_SITE_VERIFICATION_CODE}
+      - SITE_NAME=${SITE_NAME}
+      - SITE_ADDRESS=${SITE_ADDRESS}
+    env_file:
+      - .env
+  postgres:
+    volumes:
+      - db-data:/var/lib/postgresql/data
+  dem2json:
+    volumes:
+      - ./dem2json/src/dem2json:/src/dem2json
+
+volumes:
+  db-data:

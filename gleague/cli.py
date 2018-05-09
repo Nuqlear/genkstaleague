@@ -1,8 +1,6 @@
 import sys
 from optparse import OptionParser
 
-from sqlalchemy import func
-
 from gleague import api
 from gleague.core import db
 from gleague import models
@@ -20,7 +18,7 @@ def reinit_db():
 
 
 if __name__ == "__main__":
-    commands = ['reinit_db', 'remove_empty_seasonstats']
+    commands = ['reinit_db']
     usage = (
         'usage: %prog [options] command \n  Possible Commands: '
         ' '.join(commands)
