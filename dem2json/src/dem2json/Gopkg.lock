@@ -8,13 +8,12 @@
   version = "v1.1.0"
 
 [[projects]]
-  branch = "the-big-one"
   name = "github.com/dotabuff/manta"
   packages = [
 	".",
 	"dota"
   ]
-  revision = "17fc47ecfc38587860b2f6a58f5f2a4c679f7f0c"
+  revision = "b0857b18c733c82554942b1483284039fc260041"
 
 [[projects]]
   branch = "master"

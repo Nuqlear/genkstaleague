@@ -23,7 +23,7 @@
                     {% for s in signature_heroes %}
                     <tr hero={{ s.hero }}>
                         <td><img class="steam_img"
-                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png></td>
+                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png></td>
                         <td>{{ s.played }}</td>
                         <td>{{ '%i' % s.winrate }}%</td>
                         <td>{{ s.pts_diff }}</td>
@@ -105,7 +105,7 @@
                         <td>{{ s.match_id }}</td>
                         <td>{{ s.match.season.number }}</td>
                         <td class="avatar_table">
-                            <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png>
+                            <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
                         </td>
                         <td class="start_time">{{ s.match.start_time }}</td>
                         <td>{{ s.match.duration//60 }}:{{ s.match.duration % 60 }}</td>

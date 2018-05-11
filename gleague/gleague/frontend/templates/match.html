@@ -80,8 +80,8 @@
                                 <tr class="dire_table">
                             {% endif %}
                                 <td>
-                                    {% if s.season_stats.player.avatar %}
-                                        <img class="steam_img" src={{ s.season_stats.player.avatar }}>
+                                    {% if s.season_stats.player.avatar_medium %}
+                                        <img class="steam_img" src={{ s.season_stats.player.avatar_medium }}>
                                     {% endif %}
                                 </td>
                                 <td style="text-align:left">
@@ -94,7 +94,7 @@
                                     {% endif %}
                                 </td>
                                 <td style="text-align:left" class="avatar_table">
-                                    <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_sb.png>
+                                    <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
                                 </td>
                                 <td>{{ s.level }}</td>
                                 <td>{{ s.kills }}</td>

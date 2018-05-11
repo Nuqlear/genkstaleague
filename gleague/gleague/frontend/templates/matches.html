@@ -26,8 +26,8 @@
                         {% for p in m.players_stats[:5] %}
                             <tr>
                                 <td>
-                                    {% if p.season_stats.player.avatar %}
-                                        <img class="steam_img" src={{ p.season_stats.player.avatar }}>
+                                    {% if p.season_stats.player.avatar_medium %}
+                                        <img class="steam_img" src={{ p.season_stats.player.avatar_medium }}>
                                     {% endif %}
                                 </td>
                                 <td>
@@ -37,7 +37,7 @@
                                 </td>
                                 <td>
                                     <img class="steam_img"
-                                    src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
+                                    src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_lg.png>
                                 </td>
                             </tr>
                         {% endfor %}
@@ -93,11 +93,11 @@
                             <tr>
                                 <td>
                                     <img class="steam_img"
-                                    src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_sb.png>
+                                    src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_lg.png>
                                 </td>
                                 <td>
-                                    {% if p.season_stats.player.avatar %}
-                                        <img class="steam_img" src={{ p.season_stats.player.avatar }}>
+                                    {% if p.season_stats.player.avatar_medium %}
+                                        <img class="steam_img" src={{ p.season_stats.player.avatar_medium }}>
                                     {% endif %}
                                 </td>
                                 <td>

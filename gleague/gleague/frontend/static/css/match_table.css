@@ -15,6 +15,7 @@
 }
 
 .match_players_table td {
+    padding: 5px !important;
     text-align: center;
 }
 
@@ -50,5 +51,5 @@
 
 .steam_img {
     border: 1px solid white;
-    max-height: 24px;
+    max-height: 28px;
 }

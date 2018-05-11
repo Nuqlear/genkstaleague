@@ -1,6 +1,6 @@
 [[constraint]]
   name = "github.com/dotabuff/manta"
-  branch = "the-big-one"
+  revision = "b0857b18c733c82554942b1483284039fc260041"
 
 [[constraint]]
   name = "github.com/gin-gonic/gin"

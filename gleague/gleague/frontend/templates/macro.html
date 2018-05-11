@@ -35,10 +35,10 @@
                     <li {% if endpoint[0]=="seasons" %} class="active"  {% endif %} >
                         <a href="{{ url_for('seasons.players') }}">SEASON STATS</a>
                     </li>
-                    <li {% if endpoint[0]=="matches" %} class="active" {% endif %}>
+                    <li {% if endpoint[1]=="matches_preview" %} class="active" {% endif %}>
                         <a href="{{ url_for('matches.matches_preview') }}">MATCH HISTORY</a>
                     </li>
-                    <li {% if endpoint[0]=="team_builder" %} class="active" {% endif %}>
+                    <li {% if endpoint[1]=="team_builder" %} class="active" {% endif %}>
                         <a href="{{ url_for('matches.team_builder') }}">TEAM BUILDER</a>
                     </li>
                 </ul>
