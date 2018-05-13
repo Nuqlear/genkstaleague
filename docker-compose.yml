@@ -5,6 +5,8 @@ services:
     image: nuqlya/gleague-core:latest
     volumes:
       - ./wait-for-postgres.sh:/wait-for-postgres.sh
+    environment:
+      - STEAM_API_KEY=${STEAM_API_KEY}
     depends_on:
       - postgres
       - dem2json

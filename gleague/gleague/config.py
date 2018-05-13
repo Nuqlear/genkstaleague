@@ -2,7 +2,7 @@ from os import environ
 
 
 class BaseConfig(object):
-    DEBUG = False
+    DEBUG = bool(environ.get('DEBUG', False))
     PROPAGATE_EXCEPTIONS = False
     TRAP_HTTP_EXCEPTIONS = False
     PRESERVE_CONTEXT_ON_EXCEPTION = False

@@ -408,7 +408,7 @@ def records(season_number=-1):
             'season_number': season_number,
             'avg_match_duration': avg_match_duration,
             'side_winrates': side_winrates,
-            'powerfull_duos': get_duos(),
+            'powerful_duos': get_duos(),
             'powerless_duos': get_duos(False)
         }
 
