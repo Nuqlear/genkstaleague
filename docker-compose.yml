@@ -1,10 +1,12 @@
-version: '3'
+version: '3.5'
 services:
   gleague:
     build: gleague
     image: nuqlya/gleague-core:latest
     volumes:
       - ./wait-for-postgres.sh:/wait-for-postgres.sh
+    env_file:
+      - .env
     environment:
       - STEAM_API_KEY=${STEAM_API_KEY}
     depends_on:

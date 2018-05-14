@@ -1,4 +1,4 @@
-version: '3'
+version: '3.5'
 services:
   gleague:
     command: ["bash", "./wait-for-postgres.sh", "gunicorn wsgi:application -b 0.0.0.0:5000 --pid /gleague-master.pid -t 600 -w 4"]
@@ -8,8 +8,6 @@ services:
       - postgres
     environment:
       - SQLALCHEMY_DATABASE_URI=postgresql://${POSTGRES_USER}:${POSTGRES_PASSWORD}@postgres/${POSTGRES_DB}
-    env_file:
-      - .env
   postgres:
     volumes:
       - db-data:/var/lib/postgresql/data
