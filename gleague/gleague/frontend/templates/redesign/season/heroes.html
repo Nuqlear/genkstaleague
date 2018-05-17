@@ -1,0 +1,76 @@
+{% extends 'redesign/base.html' %}
+
+{% block title %}Players{% endblock %}
+
+{% block header %}
+    {% include 'redesign/_blocks/season_header.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Heroes</h5>
+            <div class="card-text">
+                <table class="table table-sm text-center">
+                   <thead>
+                    <tr>
+                        <th>
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero',
+                            desc='no', season_number=season_number) }}">Hero
+                            {% if sort == 'hero' %}
+                                <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='played',
+                            desc='yes', season_number=season_number) }}">Matches
+                            {% if not sort or sort == 'played' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='winrate',
+                            desc='yes', season_number=season_number) }}">Winrate
+                            {% if sort == 'winrate' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff',
+                            desc='yes', season_number=season_number) }}">PTS diff
+                            {% if sort == 'pts_diff' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='kda',
+                            desc='yes', season_number=season_number) }}">KDA
+                            {% if sort == 'kda' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                            </a>
+                        </th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for h in in_season_heroes %}
+                    <tr>
+                        <td><img class="steam_img"
+                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ h.hero }}_lg.png></td>
+                        <td>{{ h.played }}</td>
+                        <td>{{ '%i' % h.winrate }}%</td>
+                        <td>{{ h.pts_diff }}</td>
+                        <td>{{ '%0.2f' % h.kda }}</td>
+                    </tr>
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+

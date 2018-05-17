@@ -41,7 +41,7 @@ def players(season_number=-1):
     )
     seasons = [e[0] for e in db.session.query(Season.number).all()]
     return render_template(
-        'season/players.html',
+        'redesign/season/players.html',
         stats=stats,
         sort=sort,
         seasons=seasons,
@@ -412,7 +412,7 @@ def records(season_number=-1):
             'powerless_duos': get_duos(False)
         }
 
-    return render_template('season/records.html', **template_context)
+    return render_template('redesign/season/records.html', **template_context)
 
 
 @seasons_bp.route('/current/heroes', methods=['GET'])
@@ -454,7 +454,7 @@ def heroes(season_number=-1):
     seasons = [e[0] for e in db.session.query(Season.number).all()]
 
     return render_template(
-        'season/heroes.html',
+        'redesign/season/heroes.html',
         in_season_heroes=in_season_heroes,
         sort=sort_arg,
         is_desc=desc,

@@ -10,7 +10,6 @@ from sqlalchemy import desc
 
 from gleague.models import Match, Season, SeasonStats, Player
 
-
 matches_bp = Blueprint('matches', __name__)
 
 
@@ -19,7 +18,7 @@ def match(match_id):
     m = Match.query.get(match_id)
     if not m:
         return abort(404)
-    return render_template('match.html', match=m)
+    return render_template('redesign/match.html', match=m)
 
 
 @matches_bp.route('/', methods=['GET'])
@@ -31,16 +30,18 @@ def matches_preview():
     m = Match.query.order_by(desc(Match.id)).paginate(
         page, current_app.config['HISTORY_MATCHES_PER_PAGE'], True
     )
-    return render_template('matches.html', matches=m)
+    return render_template('redesign/matches.html', matches=m)
+
+
+PlayerTuple = namedtuple('PlayerTuple', ['nickname', 'pts'])
 
 
 @matches_bp.route('/team_builder', methods=['GET', 'POST'])
 def team_builder():
-    PlayerTuple = namedtuple('PlayerTuple', ['nickname', 'pts'], verbose=True)
     cs_id = Season.current().id
     season_stats = (
         sorted(
-            SeasonStats.query.filter(SeasonStats.season_id==cs_id).all(),
+            SeasonStats.query.filter(SeasonStats.season_id == cs_id).all(),
             key=lambda ss: ss.player.nickname.lower()
         )
     )
@@ -65,7 +66,6 @@ def team_builder():
 
 
 def sort_by_pts(players, t=50):
-
     def total_pts(players):
         return sum((players[i].pts for i in range(len(players))))
 

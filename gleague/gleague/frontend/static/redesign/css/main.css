@@ -1,0 +1,40 @@
+body {
+    background: rgb(243, 243, 243);
+    min-width: 1000px;
+}
+
+a {
+    color: rgb(61, 89, 77);
+}
+
+a:hover {
+    color: rgb(61, 89, 77);
+}
+
+.top-nav {
+    background: rgb(61, 89, 77);
+}
+
+.page {
+    width: 1000px;
+    margin: 30px auto auto;
+    padding: 0 20px 60px;
+}
+
+.card {
+    box-shadow: 0 .25rem .75rem rgba(61, 89, 77, 0.049);
+    border: none;
+    margin-bottom: 20px;
+}
+
+.border-bottom {
+    border-bottom: 1px solid #e5e5e5;
+}
+
+.hero {
+    float: left;
+}
+
+.steam_img {
+    width: 46px;
+}
