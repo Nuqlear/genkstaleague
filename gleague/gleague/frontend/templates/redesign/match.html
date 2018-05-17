@@ -76,7 +76,7 @@
                             {% for s in match.players_stats %}
                                 {% if s.player_slot < 5 %}
                                     <tr class="radiant_table">
-                                {% else %}
+                                        {% else %}
                                     <tr class="dire_table">
                                 {% endif %}
                             <td>
@@ -135,26 +135,31 @@
 {% endblock %}
 
 {% block script %}
-    $(document).ready(function() {
-    $("[data-toggle=tooltip]").tooltip({container:'body'});
-    function update_rating() {
-    var url = '/api/matches/{{ match.id }}/ratings/';
-    $.getJSON(url, function(data) {
-    $('.rating').each(function(){
-    var d = data['ratings'][$(this).attr('match_player_stats_id')]
-    console.log(d['allowed_rate']);
-    $(this).raty({ readOnly: !d['allowed_rate'],
-    path: '/static/lib/bower_components/raty/lib/img', score: d['avg_rating'],
-    click: function(score, evt) {
-    $.post('/api/matches/{{ match.id }}/ratings/'+$(this).parent().find('.rating').attr('match_player_stats_id')
-    +'?rating='+score);
-    update_rating();
-    }
-    });
-    });
-    });
-    }
-    update_rating();
-    $('#start_time').html(moment(moment.unix("{{ match.start_time }}")).format('MMMM Do YYYY, HH:mm'));
-    });
+    <script>
+        $(document).ready(function () {
+            $("[data-toggle=tooltip]").tooltip({container: 'body'});
+
+            function update_rating() {
+                var url = '/api/matches/{{ match.id }}/ratings/';
+                $.getJSON(url, function (data) {
+                    $('.rating').each(function () {
+                        var d = data['ratings'][$(this).attr('match_player_stats_id')]
+                        console.log(d['allowed_rate']);
+                        $(this).raty({
+                            readOnly: !d['allowed_rate'],
+                            path: '/static/lib/bower_components/raty/lib/img', score: d['avg_rating'],
+                            click: function (score, evt) {
+                                $.post('/api/matches/{{ match.id }}/ratings/' + $(this).parent().find('.rating').attr('match_player_stats_id')
+                                    + '?rating=' + score);
+                                update_rating();
+                            }
+                        });
+                    });
+                });
+            }
+
+            update_rating();
+            $('#start_time').html(moment(moment.unix("{{ match.start_time }}")).format('MMMM Do YYYY, HH:mm'));
+        });
+    </script>
 {% endblock %}
