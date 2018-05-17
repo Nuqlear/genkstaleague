@@ -8,4 +8,177 @@
 
 {% block content %}
     {% include 'redesign/_blocks/player_card.html' with context %}
+
+    <div class="row">
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    Signature heroes
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                        <tr>
+                            <th>Hero</th>
+                            <th>Matches</th>
+                            <th>Winrate</th>
+                            <th>PTS diff</th>
+                            <th>KDA</th>
+                        </tr>
+                        </thead>
+                        <tbody id="signature_heroes">
+                        {% for s in signature_heroes %}
+                            <tr hero={{ s.hero }}>
+                                <td><img class="steam_img"
+                                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png></td>
+                                <td>{{ s.played }}</td>
+                                <td>{{ '%i' % s.winrate }}%</td>
+                                <td>{{ s.pts_diff }}</td>
+                                <td>{{ '%0.2f' % s.kda }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    Seasons played
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                        <tr>
+                            <th>Season</th>
+                            <th>Wins/Losses</th>
+                            <th>PTS</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for ss in player.season_stats %}
+                            <tr>
+                                <td>{{ ss.season.number }}</td>
+                                <td>{{ ss.wins }} / {{ ss.losses }}</td>
+                                <td>{{ ss.pts }}</td>
+                            </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+        <div class="col-6">
+            <div class="card">
+                <div class="card-header">
+                    Pts trends
+                </div>
+                <div class="card-body">
+                    <canvas id="pts_trends" height="210px"></canvas>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-12">
+            <div class="card">
+                <div class="card-header">
+                    Matches
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm">
+                        <thead>
+                        <tr class="header_table">
+                            <th>Match id</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Season #">S#</th>
+                            <th>Hero</th>
+                            <th>Date</th>
+                            <th>Duration</th>
+                            <th>PTS</th>
+                            <th>PTS diff</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Level">L</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Kills">K</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Deaths">D</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Assists">A</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Last Hits">LH</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Hero Damage">HD</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Tower Damage">TD</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Damage Taken">DT</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
+                            <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
+                        </tr>
+                        </thead>
+                        <tbody>
+                        {% for s in matches_stats %}
+                            {% if s.player_slot < 5 %}
+                                {% if s.match.radiant_win %}
+                                    <tr class="win_row" match_id={{ s.match_id }}>
+                                        {% else %}
+                                    <tr class="loss_row" match_id={{ s.match_id }}>
+                                {% endif %}
+                            {% else %}
+                            {% if s.match.radiant_win %}
+                                <tr class="loss_row" match_id={{ s.match_id }}>
+                                    {% else %}
+                                <tr class="win_row" match_id={{ s.match_id }}>
+                            {% endif %}
+                            {% endif %}
+                        <td>{{ s.match_id }}</td>
+                        <td>{{ s.match.season.number }}</td>
+                        <td class="avatar_table">
+                            <img class="steam_img"
+                                 src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
+                        </td>
+                        <td class="start_time">{{ s.match.start_time }}</td>
+                        <td>{{ s.match.duration//60 }}:{{ s.match.duration % 60 }}</td>
+                        <td>{{ s.old_pts }}</td>
+                        <td>{% if s.pts_diff > 0 %}+{% endif %}{{ s.pts_diff }}</td>
+                        <td>{{ s.level }}</td>
+                        <td>{{ s.kills }}</td>
+                        <td>{{ s.deaths }}</td>
+                        <td>{{ s.assists }}</td>
+                        <td>{{ s.last_hits }}</td>
+                        <td>{{ s.hero_damage }}</td>
+                        <td>{{ s.tower_damage }}</td>
+                        <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
+                        <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
+                        <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
+                        </tr>
+                        {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(function () {
+            $('#avg_rating').raty({
+                readOnly: true,
+                path: '/static/lib/bower_components/raty/lib/img',
+                score: parseFloat("{{ avg_rating }}")
+            });
+
+            var ptsHistory = {{ pts_history | safe}};
+
+            new Chart(document.getElementById("pts_trends"), {
+                type: 'line',
+                data: {
+                    labels: ptsHistory.map(x => x[0]),
+                    datasets: [{
+                        data: ptsHistory.map(x => x[1]),
+                        label: "PTS",
+                        borderColor: 'rgba(54, 162, 235, 1)',
+                        backgroundColor: 'rgba(54, 162, 235, 0.2)',
+                        fill: true,
+                        borderWidth: 1
+                    }]
+                },
+            });
+        });
+    </script>
 {% endblock %}

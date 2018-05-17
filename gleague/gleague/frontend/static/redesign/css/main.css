@@ -38,3 +38,19 @@ a:hover {
 .steam_img {
     max-height: 28px;
 }
+
+.radiant_table {
+    background: #C8E6C9;
+}
+
+.dire_table {
+    background: #ffebee;
+}
+
+.win_row {
+    background: #C8E6C9;
+}
+
+.loss_row {
+    background: #ffebee;
+}
