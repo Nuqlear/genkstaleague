@@ -3,7 +3,7 @@
 {% block title %}Matches{% endblock %}
 
 {% block content %}
-    {% for m in matches.items * 10 %}
+    {% for m in matches.items %}
         <div class="card">
             <div class="card-header">
                 <a href="{{ url_for('matches.match', match_id=m.id) }}" style="padding-right: 20px">

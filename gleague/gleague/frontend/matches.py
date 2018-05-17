@@ -62,7 +62,7 @@ def team_builder():
                 p = Player.query.get(player_id)
                 players.append(PlayerTuple(p.nickname, p.season_stats[0].pts))
         context['teams'] = sort_by_pts(players)
-    return render_template('team_builder.html', **context)
+    return render_template('redesign/team_builder.html', **context)
 
 
 def sort_by_pts(players, t=50):

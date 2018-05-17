@@ -36,5 +36,5 @@ a:hover {
 }
 
 .steam_img {
-    width: 46px;
+    max-height: 28px;
 }
