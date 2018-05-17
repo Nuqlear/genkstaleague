@@ -20,38 +20,38 @@
                         <table id="top_players" class="table table-sm table-hover text-center">
                             <thead>
                             <tr>
-                                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
                 sort='nickname', season_number=season_number) }}"
                                 {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='nickname', season_number=season_number) }}"{% endif %}>Nickname</a>
                                     {% if sort == 'nickname' %}
                                         <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
                                     {% endif %}
-                                </td>
-                                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                                </th>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
                 sort='pts', season_number=season_number) }}"
                                 {% else %}"{{ url_for('seasons.players', page=stats.page, sort='pts',
                     season_number=season_number) }}"{% endif %}>PTS</a>
                                     {% if sort == 'pts' %}
                                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                                     {% endif %}
-                                </td>
-                                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                                </th>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
                 sort='wins', season_number=season_number) }}"
                                 {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='wins', season_number=season_number) }}"{% endif %}>Wins</a>
                                     {% if sort == 'wins' %}
                                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                                     {% endif %}
-                                </td>
-                                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                                </th>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
                 sort='losses', season_number=season_number) }}"
                                 {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='losses', season_number=season_number) }}"{% endif %}>Losses</a>
                                     {% if sort == 'losses' %}
                                         <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
                                     {% endif %}
-                                </td>
+                                </th>
                             </tr>
                             </thead>
                             <tbody>
