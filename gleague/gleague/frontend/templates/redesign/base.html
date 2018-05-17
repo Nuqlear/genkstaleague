@@ -29,9 +29,20 @@
         </li>
     </ul>
     <ul class="navbar-nav">
-        <li class="nav-item">
-            <a href="" class="nav-link">Steam Login</a>
-        </li>
+        {% if g.user %}
+            {% if g.user.is_admin() %}
+                <li class="nav-item">
+                    <a href="{{ url_for('admin.index') }}" class="nav-link">ADMIN</a>
+                </li>
+            {% endif %}
+            <li class="nav-item">
+                <a href="{{ url_for('players.overview', steam_id=g.user.steam_id) }}" class="nav-link">PROFILE</a>
+            </li>
+        {% else %}
+            <li class="nav-item">
+                <a href="{{ url_for('auth.login') }}" class="nav-link">STEAM LOGIN</a>
+            </li>
+        {% endif %}
     </ul>
 </nav>
 

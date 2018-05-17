@@ -1,6 +1,6 @@
 body {
     background: rgb(243, 243, 243);
-    min-width: 1000px;
+    min-width: 1240px;
 }
 
 a {
@@ -16,9 +16,9 @@ a:hover {
 }
 
 .page {
-    width: 1000px;
+    width: 1200px;
     margin: 30px auto auto;
-    padding: 0 20px 60px;
+    padding-bottom: 60px;
 }
 
 .card {
