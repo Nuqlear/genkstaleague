@@ -135,15 +135,14 @@
 {% endblock %}
 
 {% block script %}
-    <script>
+    <script type="application/javascript">
         $(document).ready(function () {
-            $("[data-toggle=tooltip]").tooltip({container: 'body'});
-
             function update_rating() {
                 var url = '/api/matches/{{ match.id }}/ratings/';
+
                 $.getJSON(url, function (data) {
                     $('.rating').each(function () {
-                        var d = data['ratings'][$(this).attr('match_player_stats_id')]
+                        var d = data['ratings'][$(this).attr('match_player_stats_id')];
                         console.log(d['allowed_rate']);
                         $(this).raty({
                             readOnly: !d['allowed_rate'],
