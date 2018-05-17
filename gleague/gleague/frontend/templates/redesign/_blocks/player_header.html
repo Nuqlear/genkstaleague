@@ -1,0 +1,11 @@
+<ul class="nav nav-tabs" style="background: #ffffff;">
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if endpoint[1] == 'overview' else None }}" href="{{ url_for('players.overview', steam_id=player.steam_id) }}">Overview</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if endpoint[1] == 'heroes' else None }}" href="{{ url_for('players.heroes', steam_id=player.steam_id) }}">Heroes</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if endpoint[1] == 'matches' else None }}" href="{{ url_for('players.matches', steam_id=player.steam_id) }}">Matches</a>
+    </li>
+</ul>

@@ -59,7 +59,7 @@ def overview(steam_id):
     matches_stats = stats.all()
     season_stats = get_season_stats(current_season_id, p)
     return render_template(
-        'player/overview.html',
+        'redesign/player/overview.html',
         player=p,
         season_stats=season_stats,
         avg_rating=avg_rating,

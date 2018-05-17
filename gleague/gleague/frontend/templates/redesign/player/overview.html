@@ -1,0 +1,11 @@
+{% extends 'redesign/base.html' %}
+
+{% block title %}Overview{% endblock %}
+
+{% block header %}
+    {% include 'redesign/_blocks/player_header.html' %}
+{% endblock %}
+
+{% block content %}
+    {% include 'redesign/_blocks/player_card.html' with context %}
+{% endblock %}
