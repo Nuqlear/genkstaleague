@@ -1,11 +1,11 @@
 <ul class="nav nav-tabs" style="background: #ffffff;">
-  <li class="nav-item">
-    <a class="nav-link" href="/seasons/current/players">Players</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="/seasons/current/heroes">Heroes</a>
-  </li>
-  <li class="nav-item">
-    <a class="nav-link" href="/seasons/current/records">Records</a>
-  </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if endpoint[1] == 'players' }}" href="/seasons/current/players">Players</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if endpoint[1] == 'heroes' }}" href="/seasons/current/heroes">Heroes</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if endpoint[1] == 'records' }}" href="/seasons/current/records">Records</a>
+    </li>
 </ul>
