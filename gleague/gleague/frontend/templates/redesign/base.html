@@ -18,13 +18,13 @@
         <img src="/static/img/logo.png" height="40px" alt="">
     </a>
     <ul class="navbar-nav mr-auto">
-        <li class="nav-item active">
+        <li class="nav-item {{ 'active' if endpoint[0] == 'seasons' else None }}">
             <a href="/seasons/current/players" class="nav-link">Season Stats</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item {{ 'active' if endpoint[1] == 'matches_preview' else None }}">
             <a href="/matches/" class="nav-link">Match history</a>
         </li>
-        <li class="nav-item">
+        <li class="nav-item {{ 'active' if endpoint[1] == 'team_builder' else None }}">
             <a href="/matches/team_builder" class="nav-link">Team builder</a>
         </li>
     </ul>
