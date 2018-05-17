@@ -72,6 +72,12 @@
                 {% endfor %}
                 </tbody>
             </table>
+
+            {% if hero_filter %}
+                {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id, hero=hero_filter) }}
+            {% else %}
+                {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id) }}
+            {% endif %}
         </div>
     </div>
 {% endblock %}
