@@ -1,11 +1,11 @@
 <ul class="nav nav-tabs" style="background: #ffffff;">
     <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'players' }}" href="/seasons/current/players">Players</a>
+        <a class="nav-link {{ 'active' if endpoint[1] == 'players' }}" href="{{ url_for('seasons.players') }}">Players</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'heroes' }}" href="/seasons/current/heroes">Heroes</a>
+        <a class="nav-link {{ 'active' if endpoint[1] == 'heroes' }}" href="{{ url_for('seasons.heroes') }}">Heroes</a>
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'records' }}" href="/seasons/current/records">Records</a>
+        <a class="nav-link {{ 'active' if endpoint[1] == 'records' }}" href="{{ url_for('seasons.records') }}">Records</a>
     </li>
 </ul>
