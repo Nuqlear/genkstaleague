@@ -59,12 +59,14 @@
                     <div class="card-text">
                         <table class="table table-sm table-borderless table-hover">
                             <tbody>
-                            <tr>
-                                <td>Average match duration</td>
-                                <td>
-                                    {{ avg_match_duration//60 }}:{{ (shortest_match.duration % 60) }}
-                                </td>
-                            </tr>
+                            {% if avg_match_duration %}
+                                <tr>
+                                    <td>Average match duration</td>
+                                    <td>
+                                        {{ avg_match_duration // 60 }}:{{ (shortest_match.duration % 60) }}
+                                    </td>
+                                </tr>
+                            {% endif %}
                             <tr>
                                 <td>Radiant Winrate</td>
                                 <td>
