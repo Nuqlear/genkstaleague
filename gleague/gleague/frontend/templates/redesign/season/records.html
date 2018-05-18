@@ -67,18 +67,20 @@
                                     </td>
                                 </tr>
                             {% endif %}
-                            <tr>
-                                <td>Radiant Winrate</td>
-                                <td>
-                                    {{ side_winrates[0] }}%
-                                </td>
-                            </tr>
-                            <tr>
-                                <td>Dire Winrate</td>
-                                <td>
-                                    {{ side_winrates[1] }}%
-                                </td>
-                            </tr>
+                            {% if side_winrates %}
+                                <tr>
+                                    <td>Radiant Winrate</td>
+                                    <td>
+                                        {{ side_winrates[0] }}%
+                                    </td>
+                                </tr>
+                                <tr>
+                                    <td>Dire Winrate</td>
+                                    <td>
+                                        {{ side_winrates[1] }}%
+                                    </td>
+                                </tr>
+                            {% endif %}
                             </tbody>
                         </table>
                     </div>
