@@ -1,7 +1,6 @@
 version: '3.5'
 services:
   gleague:
-    build: gleague
     image: nuqlya/gleague-core:latest
     volumes:
       - ./wait-for-postgres.sh:/wait-for-postgres.sh
@@ -13,7 +12,6 @@ services:
       - postgres
       - dem2json
   dem2json:
-    build: dem2json
     image: nuqlya/gleague-dem2json:latest
     command: ["/dem2json"]
     ports:

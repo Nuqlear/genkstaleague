@@ -1,0 +1,23 @@
+version: '3.5'
+services:
+  gleague:
+    build:
+      context: gleague
+      cache_from:
+        - nuqlya/gleague-core:latest
+  dem2json-base:
+    build:
+      context: dem2json
+      target: builder
+      cache_from:
+        - dem2json-base:latest
+  dem2json:
+    build:
+      context: dem2json
+      cache_from:
+        - nuqlya/gleague-dem2json:latest
+        - dem2json-base:latest
+    depends_on:
+      - dem2json-base
+  postgres:
+    image: postgres:9.3

@@ -1,0 +1,67 @@
+pipeline:
+
+  restore-cache:
+    image: drillster/drone-volume-cache
+    restore: true
+    mount:
+      - ./docker-cache
+    volumes:
+      - /tmp/cache:/cache
+
+  test:
+    image: docker
+    secrets: [ steam_api_key, docker_username, docker_password ]
+    environment:
+      - DOCKER_HOST=unix:///drone/docker.sock
+      - STEAM_API_KEY=$$steam_api_key
+    commands:
+      - test -e ./docker-cache/images.tar && docker load < ./docker-cache/images.tar
+      - apk add --update py-pip && pip install docker-compose
+      - docker-compose -f docker-compose.yml -f docker-compose.build.yml build
+      - docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --exit-code-from gleague gleague
+      - test ! -e ./docker-cache && mkdir docker-cache
+      - docker save $(docker images -f "dangling=false" | awk '{ if ($2 != "<none>") print $1":"$2 }' | tail -n +2) > ./docker-cache/images.tar
+
+  publish:
+    image: docker
+    secrets: [ docker_username, docker_password, docker_email ]
+    environment:
+      - DOCKER_HOST=unix:///drone/docker.sock
+      - DOCKER_LOGIN=$$DOCKER_LOGIN
+      - DOCKER_PASSWORD=$$DOCKER_PASSWORD
+      - DOCKER_EMAIL=$$DOCKER_EMAIL
+    commands:
+      - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
+      - apk add --update py-pip && pip install docker-compose
+      - docker-compose -f docker-compose.yml -f docker-compose.prod.yml push
+    when:
+      branch: master
+
+  rebuild-cache:
+    image: drillster/drone-volume-cache
+    rebuild: true
+    mount:
+      - ./docker-cache
+    volumes:
+      - /tmp/cache:/cache
+
+  deploy:
+    image: williamyeh/ansible:ubuntu16.04
+    secrets: [ scaleway_ssh_key, gitlab_ssh_key ]
+    commands:
+      - apt-get update && apt-get install git -y
+      - mkdir -p ~/.ssh/
+      - ssh-keyscan gitlab.com >> ~/.ssh/known_hosts
+      - echo -n "$GITLAB_SSH_KEY" >> ~/.ssh/gitlab.com && chmod 600 ~/.ssh/gitlab.com
+      - ssh-agent bash -c 'ssh-add ~/.ssh/gitlab.com; git clone git@gitlab.com:Nuqlear/deploy.git'
+      - ssh-keyscan -p 1488 51.15.58.244 >> ~/.ssh/known_hosts
+      - echo -n "$SCALEWAY_SSH_KEY" >> ~/.ssh/scaleway && chmod 600 ~/.ssh/scaleway
+      - ssh-agent bash -c 'ssh-add ~/.ssh/scaleway; cd deploy/projects/genkstaleague && ansible-playbook -i hosts playbook.yml'
+    when:
+      branch: master
+
+services:
+  docker:
+    image: docker:dind
+    privileged: true
+    command: [ '-H', 'unix:///drone/docker.sock' ]
