@@ -132,24 +132,26 @@
                 <div class="card-header">In-Season longest match</div>
                 <div class="card-body">
                     <div class="card-text">
-                        <table class="table table-sm table-borderless table-hover">
-                            <thead>
-                            <tr>
-                                <th>Match id</th>
-                                <th>Date</th>
-                                <th>Duration</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr match_id="{{ longest_match.id }}">
-                                <td>{{ longest_match.id }}</td>
-                                <td class="start_time">{{ longest_match.start_time }}</td>
-                                <td>
-                                    {{ longest_match.duration//60 }}:{{ longest_match.duration % 60 }}
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        {% if longest_match %}
+                            <table class="table table-sm table-borderless table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Match id</th>
+                                    <th>Date</th>
+                                    <th>Duration</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr match_id="{{ longest_match.id }}">
+                                    <td>{{ longest_match.id }}</td>
+                                    <td class="start_time">{{ longest_match.start_time }}</td>
+                                    <td>
+                                        {{ longest_match.duration//60 }}:{{ longest_match.duration % 60 }}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        {% endif %}
                     </div>
                 </div>
             </div>
@@ -159,24 +161,26 @@
                 <div class="card-header">In-Season shortest match</div>
                 <div class="card-body">
                     <div class="card-text">
-                        <table class="table table-sm table-borderless table-hover">
-                            <thead>
-                            <tr>
-                                <th>Match id</th>
-                                <th>Date</th>
-                                <th>Duration</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            <tr match_id="{{ shortest_match.id }}">
-                                <td>{{ shortest_match.id }}</td>
-                                <td class="start_time">{{ shortest_match.start_time }}</td>
-                                <td>
-                                    {{ shortest_match.duration//60 }}:{{ shortest_match.duration % 60 }}
-                                </td>
-                            </tr>
-                            </tbody>
-                        </table>
+                        {% if shortest_match %}
+                            <table class="table table-sm table-borderless table-hover">
+                                <thead>
+                                <tr>
+                                    <th>Match id</th>
+                                    <th>Date</th>
+                                    <th>Duration</th>
+                                </tr>
+                                </thead>
+                                <tbody>
+                                <tr match_id="{{ shortest_match.id }}">
+                                    <td>{{ shortest_match.id }}</td>
+                                    <td class="start_time">{{ shortest_match.start_time }}</td>
+                                    <td>
+                                        {{ shortest_match.duration//60 }}:{{ shortest_match.duration % 60 }}
+                                    </td>
+                                </tr>
+                                </tbody>
+                            </table>
+                        {% endif %}
                     </div>
                 </div>
             </div>
