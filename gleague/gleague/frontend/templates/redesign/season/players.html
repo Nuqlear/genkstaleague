@@ -13,8 +13,9 @@
             <div class="card-text">
                 <div class="row">
                     <div class="col-12">
-                        <form style="margin-bottom: 30px;" action="">
-                            <input type="text" placeholder="Nickname" class="form-control">
+                        <form style="margin-bottom: 30px;" action="{{ url_for('seasons.players') }}">
+                            <input type="text" name="q" placeholder="Nickname" class="form-control">
+                            <input type="hidden" name="sort" value={{ sort }} />
                         </form>
 
                         <table id="top_players" class="table table-sm table-hover text-center">
