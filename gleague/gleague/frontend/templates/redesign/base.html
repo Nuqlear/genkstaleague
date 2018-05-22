@@ -10,6 +10,8 @@
     <title>{% block title %}Genksta League{% endblock %}</title>
     <link rel="stylesheet" href="https://stackpath.bootstrapcdn.com/bootstrap/4.1.1/css/bootstrap.min.css"
           integrity="sha384-WskhaSGFgHYWDcbwN70/dfYBj47jz9qbsMId/iRN3ewGhXQFZCSftd1LZCfmhktB" crossorigin="anonymous">
+    <link rel="stylesheet" href="https://use.fontawesome.com/releases/v5.0.13/css/all.css"
+          integrity="sha384-DNOHZ68U8hZfKXOrtjWvjxusGo9WQnrNx2sqG0tfsghAvtVlRW3tvkXWZh58N9jp" crossorigin="anonymous">
     <link rel="stylesheet" href="/static/redesign/css/main.css">
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/select2/4.0.5/css/select2.min.css"/>
     <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/jquery.raty.min.css"/>
@@ -34,15 +36,19 @@
         {% if g.user %}
             {% if g.user.is_admin() %}
                 <li class="nav-item">
-                    <a href="{{ url_for('admin.index') }}" class="nav-link">ADMIN</a>
+                    <a href="{{ url_for('admin.index') }}" class="nav-link">Admin</a>
                 </li>
             {% endif %}
             <li class="nav-item">
-                <a href="{{ url_for('players.overview', steam_id=g.user.steam_id) }}" class="nav-link">PROFILE</a>
+                <a href="{{ url_for('players.overview', steam_id=g.user.steam_id) }}" class="nav-link">
+                    <i class="fas fa-user"></i>&nbsp;Profile
+                </a>
             </li>
         {% else %}
             <li class="nav-item">
-                <a href="{{ url_for('auth.login') }}" class="nav-link">STEAM LOGIN</a>
+                <a href="{{ url_for('auth.login') }}" class="nav-link">
+                    <i class="fab fa-steam"></i>&nbsp;LOGIN
+                </a>
             </li>
         {% endif %}
     </ul>

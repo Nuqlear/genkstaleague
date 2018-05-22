@@ -1,11 +1,23 @@
 <ul class="nav nav-tabs bg-white">
     <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'players' }}" href="{{ url_for('seasons.players') }}">Players</a>
+        {% if endpoint[1] == 'players' %}
+            <span class="nav-link active">Players</span>
+        {% else %}
+            <a class="nav-link" href="{{ url_for('seasons.players') }}">Players</a>
+        {% endif %}
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'heroes' }}" href="{{ url_for('seasons.heroes') }}">Heroes</a>
+        {% if endpoint[1] == 'heroes' %}
+            <span class="nav-link active">Heroes</span>
+        {% else %}
+            <a class="nav-link" href="{{ url_for('seasons.heroes') }}">Heroes</a>
+        {% endif %}
     </li>
     <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'records' }}" href="{{ url_for('seasons.records') }}">Records</a>
+        {% if endpoint[1] == 'records' %}
+            <span class="nav-link active">Records</span>
+        {% else %}
+            <a class="nav-link" href="{{ url_for('seasons.records') }}">Records</a>
+        {% endif %}
     </li>
 </ul>

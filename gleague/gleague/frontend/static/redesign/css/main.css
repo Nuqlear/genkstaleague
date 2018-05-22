@@ -64,7 +64,7 @@ a:hover {
 .pagination > li > span:hover,
 .pagination > li > a:focus,
 .pagination > li > span:focus {
-    color: green;
+    color: rgb(61, 89, 77);
     background-color: #eee;
     border-color: #ddd;
 }
@@ -78,8 +78,8 @@ a:hover {
     z-index: 2;
     color: #fff;
     cursor: default;
-    background-color: green;
-    border-color: green;
+    background-color: rgb(61, 89, 77);
+    border-color: rgb(61, 89, 77);
 }
 
 .pagination > li > a,
@@ -89,7 +89,7 @@ a:hover {
     padding: 6px 12px;
     margin-left: -1px;
     line-height: 1.42857143;
-    color: green;
+    color: rgb(61, 89, 77);
     text-decoration: none;
     background-color: #fff;
     border: 1px solid #ddd;

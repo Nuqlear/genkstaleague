@@ -37,7 +37,7 @@ def players(season_number=-1):
     page = int(request.args.get('page', 1))
     stats = SeasonStats.get_stats(season_number, q, sort)
     stats = stats.paginate(
-        page, current_app.config['TOP_PLAYERS_PER_PAGE'], True
+        page, 15, True
     )
     seasons = [e[0] for e in db.session.query(Season.number).all()]
     return render_template(
@@ -412,7 +412,10 @@ def records(season_number=-1):
             'powerless_duos': get_duos(False)
         }
 
-    return render_template('redesign/season/records.html', **template_context)
+    return render_template(
+        'redesign/season/records.html',
+        **template_context
+    )
 
 
 @seasons_bp.route('/current/heroes', methods=['GET'])

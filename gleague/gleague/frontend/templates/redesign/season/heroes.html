@@ -18,7 +18,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero',
                             desc='no', season_number=season_number) }}">Hero
                             {% if sort == 'hero' %}
-                                <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -26,7 +26,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='played',
                             desc='yes', season_number=season_number) }}">Matches
                             {% if not sort or sort == 'played' %}
-                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -34,7 +34,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='winrate',
                             desc='yes', season_number=season_number) }}">Winrate
                             {% if sort == 'winrate' %}
-                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -42,7 +42,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff',
                             desc='yes', season_number=season_number) }}">PTS diff
                             {% if sort == 'pts_diff' %}
-                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -50,7 +50,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='kda',
                             desc='yes', season_number=season_number) }}">KDA
                             {% if sort == 'kda' %}
-                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
