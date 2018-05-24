@@ -16,9 +16,10 @@
                         <table class="table table-sm table-borderless table-hover in_match_records_table">
                             <tbody>
                             {% for record in in_match_records %}
-                                <tr match_id={{ record[0] }}>
+                                <tr>
                                     <td>{{ record[1] }}</td>
-                                    <td><span class="link_alt">{{ record[2].nickname }}</span></td>
+                                    <td><a href="{{ url_for('players.overview', steam_id=record[2].steam_id) }}"
+                                           class="link_alt">{{ record[2].nickname }}</a></td>
                                     <td><img class="steam_img"
                                              src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ record[3] }}_lg.png>
                                     </td>
@@ -40,9 +41,13 @@
                         <table class="table table-sm table-hover table-borderless in_season_records_table">
                             <tbody>
                             {% for record in in_season_player_records %}
-                                <tr player_id={{ record[1].steam_id }}>
+                                <tr>
                                     <td>{{ record[0] }}</td>
-                                    <td><span class="link_alt">{{ record[1].nickname }}</span></td>
+                                    <td>
+                                        <a href="{{ url_for('players.overview', steam_id=record[1].steam_id) }}">
+                                            {{ record[1].nickname }}
+                                        </a>
+                                    </td>
                                     <td>{{ record[2] }}</td>
                                 </tr>
                             {% endfor %}

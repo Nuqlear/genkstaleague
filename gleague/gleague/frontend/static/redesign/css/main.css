@@ -47,6 +47,14 @@ a:hover {
     background: #ffebee;
 }
 
+.radiant_text_color {
+    color: #687a1f;
+}
+
+.dire_text_color {
+    color: #aa3729;
+}
+
 .win_row {
     background: #C8E6C9;
 }
