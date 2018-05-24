@@ -5,7 +5,11 @@
         <div class="dropdown-menu">
             {% for season in seasons %}
                 <a class="dropdown-item" href="/seasons/{{ season }}/{{ endpoint[-1] }}">
-                {{ 'Season #' + season if season != season_number else 'Current' }}
+                    {% if season == season_number %}
+                        Current
+                    {% else %}
+                        Season #{{ season }}
+                    {% endif %}
                 </a>
             {% else %}
                 <span class="dropdown-item">hi there!</span>
