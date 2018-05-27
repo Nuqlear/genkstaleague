@@ -9,6 +9,8 @@ from flask import request
 from sqlalchemy import desc
 
 from gleague.models import Match, Season, SeasonStats, Player
+from gleague.frontend.utils import get_templates_root_folder
+
 
 matches_bp = Blueprint('matches', __name__)
 
@@ -18,7 +20,7 @@ def match(match_id):
     m = Match.query.get(match_id)
     if not m:
         return abort(404)
-    return render_template('redesign/match.html', match=m)
+    return render_template(f'{get_templates_root_folder()}match.html', match=m)
 
 
 @matches_bp.route('/', methods=['GET'])
@@ -30,7 +32,7 @@ def matches_preview():
     m = Match.query.order_by(desc(Match.id)).paginate(
         page, current_app.config['HISTORY_MATCHES_PER_PAGE'], True
     )
-    return render_template('redesign/matches.html', matches=m)
+    return render_template(f'{get_templates_root_folder()}matches.html', matches=m)
 
 
 PlayerTuple = namedtuple('PlayerTuple', ['nickname', 'pts'])
@@ -62,7 +64,7 @@ def team_builder():
                 p = Player.query.get(player_id)
                 players.append(PlayerTuple(p.nickname, p.season_stats[0].pts))
         context['teams'] = sort_by_pts(players)
-    return render_template('redesign/team_builder.html', **context)
+    return render_template(f'{get_templates_root_folder()}/team_builder.html', **context)
 
 
 def sort_by_pts(players, t=50):

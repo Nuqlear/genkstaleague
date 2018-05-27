@@ -37,6 +37,12 @@
     {% endblock %}
 </body>
 <script>
+$(document).ready(function() {
+    $('#change_design').click(function() {
+        document.cookie = "design=new; path=/;";
+        location.reload();
+    });
+});
 {% block script %}
 {% endblock %}
 </script>

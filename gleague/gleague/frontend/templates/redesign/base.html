@@ -33,6 +33,9 @@
         </li>
     </ul>
     <ul class="navbar-nav">
+        <li class="nav-item" id="change_design">
+            <a href="" class="nav-link">OLD DESIGN</a>
+        </li>
         {% if g.user %}
             {% if g.user.is_admin() %}
                 <li class="nav-item">
@@ -73,6 +76,15 @@
 <script src="https://cdnjs.cloudflare.com/ajax/libs/Chart.js/2.7.2/Chart.min.js"></script>
 <script src="https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/jquery.raty.min.js"></script>
 
-{% block script %}{% endblock %}
+{% block script %}
+{% endblock %}
+<script>
+$(document).ready(function() {
+    $('#change_design').click(function() {
+        document.cookie = "design=old; path=/;";
+        location.reload();
+    });
+});
+</script>
 </body>
 </html>
