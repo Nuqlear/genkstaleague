@@ -33,7 +33,7 @@ pipeline:
     commands:
       - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
       - apk add --update py-pip && pip install docker-compose
-      - docker-compose -f docker-compose.yml -f docker-compose.prod.yml push
+      - docker-compose -f docker-compose.yml -f docker-compose.build.yml push dem2json gleague
     when:
       branch: master
 
