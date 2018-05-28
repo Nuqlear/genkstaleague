@@ -1,0 +1,109 @@
+{% extends 'redesign/base.html' %}
+
+{% block title %}Players{% endblock %}
+
+{% block header %}
+    {% include 'redesign/_blocks/season_header.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Players</h5>
+            <div class="card-text">
+                <div class="row">
+                    <div class="col-12">
+                        <form style="margin-bottom: 30px;" action="{{ url_for('seasons.players') }}">
+                            <input type="text" name="q" placeholder="Nickname" class="form-control">
+                            <input type="hidden" name="sort" value={{ sort }}/>
+                        </form>
+
+                        <table id="top_players" class="table table-sm table-hover text-center">
+                            <thead>
+                            <tr>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                sort='nickname', season_number=season_number) }}">
+                                {% else %}"{{ url_for('seasons.players', page=stats.page,
+                    sort='nickname', season_number=season_number) }}"{% endif %}>Nickname</a>
+                                    {% if sort == 'nickname' %}
+                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                    {% endif %}
+                                </th>
+                                <th>
+                                    <a class="order"
+                                       href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,sort='pts', season_number=season_number) }}"
+                                           >
+                                       {% else %}"
+                                           {{ url_for('seasons.players', page=stats.page, sort='pts', season_number=season_number) }}
+                                           "{% endif %}>PTS</a>
+                                    {% if sort == 'pts' %}
+                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                    {% endif %}
+                                </th>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                sort='wins', season_number=season_number) }}">
+                                {% else %}"{{ url_for('seasons.players', page=stats.page,
+                    sort='wins', season_number=season_number) }}"{% endif %}>Wins</a>
+                                    {% if sort == 'wins' %}
+                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                    {% endif %}
+                                </th>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                sort='losses', season_number=season_number) }}">
+                                {% else %}"{{ url_for('seasons.players', page=stats.page,
+                    sort='losses', season_number=season_number) }}"{% endif %}>Losses</a>
+                                    {% if sort == 'losses' %}
+                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                    {% endif %}
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for s in stats.items %}
+                                <tr {% if not s.calibrated() %}class="calibrating"{% endif %}>
+                                    <td>
+                                        <a class="link"
+                                           href="{{ url_for('players.overview', steam_id=s.steam_id) }}">
+                                            {{ s.player.nickname }}
+                                        </a>
+                                    </td>
+                                    <td> {{ s.pts }} </td>
+                                    <td> {{ s.wins }} </td>
+                                    <td> {{ s.losses }} </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div id="pagination">
+                            <ul class="pagination">
+                                {% if stats.has_prev %}
+                                    <li><a href="{{ url_for('seasons.players', page=stats.prev_num, q=q,
+                    sort=sort, season_number=season_number) }}"><</a></li>
+                                {% endif %}
+                                {%- for _page in stats.iter_pages() %}
+                                    {% if _page %}
+                                        {% if _page != stats.page %}
+                                            <li>
+                                                <a href="{{ url_for('seasons.players', page=_page, sort=sort, season_number=season_number) }}">{{ _page }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="active"><a>{{ _page }}</a></li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li><span class=ellipsis>¦</span></li>
+                                    {% endif %}
+                                {%- endfor %}
+                                {% if stats.has_next %}
+                                    <li>
+                                        <a href="{{ url_for('seasons.players', page=stats.next_num, q=q, sort=sort, season_number=season_number) }}">></a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </div>
+    </div>
+{% endblock %}

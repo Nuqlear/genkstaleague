@@ -43,6 +43,7 @@
                     </li>
                 </ul>
                 <ul class="nav navbar-nav navbar-right">
+                    <li id="change_design"><a>REDESIGN</a></li>
                     {% if g.user %}
                         {% if g.user.is_admin() %}
                         <li><a href="{{ url_for('admin.index') }}">ADMIN</a></li>

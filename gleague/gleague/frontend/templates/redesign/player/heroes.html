@@ -1,0 +1,88 @@
+{% extends 'redesign/base.html' %}
+
+{% block title %}Player | Heroes{% endblock %}
+
+{% block header %}
+    {% include 'redesign/_blocks/player_header.html' %}
+{% endblock %}
+
+{% block content %}
+    {% include 'redesign/_blocks/player_card.html' with context %}
+
+    <div class="card">
+        <div class="card-header">Heroes</div>
+        <div class="card-body">
+            <table class="table table-sm table-hover text-center">
+                <thead>
+                <tr>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='hero',
+                                 desc='no') }}">Hero
+                            {% if sort == 'hero' %}
+                                <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='played',
+                                desc='yes') }}">Matches
+                            {% if not sort or sort == 'played' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='winrate',
+                                desc='yes') }}">Winrate
+                            {% if sort == 'winrate' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='pts_diff',
+                                desc='yes') }}">Earned pts
+                            {% if sort == 'pts_diff' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.heroes', steam_id=player.steam_id, sort='kda',
+                                desc='yes') }}">KDA
+                            {% if sort == 'kda' %}
+                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                            {% endif %}
+                        </a>
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="heroes_stats">
+                {% for s in heroes_stats %}
+                    <tr hero={{ s.hero }}>
+                        <td><img class="steam_img"
+                                 src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png></td>
+                        <td>{{ s.played }}</td>
+                        <td>{{ '%i' % s.winrate }}%</td>
+                        <td>{{ s.pts_diff }}</td>
+                        <td>{{ '%0.2f' % s.kda }}</td>
+                        </td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(function () {
+            $('#avg_rating').raty({
+                readOnly: true,
+                path: '/static/lib/bower_components/raty/lib/img',
+                score: parseFloat("{{ avg_rating }}")
+            });
+        });
+    </script>
+{% endblock %}

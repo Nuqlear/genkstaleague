@@ -13,6 +13,7 @@ from gleague.models import Match
 from gleague.models import PlayerMatchStats
 from gleague.models import Season
 from gleague.models import SeasonStats
+from gleague.frontend.utils import get_templates_root_folder
 
 
 seasons_bp = Blueprint('seasons', __name__)
@@ -37,11 +38,11 @@ def players(season_number=-1):
     page = int(request.args.get('page', 1))
     stats = SeasonStats.get_stats(season_number, q, sort)
     stats = stats.paginate(
-        page, current_app.config['TOP_PLAYERS_PER_PAGE'], True
+        page, 15, True
     )
     seasons = [e[0] for e in db.session.query(Season.number).all()]
     return render_template(
-        'season/players.html',
+        f'{get_templates_root_folder()}season/players.html',
         stats=stats,
         sort=sort,
         seasons=seasons,
@@ -412,7 +413,10 @@ def records(season_number=-1):
             'powerless_duos': get_duos(False)
         }
 
-    return render_template('season/records.html', **template_context)
+    return render_template(
+        f'{get_templates_root_folder()}season/records.html',
+        **template_context
+    )
 
 
 @seasons_bp.route('/current/heroes', methods=['GET'])
@@ -454,7 +458,7 @@ def heroes(season_number=-1):
     seasons = [e[0] for e in db.session.query(Season.number).all()]
 
     return render_template(
-        'season/heroes.html',
+        f'{get_templates_root_folder()}season/heroes.html',
         in_season_heroes=in_season_heroes,
         sort=sort_arg,
         is_desc=desc,
