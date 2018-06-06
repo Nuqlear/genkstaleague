@@ -1,55 +1,68 @@
-{% extends 'base.html' %}
+{% extends '/base.html' %}
 
 {% block head %}
     {{ macro.render_site_title('TEAMBUILDER') }}
 {% endblock %}
 
-{% block body %}
-    <div class="container">
-        {{ macro.render_navbar() }}
-        {% set non_registered_player='NOT REGISTERED PLAYER' %}
-        <form method="POST" action="" class="team_builder_row">
-            {% for i in range(1, 11) %}
-                <div class="team_builder_row">
-                    <label for="select2-input-sm" class="control-label">Player {{ i }}</label>
-                    <select name="player-{{ i }}" class="input-lg select2-multiple">
-                        <option value="None"
-                        {% if teams and teams[(i-1)//5][(i-1)%5].nickname==non_registered_player %}
-                        selected="selected"
-                        {% endif %}>
-                            {{ non_registered_player }}
-                        </option>
-                        {% for ss in season_stats %}
-                            <option value={{ ss.steam_id }}
-                            {% if teams and teams[(i-1)//5][(i-1)%5].nickname==ss.player.nickname %}
-                            selected="selected"
-                            {% endif %}>
-                                {{ ss.player.nickname }}
-                            </option>
+{% block content %}
+    {% set non_registered_player='NOT REGISTERED PLAYER' %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Team builder</h5>
+            <div class="row">
+                <div class="col-10 offset-1">
+                    <form method="POST" action="">
+                        {% for i in range(1, 11) %}
+                            <div class="form-group">
+                                <label for="player-{{ i }}">Player {{ i }}</label>
+                                <select id="player-{{ i }}" name="player-{{ i }}" class="form-control select2-multiple">
+                                    <option value="None"
+                                        {% if teams and teams[(i-1)//5][(i-1)%5].nickname==non_registered_player %}
+                                            selected="selected"
+                                        {% endif %}>
+                                        {{ non_registered_player }}
+                                    </option>
+                                    {% for ss in season_stats %}
+                                        <option value={{ ss.steam_id }}
+                                                    {% if teams and teams[(i-1)//5][(i-1)%5].nickname==ss.player.nickname %}
+                                                        selected="selected"
+                                                    {% endif %}>
+                                            {{ ss.player.nickname }}
+                                        </option>
+                                    {% endfor %}
+                                </select>
+                            </div>
                         {% endfor %}
-                    </select>
-                </div>
-            {% endfor %}
-            <p>
-                <input type="submit" value="Get teams" class="btn btn-default" style="margin:20px">
-            </p>
-            <textarea disabled class="random_result" rows="12">
+                        <div class="form-group">
+                            <input type="submit" value="Get teams" class="btn btn-success" style="margin:20px">
+                        </div>
+                        <textarea disabled class="form-control" rows="28">
                     {% if teams %}
-                    Radiant:
+                        Radiant:
                         {% for player in teams[0] %}
                             {{ player.nickname }}
                         {% endfor %}
 
-                    Dire:
+                        Dire:
                         {% for player in teams[1] %}
                             {{ player.nickname }}
                         {% endfor %}
                     {% endif %}
                 </textarea>
-        </form>
+                    </form>
+                </div>
+            </div>
+
+        </div>
     </div>
 {% endblock %}
 
 {% block script %}
-    $(document).ready(function() { $('.select2-multiple').each(function() { $(this).select2({}); }); });
+    <script type="application/javascript">
+        $(document).ready(function () {
+            $('.select2-multiple').each(function () {
+                $(this).select2({});
+            });
+        });
+    </script>
 {% endblock %}

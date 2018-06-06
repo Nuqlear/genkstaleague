@@ -1,13 +1,21 @@
-{% extends 'player/base.html' %}
+{% extends '/base.html' %}
 
 {% block head %}
-    {{ macro.render_site_title(player.nickname ~ ' matches') }}
+    {{ macro.render_site_title(player.nickname ~ " MATCHES") }}
 {% endblock %}
 
-{% block player_body %}
-    <div class="player_matches table-responsive">
-        <table class="table table-hover">
-            <thead>
+{% block header %}
+    {% include '/_blocks/player_header.html' %}
+{% endblock %}
+
+{% block content %}
+    {% include '/_blocks/player_card.html' with context %}
+
+    <div class="card">
+        <div class="card-header">Matches</div>
+        <div class="card-body">
+            <table id="matches" class="table table-sm">
+                <thead>
                 <tr class="header_table">
                     <th>Match id</th>
                     <th data-toggle="tooltip" data-placement="top" title="Season #">S#</th>
@@ -27,65 +35,72 @@
                     <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
                     <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
                 </tr>
-            </thead>
-            <tbody>
+                </thead>
+                <tbody>
                 {% for s in matches_stats.items %}
                     {% if s.player_slot < 5 %}
                         {% if s.match.radiant_win %}
-                        <tr class="win_row" match_id={{ s.match_id }}>
-                        {% else %}
-                        <tr class="loss_row" match_id={{ s.match_id }}>
+                            <tr class="win_row clickable" match_id={{ s.match_id }}>
+                                {% else %}
+                            <tr class="loss_row clickable" match_id={{ s.match_id }}>
                         {% endif %}
-                    {% else%}
-                        {% if s.match.radiant_win %}
-                        <tr class="loss_row" match_id={{ s.match_id }}>
-                        {% else %}
-                        <tr class="win_row" match_id={{ s.match_id }}>
-                        {% endif %}
+                    {% else %}
+                    {% if s.match.radiant_win %}
+                        <tr class="loss_row clickable" match_id={{ s.match_id }}>
+                            {% else %}
+                        <tr class="win_row clickable" match_id={{ s.match_id }}>
                     {% endif %}
-                        <td>{{ s.match_id }}</td>
-                        <td>{{ s.match.season.number }}</td>
-                        <td class="avatar_table">
-                            <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
-                        </td>
-                        <td class="start_time">{{ s.match.start_time }}</td>
-                        <td>{{ s.match.duration//60 }}:{{ s.match.duration % 60 }}</td>
-                        <td>{{ s.old_pts }}</td>
-                        <td>{% if s.pts_diff > 0 %}+{% endif %}{{ s.pts_diff }}</td>
-                        <td>{{ s.level }}</td>
-                        <td>{{ s.kills }}</td>
-                        <td>{{ s.deaths }}</td>
-                        <td>{{ s.assists }}</td>
-                        <td>{{ s.last_hits }}</td>
-                        <td>{{ s.hero_damage }}</td>
-                        <td>{{ s.tower_damage }}</td>
-                        <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
-                        <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
-                        <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
-                    </tr>
+                    {% endif %}
+                <td>{{ s.match_id }}</td>
+                <td>{{ s.match.season.number }}</td>
+                <td class="avatar_table">
+                    <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
+                </td>
+                <td class="start_time">{{ s.match.start_time }}</td>
+                <td>{{ s.match.duration//60 }}:{{ s.match.duration % 60 }}</td>
+                <td>{{ s.old_pts }}</td>
+                <td>{% if s.pts_diff > 0 %}+{% endif %}{{ s.pts_diff }}</td>
+                <td>{{ s.level }}</td>
+                <td>{{ s.kills }}</td>
+                <td>{{ s.deaths }}</td>
+                <td>{{ s.assists }}</td>
+                <td>{{ s.last_hits }}</td>
+                <td>{{ s.hero_damage }}</td>
+                <td>{{ s.tower_damage }}</td>
+                <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
+                <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
+                <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
+                </tr>
                 {% endfor %}
-            </tbody>
-        </table>
+                </tbody>
+            </table>
+
+            {% if hero_filter %}
+                {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id, hero=hero_filter) }}
+            {% else %}
+                {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id) }}
+            {% endif %}
+        </div>
     </div>
-    {% if hero_filter %}
-        {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id, hero=hero_filter) }}
-    {% else %}
-        {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id) }}
-    {% endif %}
 {% endblock %}
 
 {% block script %}
-    $(document).ready(function() {
-        $('#avg_rating').raty({ readOnly: true, path: '/static/lib/bower_components/raty/lib/img', score: parseFloat("{{ avg_rating }}")});
-        $("[data-toggle=tooltip]").tooltip({container:'body'});
-        $('.start_time').each(function() {
-            $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
-        });
-        $('.player_matches tbody tr').each(function() {
-            $(this).click(function() {
-                window.location.href = '/matches/' + $(this).attr('match_id');
+    <script>
+        $(document).ready(function() {
+            $("[data-toggle=tooltip]").tooltip({container:'body'});
+            $('#avg_rating').raty({
+                readOnly: true,
+                path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
+                score: parseFloat("{{ avg_rating }}")
+            });
+            $('.start_time').each(function() {
+                $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
+            });
+            $('#matches tbody > tr').each(function() {
+                $(this).click(function() {
+                    window.location.href = '/matches/' + $(this).attr('match_id');
+                });
             });
         });
-    });
+    </script>
 {% endblock %}
-

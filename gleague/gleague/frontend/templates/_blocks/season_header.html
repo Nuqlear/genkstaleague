@@ -4,13 +4,11 @@
            aria-expanded="false">Season #{{ season_number }}</a>
         <div class="dropdown-menu">
             {% for season in seasons %}
-                <a class="dropdown-item" href="/seasons/{{ season }}/{{ endpoint[-1] }}">
-                    {% if season == season_number %}
-                        Current
-                    {% else %}
+                {% if season != season_number %}
+                    <a class="dropdown-item" href="/seasons/{{ season }}/{{ endpoint[-1] }}">
                         Season #{{ season }}
-                    {% endif %}
-                </a>
+                    </a>
+                {% endif %}
             {% else %}
                 <span class="dropdown-item">hi there!</span>
             {% endfor %}
@@ -21,21 +19,21 @@
         {% if endpoint[1] == 'players' %}
             <span class="nav-link active">Players</span>
         {% else %}
-            <a class="nav-link" href="{{ url_for('seasons.players') }}">Players</a>
-        {% endif %}
-    </li>
-    <li class="nav-item">
-        {% if endpoint[1] == 'heroes' %}
-            <span class="nav-link active">Heroes</span>
-        {% else %}
-            <a class="nav-link" href="{{ url_for('seasons.heroes') }}">Heroes</a>
+            <a class="nav-link" href="{{ url_for('seasons.players', season_number=season_number) }}">Players</a>
         {% endif %}
     </li>
     <li class="nav-item">
         {% if endpoint[1] == 'records' %}
             <span class="nav-link active">Records</span>
         {% else %}
-            <a class="nav-link" href="{{ url_for('seasons.records') }}">Records</a>
+            <a class="nav-link" href="{{ url_for('seasons.records', season_number=season_number) }}">Records</a>
+        {% endif %}
+    </li>
+    <li class="nav-item">
+        {% if endpoint[1] == 'heroes' %}
+            <span class="nav-link active">Heroes</span>
+        {% else %}
+            <a class="nav-link" href="{{ url_for('seasons.heroes', season_number=season_number) }}">Heroes</a>
         {% endif %}
     </li>
 </ul>

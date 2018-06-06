@@ -5,7 +5,6 @@ services:
     command: ["bash", "./wait-for-postgres.sh", "python wsgi.py"]
     volumes:
       - ./gleague/gleague:/gleague
-      - gleague-bower:/gleague/frontend/static/lib/bower_components
       - ./gleague/alembic:/alembic
       - ./gleague/tests:/tests
       - ./gleague/cli.py:/cli.py
@@ -24,4 +23,3 @@ services:
 
 volumes:
   db-data:
-  gleague-bower:

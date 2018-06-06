@@ -1,22 +1,26 @@
-{% extends 'season/base.html' %}
+{% extends '/base.html' %}
 
 {% block head %}
-    {{ macro.render_site_title("heroes") }}
+    {{ macro.render_site_title("SEASON #" ~ season_number ~ " HEROES") }}
 {% endblock %}
 
-{% block season_body %}
-    <div class="row" style="padding: 20px 20px; color:black">
-        <div class="col-md-8 col-md-offset-2">
-            <div class="panel panel-default">
-                <div class="panel-heading">Played heroes</div>
-                <table class="table">
+{% block header %}
+    {% include '/_blocks/season_header.html' %}
+{% endblock %}
+
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Heroes</h5>
+            <div class="card-text">
+                <table class="table table-sm table-hover text-center">
                    <thead>
                     <tr>
                         <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero',
                             desc='no', season_number=season_number) }}">Hero
                             {% if sort == 'hero' %}
-                                <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -24,7 +28,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='played',
                             desc='yes', season_number=season_number) }}">Matches
                             {% if not sort or sort == 'played' %}
-                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -32,7 +36,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='winrate',
                             desc='yes', season_number=season_number) }}">Winrate
                             {% if sort == 'winrate' %}
-                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -40,7 +44,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff',
                             desc='yes', season_number=season_number) }}">PTS diff
                             {% if sort == 'pts_diff' %}
-                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -48,7 +52,7 @@
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='kda',
                             desc='yes', season_number=season_number) }}">KDA
                             {% if sort == 'kda' %}
-                                <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
                         </th>
@@ -70,22 +74,4 @@
             </div>
         </div>
     </div>
-{% endblock %}
-
-{% block script %}
-    $(document).ready(function() {
-        $('.in_match_records_table tr').each(function() {
-            $(this).click(function() {
-                window.location.href = '/matches/' + $(this).attr('match_id');
-            });
-        });
-        $('.in_season_records_table tr').each(function() {
-            $(this).click(function() {
-                window.location.href = '/players/' + $(this).attr('player_id') + '/overview';
-            });
-        });
-        $("#select_season").on('change', function (e) {
-            window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
-        });
-    });
 {% endblock %}

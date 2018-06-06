@@ -1,107 +1,112 @@
-{% extends 'season/base.html' %}
+{% extends '/base.html' %}
 
 {% block head %}
-    {{ macro.render_site_title("players") }}
+    {{ macro.render_site_title("SEASON #" ~ season_number ~ " PLAYERS") }}
 {% endblock %}
 
-{% block season_body %}
-    <div class="row" style="padding: 20px 20px;">
-        <form action="{{ url_for('seasons.players') }}">
-        <div class="input-group row" style="width: 512px; margin:0 auto; padding: 20px">
-            <input type="text" name='q' placeholder="nickname" class="form-control" value={{q}}>
-            <span class="input-group-btn">
-                <button type=submit class="btn btn-default" type="button">
-                    <span class="glyphicon glyphicon-search" style="color:black"></span>
-                </button>
-            </span>
-        <input type="hidden" name="sort" value={{ sort }} />
-        </div>
-        </form>
-        <table id="top_players" class="span5 center-table">
-            <thead>
-                <tr>
-                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
-                sort='nickname', season_number=season_number) }}"
-                    {% else %}"{{ url_for('seasons.players', page=stats.page,
+{% block header %}
+    {% include '/_blocks/season_header.html' %}
+{% endblock %}
+
+<!--  cfcfcf -->
+{% block content %}
+    <div class="card">
+        <div class="card-body">
+            <h5 class="card-title">Players</h5>
+            <div class="card-text">
+                <div class="row">
+                    <div class="col-12">
+                        <form style="margin-bottom: 30px;" action="{{ url_for('seasons.players') }}">
+                            <input type="text" name="q" placeholder="Nickname" class="form-control">
+                            <input type="hidden" name="sort" value={{ sort }}/>
+                        </form>
+
+                        <table id="top_players" class="table table-sm table-hover text-center">
+                            <thead>
+                            <tr>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                sort='nickname', season_number=season_number) }}">
+                                {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='nickname', season_number=season_number) }}"{% endif %}>Nickname</a>
-                    {% if sort == 'nickname' %}
-                        <span class="glyphicon glyphicon glyphicon glyphicon-sort-by-alphabet"></span>
-                    {% endif %}
-                </td>
-                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
-                sort='pts', season_number=season_number) }}"
-                    {% else %}"{{ url_for('seasons.players', page=stats.page, sort='pts',
-                    season_number=season_number) }}"{% endif %}>PTS</a>
-                    {% if sort == 'pts' %}
-                        <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
-                    {% endif %}
-                </td>
-                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
-                sort='wins', season_number=season_number) }}"
-                    {% else %}"{{ url_for('seasons.players', page=stats.page,
+                                    {% if sort == 'nickname' %}
+                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                    {% endif %}
+                                </th>
+                                <th>
+                                    <a class="order"
+                                       href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,sort='pts', season_number=season_number) }}"
+                                           >
+                                       {% else %}"
+                                           {{ url_for('seasons.players', page=stats.page, sort='pts', season_number=season_number) }}
+                                           "{% endif %}>PTS</a>
+                                    {% if sort == 'pts' %}
+                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                    {% endif %}
+                                </th>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                sort='wins', season_number=season_number) }}">
+                                {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='wins', season_number=season_number) }}"{% endif %}>Wins</a>
-                    {% if sort == 'wins' %}
-                        <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
-                    {% endif %}
-                </td>
-                <td><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
-                sort='losses', season_number=season_number) }}"
-                    {% else %}"{{ url_for('seasons.players', page=stats.page,
+                                    {% if sort == 'wins' %}
+                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                    {% endif %}
+                                </th>
+                                <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
+                sort='losses', season_number=season_number) }}">
+                                {% else %}"{{ url_for('seasons.players', page=stats.page,
                     sort='losses', season_number=season_number) }}"{% endif %}>Losses</a>
-                    {% if sort == 'losses' %}
-                        <span class="glyphicon glyphicon glyphicon-sort-by-attributes-alt"></span>
-                    {% endif %}
-                </td>
-                </tr>
-            </thead>
-            <tbody>
-                {% for s in stats.items %}
-                <tr {% if not s.calibrated() %}class="calibrating"{% endif %}>
-                    <td>
-                        <a class="link"
-                        href="{{ url_for('players.overview', steam_id=s.steam_id)}}">
-                            {{ s.player.nickname }}
-                        </a>
-                    </td>
-                    <td> {{ s.pts }} </td>
-                    <td> {{ s.wins }} </td>
-                    <td> {{ s.losses }} </td>
-                </tr>
-                {% endfor %}
-            </tbody>
-        </table>
-        <div id="pagination">
-            <ul class="pagination">
-            {% if stats.has_prev %}
-                <li><a href="{{ url_for('seasons.players', page=stats.prev_num, q=q,
-                    sort=sort, season_number=season_number)}}"><</a></li>
-            {% endif %}
-            {%- for _page in stats.iter_pages() %}
-                {% if _page %}
-                  {% if _page != stats.page %}
-                    <li><a href="{{ url_for('seasons.players', page=_page,
-                        sort=sort, season_number=season_number) }}">{{ _page }}</a></li>
-                  {% else %}
-                    <li class="active"><a>{{ _page }}</strong></a></li>
-                  {% endif %}
-                {% else %}
-                  <li><span class=ellipsis>¦</span></li>
-                {% endif %}
-              {%- endfor %}
-              {% if stats.has_next %}
-                <li><a href="{{ url_for('seasons.players', page=stats.next_num, q=q,
-                    sort=sort, season_number=season_number)}}">></a></li>
-              {% endif %}
-            </ul>
+                                    {% if sort == 'losses' %}
+                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                    {% endif %}
+                                </th>
+                            </tr>
+                            </thead>
+                            <tbody>
+                            {% for s in stats.items %}
+                                <tr {% if not s.calibrated() %}class="calibrating"{% endif %}>
+                                    <td>
+                                        <a class="link"
+                                           href="{{ url_for('players.overview', steam_id=s.steam_id) }}">
+                                            {{ s.player.nickname }}
+                                        </a>
+                                    </td>
+                                    <td> {{ s.pts }} </td>
+                                    <td> {{ s.wins }} </td>
+                                    <td> {{ s.losses }} </td>
+                                </tr>
+                            {% endfor %}
+                            </tbody>
+                        </table>
+
+                        <div id="pagination">
+                            <ul class="pagination justify-content-center">
+                                {% if stats.has_prev %}
+                                    <li><a href="{{ url_for('seasons.players', page=stats.prev_num, q=q,
+                    sort=sort, season_number=season_number) }}"><</a></li>
+                                {% endif %}
+                                {%- for _page in stats.iter_pages() %}
+                                    {% if _page %}
+                                        {% if _page != stats.page %}
+                                            <li>
+                                                <a href="{{ url_for('seasons.players', page=_page, sort=sort, season_number=season_number) }}">{{ _page }}</a>
+                                            </li>
+                                        {% else %}
+                                            <li class="active"><a>{{ _page }}</a></li>
+                                        {% endif %}
+                                    {% else %}
+                                        <li><span class=ellipsis>¦</span></li>
+                                    {% endif %}
+                                {%- endfor %}
+                                {% if stats.has_next %}
+                                    <li>
+                                        <a href="{{ url_for('seasons.players', page=stats.next_num, q=q, sort=sort, season_number=season_number) }}">></a>
+                                    </li>
+                                {% endif %}
+                            </ul>
+                        </div>
+                    </div>
+                </div>
+            </div>
         </div>
     </div>
 {% endblock %}
-
-{% block script %}
-    $(document).ready(function() {
-        $("#select_season").on('change', function (e) {
-            window.location.href = '/seasons/'+this.value+'/{{ endpoint[1] }}';
-        });
-    });
-{% endblock %}
-

@@ -13,7 +13,6 @@ from gleague.models import Match
 from gleague.models import PlayerMatchStats
 from gleague.models import Season
 from gleague.models import SeasonStats
-from gleague.frontend.utils import get_templates_root_folder
 
 
 seasons_bp = Blueprint('seasons', __name__)
@@ -42,7 +41,7 @@ def players(season_number=-1):
     )
     seasons = [e[0] for e in db.session.query(Season.number).all()]
     return render_template(
-        f'{get_templates_root_folder()}season/players.html',
+        '/season/players.html',
         stats=stats,
         sort=sort,
         seasons=seasons,
@@ -414,7 +413,7 @@ def records(season_number=-1):
         }
 
     return render_template(
-        f'{get_templates_root_folder()}season/records.html',
+        '/season/records.html',
         **template_context
     )
 
@@ -458,7 +457,7 @@ def heroes(season_number=-1):
     seasons = [e[0] for e in db.session.query(Season.number).all()]
 
     return render_template(
-        f'{get_templates_root_folder()}season/heroes.html',
+        '/season/heroes.html',
         in_season_heroes=in_season_heroes,
         sort=sort_arg,
         is_desc=desc,

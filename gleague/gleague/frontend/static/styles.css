@@ -1,6 +1,8 @@
 body {
     background: rgb(243, 243, 243);
     min-width: 1240px;
+    font-family: 'Gafata', sans-serif;
+    font-size: 12pt;
 }
 
 a {
@@ -12,7 +14,18 @@ a:hover {
 }
 
 .top-nav {
-    background: rgb(61, 89, 77);
+    background: white;
+    border-bottom: 1px solid rgb(243, 243, 243);
+    font-size: 14pt;
+}
+
+.navbar-brand {
+    background: rgba(21, 69, 57, 0.76);
+    border: 1px dotted rgb(20, 105, 10);
+}
+
+.nav-item.active > a {
+    color: green;
 }
 
 .page {
@@ -37,14 +50,23 @@ a:hover {
 
 .steam_img {
     max-height: 28px;
+    border: 1px solid white;
 }
 
 .radiant_table {
-    background: #C8E6C9;
+    background-color: rgba(38, 61, 38, 0.84);
+}
+
+.radiant_table, .radiant_table > td > a {
+    color: white;
 }
 
 .dire_table {
-    background: #ffebee;
+    background-color: rgba(46, 32, 32, 0.83);
+}
+
+.dire_table, .dire_table > td > a {
+    color: white;
 }
 
 .radiant_text_color {
@@ -56,11 +78,19 @@ a:hover {
 }
 
 .win_row {
-    background: #C8E6C9;
+    background-color: rgba(38, 61, 38, 0.84);
+}
+
+.win_row, .win_row > td > a {
+    color: white;
 }
 
 .loss_row {
-    background: #ffebee;
+    background-color: rgba(46, 32, 32, 0.8);
+}
+
+.loss_row, .loss_row > td > a {
+    color: white;
 }
 
 /*** pagination ***/
@@ -101,4 +131,16 @@ a:hover {
     text-decoration: none;
     background-color: #fff;
     border: 1px solid #ddd;
+}
+
+.clickable {
+    cursor: pointer;
+
+    td {
+        cursor: pointer;
+    }
+}
+
+.clickable:hover {
+    background-color: rgba(100, 100, 100, 1);
 }
