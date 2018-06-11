@@ -13,6 +13,8 @@ class BaseConfig(object):
     _admin_steam_id = int(environ.get('ADMIN_STEAM_ID', None))
     ADMINS_STEAM_ID = [_admin_steam_id] if _admin_steam_id else []
     MATCH_BASE_PTS_DIFF = 10
+    SSDB_HOST = 'ssdb'
+    SSDB_PORT = 8888
 
 
 class gleague_api(BaseConfig):
@@ -22,7 +24,7 @@ class gleague_api(BaseConfig):
 class gleague_frontend(BaseConfig):
     SEASON_CALIBRATING_MATCHES_NUM = int(environ.get('SEASON_CALIBRATING_MATCHES_NUM', 0))
     HISTORY_MATCHES_PER_PAGE = int(environ.get('HISTORY_MATCHES_PER_PAGE', 4))
-    TOP_PLAYERS_PER_PAGE = int(environ.get('TOP_PLAYERS_PER_PAGE', 22))
+    TOP_PLAYERS_PER_PAGE = int(environ.get('TOP_PLAYERS_PER_PAGE', 15))
     PLAYER_HISTORY_MATCHES_PER_PAGE = 10
     GOOGLE_SITE_VERIFICATION_CODE = environ.get(
         'GOOGLE_SITE_VERIFICATION_CODE', 'YOUR GOGLE SITE VERIFICATION CODE'

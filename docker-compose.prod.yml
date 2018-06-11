@@ -1,7 +1,7 @@
 version: '3.5'
 services:
   gleague:
-    command: ["bash", "./wait-for-postgres.sh", "gunicorn wsgi:application -b 0.0.0.0:5000 --pid /gleague-master.pid -t 600 -w 4"]
+    command: ["bash", "./wait-for-postgres.sh", "gunicorn wsgi:application -b 0.0.0.0:5000 --pid /gleague-master.pid -t 600 -w 2 -k gevent"]
     ports:
       - 127.0.0.1:${GLEAGUE_PORT}:5000
     environment:
@@ -9,6 +9,10 @@ services:
   postgres:
     volumes:
       - db-data:/var/lib/postgresql/data
+  ssdb:
+    volumes:
+      - ssdb-data:/ssdb/var
 
 volumes:
   db-data:
+  ssdb-data:

@@ -5,7 +5,7 @@
                 <h2>
                     <img class="rounded" src={{ player.avatar_medium }}>
                     <span>{{ player.nickname }}</span>
-                    <span id="avg_rating"></span><span style="font-size:12pt">({{ rating_amount }} votes)</span>
+                    <span id="avg_rating"></span><span style="font-size:12pt; padding-left: 10px;">({{ rating_amount }} votes)</span>
                     {% for s in player.place_1_seasons %}
                         {{ macro.render_trophy(1, s) }}
                     {% endfor %}

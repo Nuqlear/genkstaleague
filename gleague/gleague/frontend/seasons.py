@@ -1,8 +1,8 @@
 from flask import Blueprint
 from flask import abort
-from flask import current_app
 from flask import render_template
 from flask import request
+from flask import current_app
 from sqlalchemy import and_
 from sqlalchemy import case
 from sqlalchemy import desc
@@ -13,6 +13,7 @@ from gleague.models import Match
 from gleague.models import PlayerMatchStats
 from gleague.models import Season
 from gleague.models import SeasonStats
+from gleague.cache import cached
 
 
 seasons_bp = Blueprint('seasons', __name__)
@@ -30,6 +31,7 @@ def get_season_id(season_number):
 
 @seasons_bp.route('/current/players', methods=['GET'])
 @seasons_bp.route('/<int:season_number>/players', methods=['GET'])
+@cached([Match])
 def players(season_number=-1):
     season_number, s_id = get_season_id(season_number)
     q = request.args.get('q')
@@ -37,7 +39,7 @@ def players(season_number=-1):
     page = int(request.args.get('page', 1))
     stats = SeasonStats.get_stats(season_number, q, sort)
     stats = stats.paginate(
-        page, 15, True
+        page, current_app.config['TOP_PLAYERS_PER_PAGE'], True
     )
     seasons = [e[0] for e in db.session.query(Season.number).all()]
     return render_template(
@@ -51,6 +53,7 @@ def players(season_number=-1):
 
 @seasons_bp.route('/current/records', methods=['GET'])
 @seasons_bp.route('/<int:season_number>/records', methods=['GET'])
+@cached([Match])
 def records(season_number=-1):
     season_number, s_id = get_season_id(season_number)
 
@@ -354,11 +357,11 @@ def records(season_number=-1):
         )
 
         radiant_winrate = (
-            100 * func.sum(case([(Match.radiant_win == True, 1)], else_=0)) /
+            100 * func.sum(case([(Match.radiant_win.is_(True), 1)], else_=0)) /
             func.count(Match.id)
         )
         dire_winrate = (
-            100 * func.sum(case([(Match.radiant_win == False, 1)], else_=0)) /
+            100 * func.sum(case([(Match.radiant_win.is_(False), 1)], else_=0)) /
             func.count(Match.id)
         )
         side_winrates = (
@@ -420,6 +423,7 @@ def records(season_number=-1):
 
 @seasons_bp.route('/current/heroes', methods=['GET'])
 @seasons_bp.route('/<int:season_number>/heroes', methods=['GET'])
+@cached([Match])
 def heroes(season_number=-1):
     season_number, s_id = get_season_id(season_number)
     sort_arg = request.args.get('sort', 'played')
@@ -430,7 +434,6 @@ def heroes(season_number=-1):
     if is_desc != 'no':
         is_desc = 'yes'
         order_by = desc(order_by)
-    hero_filter = request.args.get('hero', None)
     in_season_heroes = (
         PlayerMatchStats.query.join(SeasonStats)
         .filter(SeasonStats.season_id == s_id)

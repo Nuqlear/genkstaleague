@@ -10,8 +10,11 @@ from sqlalchemy import desc
 
 from gleague.models import Player
 from gleague.models import PlayerMatchStats
+from gleague.models import PlayerMatchRating
 from gleague.models import Season
+from gleague.models import Match
 from gleague.models import SeasonStats
+from gleague.cache import cached
 
 
 players_bp = Blueprint('players', __name__)
@@ -27,8 +30,9 @@ def get_season_stats(current_season_id, player):
 
 @players_bp.route('/<int:steam_id>/', methods=['GET'])
 @players_bp.route('/<int:steam_id>/overview', methods=['GET'])
+@cached([Match, PlayerMatchRating])
 def overview(steam_id):
-    p = Player.query.filter(Player.steam_id==steam_id).first()
+    p = Player.query.filter(Player.steam_id == steam_id).first()
     if not p:
         return abort(404)
     current_season_id = Season.current().id
@@ -71,6 +75,7 @@ def overview(steam_id):
 
 
 @players_bp.route('/<int:steam_id>/matches', methods=['GET'])
+@cached([Match, PlayerMatchRating])
 def matches(steam_id):
     p = Player.query.get(steam_id)
     if not p:
@@ -101,6 +106,7 @@ def matches(steam_id):
 
 
 @players_bp.route('/<int:steam_id>/heroes', methods=['GET'])
+@cached([Match, PlayerMatchRating])
 def heroes(steam_id):
     p = Player.query.get(steam_id)
     if not p:
@@ -113,7 +119,6 @@ def heroes(steam_id):
     if is_desc != 'no':
         is_desc = 'yes'
         order_by = desc(order_by)
-    hero_filter = request.args.get('hero', None)
     current_season_id = Season.current().id
     heroes_stats = p.get_heroes(current_season_id).order_by(order_by).all()
     template_context = {'player': p, 'sort': sort_value, 'desc': is_desc}

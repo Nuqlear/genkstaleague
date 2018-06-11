@@ -1,0 +1,18 @@
+{% if g.user %}
+    {% if g.user.is_admin() %}
+        <li class="nav-item">
+            <a href="{{ url_for('admin.index') }}" class="nav-link">ADMIN</a>
+        </li>
+    {% endif %}
+    <li class="nav-item">
+        <a href="{{ url_for('players.overview', steam_id=g.user.steam_id) }}" class="nav-link">
+            <i class="fas fa-user"></i>&nbsp;PROFILE
+        </a>
+    </li>
+{% else %}
+    <li class="nav-item">
+        <a href="{{ url_for('auth.login') }}" class="nav-link">
+            <i class="fab fa-steam"></i>&nbsp;LOGIN
+        </a>
+    </li>
+{% endif %}

@@ -18,8 +18,6 @@ def create_app(name=__name__):
         app.errorhandler(e)(handle_error)
     oid.init_app(app)
     admin.init_admin(app)
-    from gleague.api.players import players_bp
-    app.register_blueprint(players_bp, url_prefix='/players')
     from gleague.api.matches import matches_bp
     app.register_blueprint(matches_bp, url_prefix='/matches')
     return app

@@ -35,23 +35,13 @@
         </li>
     </ul>
     <ul class="navbar-nav">
-        {% if g.user %}
-            {% if g.user.is_admin() %}
-                <li class="nav-item">
-                    <a href="{{ url_for('admin.index') }}" class="nav-link">ADMIN</a>
-                </li>
-            {% endif %}
-            <li class="nav-item">
-                <a href="{{ url_for('players.overview', steam_id=g.user.steam_id) }}" class="nav-link">
-                    <i class="fas fa-user"></i>&nbsp;PROFILE
-                </a>
-            </li>
+        {# raw needed here because we cant cache this block #}
+        {% if not bypass_cache %}
+            {% raw %}
+                {% include "/_blocks/user_nav.html" %}
+            {% endraw %}
         {% else %}
-            <li class="nav-item">
-                <a href="{{ url_for('auth.login') }}" class="nav-link">
-                    <i class="fab fa-steam"></i>&nbsp;LOGIN
-                </a>
-            </li>
+            {% include "/_blocks/user_nav.html" %}
         {% endif %}
     </ul>
 </nav>

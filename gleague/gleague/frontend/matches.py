@@ -9,12 +9,14 @@ from flask import request
 from sqlalchemy import desc
 
 from gleague.models import Match, Season, SeasonStats, Player
+from gleague.cache import cached
 
 
 matches_bp = Blueprint('matches', __name__)
 
 
 @matches_bp.route('/<int:match_id>', methods=['GET'])
+@cached([Match])
 def match(match_id):
     m = Match.query.get(match_id)
     if not m:
@@ -23,6 +25,7 @@ def match(match_id):
 
 
 @matches_bp.route('/', methods=['GET'])
+@cached([Match])
 def matches_preview():
     page = request.args.get('page', '1')
     if not page.isdigit():
@@ -47,7 +50,8 @@ def team_builder():
         )
     )
     context = {
-        'season_stats': season_stats
+        'season_stats': season_stats,
+        'bypass_cache': True
     }
     if request.method == 'POST':
         players = []
