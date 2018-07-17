@@ -25,7 +25,7 @@ a:hover {
 }
 
 .nav-item.active > a {
-    color: green;
+    color: rgb(0, 181, 0);
 }
 
 .page {
@@ -96,6 +96,14 @@ a:hover {
 /*** pagination ***/
 #pagination {
     text-align: center;
+}
+
+.calibrating {
+    background-color: rgb(244, 244, 244);
+}
+
+.calibrating, .calibrating > td > a {
+    color: rgb(165, 149, 160);
 }
 
 .pagination > li > a:hover,
