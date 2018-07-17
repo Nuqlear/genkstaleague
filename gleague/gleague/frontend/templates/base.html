@@ -35,18 +35,17 @@
         </li>
     </ul>
     <ul class="navbar-nav">
-        {# raw needed here because we cant cache this block #}
-        {% if not bypass_cache %}
+        {% set user_nav_block %}
             {% raw %}
                 {% include "/_blocks/user_nav.html" %}
             {% endraw %}
-        {% else %}
-            {% include "/_blocks/user_nav.html" %}
-        {% endif %}
+        {% endset %}
+        {{ cache_aware(user_nav_block, bypass_cache) | safe }}
     </ul>
 </nav>
 
-{% block header %}{% endblock %}
+{% block header %}
+{% endblock %}
 
 <div class="page">
     <div class="container-fluid">

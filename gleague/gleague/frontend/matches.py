@@ -12,62 +12,55 @@ from gleague.models import Match, Season, SeasonStats, Player
 from gleague.cache import cached
 
 
-matches_bp = Blueprint('matches', __name__)
+matches_bp = Blueprint("matches", __name__)
 
 
-@matches_bp.route('/<int:match_id>', methods=['GET'])
+@matches_bp.route("/<int:match_id>", methods=["GET"])
 @cached([Match])
 def match(match_id):
     m = Match.query.get(match_id)
     if not m:
         return abort(404)
-    return render_template('/match.html', match=m)
+    return render_template("/match.html", match=m)
 
 
-@matches_bp.route('/', methods=['GET'])
+@matches_bp.route("/", methods=["GET"])
 @cached([Match])
 def matches_preview():
-    page = request.args.get('page', '1')
+    page = request.args.get("page", "1")
     if not page.isdigit():
         abort(400)
     page = int(page)
     m = Match.query.order_by(desc(Match.id)).paginate(
-        page, current_app.config['HISTORY_MATCHES_PER_PAGE'], True
+        page, current_app.config["HISTORY_MATCHES_PER_PAGE"], True
     )
-    return render_template('/matches.html', matches=m)
+    return render_template("/matches.html", matches=m)
 
 
-PlayerTuple = namedtuple('PlayerTuple', ['nickname', 'pts'])
+PlayerTuple = namedtuple("PlayerTuple", ["nickname", "pts"])
 
 
-@matches_bp.route('/team_builder', methods=['GET', 'POST'])
+@matches_bp.route("/team_builder", methods=["GET", "POST"])
 def team_builder():
     cs_id = Season.current().id
-    season_stats = (
-        sorted(
-            SeasonStats.query.filter(SeasonStats.season_id == cs_id).all(),
-            key=lambda ss: ss.player.nickname.lower()
-        )
+    season_stats = sorted(
+        SeasonStats.query.filter(SeasonStats.season_id == cs_id).all(),
+        key=lambda ss: ss.player.nickname.lower(),
     )
-    context = {
-        'season_stats': season_stats,
-        'bypass_cache': True
-    }
-    if request.method == 'POST':
+    context = {"season_stats": season_stats, "bypass_cache": True}
+    if request.method == "POST":
         players = []
         for i in range(1, 11):
-            player_id = request.form.get('player-%i' % i)
-            if player_id == 'None':
+            player_id = request.form.get("player-%i" % i)
+            if player_id == "None":
                 players.append(
-                    PlayerTuple(
-                        'NOT REGISTERED PLAYER', SeasonStats.pts.default.arg
-                    )
+                    PlayerTuple("NOT REGISTERED PLAYER", SeasonStats.pts.default.arg)
                 )
             else:
                 p = Player.query.get(player_id)
                 players.append(PlayerTuple(p.nickname, p.season_stats[0].pts))
-        context['teams'] = sort_by_pts(players)
-    return render_template('//team_builder.html', **context)
+        context["teams"] = sort_by_pts(players)
+    return render_template("//team_builder.html", **context)
 
 
 def sort_by_pts(players, t=50):

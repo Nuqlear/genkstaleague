@@ -10,15 +10,20 @@ from gleague import models
 
 class SSDBCache(object):
 
-    dependents = {
-        models.Match: set(),
-        models.PlayerMatchRating: set()
-    }
+    dependents = {models.Match: set(), models.PlayerMatchRating: set()}
+
+    @staticmethod
+    def cache_aware(block, bypass_cache=False):
+        if bypass_cache:
+            return render_template_string(block)
+        else:
+            return block
 
     def init_app(self, app):
         self.client = pyssdb.Client(
-            host=app.config['SSDB_HOST'], port=app.config['SSDB_PORT']
+            host=app.config["SSDB_HOST"], port=app.config["SSDB_PORT"]
         )
+        app.jinja_env.globals.update(cache_aware=self.cache_aware)
 
     def get(self, base, key):
         return self.client.hget(base, key)
@@ -35,22 +40,22 @@ cache = SSDBCache()
 
 
 def cached(dependencies):
-
     def decorator(f):
-        base = f'{f.__module__}.{f.__name__}'
+        base = f"{f.__module__}.{f.__name__}"
         for dependency in dependencies:
             cache.dependents[dependency].add(base)
 
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            key = f'{request.path}?{request.query_string}'
+            key = f"{request.path}?{request.query_string}"
             res = cache.get(base, key)
             if not res:
                 res = f(*args, **kwargs)
                 cache.set(base, key, res)
             else:
-                res = res.decode('utf-8')
+                res = res.decode("utf-8")
             return render_template_string(res)
+
         return decorated_function
 
     return decorator

@@ -39,14 +39,19 @@
             </table>
         </div>
     </div>
-    {% if not g.user %}
-        <div id="warning" class="alert alert-warning alert-dismissable text-center">
-            <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
-            <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;"
-                                                       src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
-            to rate players if you played in this match.
-        </div>
-    {% endif %}
+    {% set rate_block %}
+        {% raw %}
+            {% if not g.user %}
+                <div id="warning" class="alert alert-warning alert-dismissable text-center">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;"
+                                                               src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png"/></a>
+                    to rate players if you played in this match.
+                </div>
+            {% endif %}
+        {% endraw %}
+    {% endset %}
+    {{ cache_aware(rate_block, bypass_cache) | safe }}
     <div class="card">
         <div class="card-header">Players</div>
         <div class="card-body">
@@ -140,32 +145,39 @@
 
 {% block script %}
     <script type="application/javascript">
-        $(document).ready(function () {
-            $("[data-toggle=tooltip]").tooltip({container:'body'});
-
-            function update_rating() {
-                var url = '/api/matches/{{ match.id }}/ratings/';
-                $.getJSON(url, function (data) {
-                    $('.rating').each(function () {
-                        var d = data['ratings'][$(this).attr('match_player_stats_id')];
-                        console.log(d['allowed_rate']);
-                        $(this).raty({
-                            readOnly: !d['allowed_rate'],
-                            path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
-
-                            path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images', score: d['avg_rating'],
-                            click: function (score, evt) {
-                                $.post('/api/matches/{{ match.id }}/ratings/' + $(this).parent().find('.rating').attr('match_player_stats_id')
-                                    + '?rating=' + score);
-                                update_rating();
-                            }
-                        });
+    $(document).ready(function() {
+        $('[data-toggle=tooltip]').tooltip({ container: 'body' });
+        function update_rating() {
+            var url = '/api/matches/{{ match.id }}/ratings/';
+            $.getJSON(url, function(data) {
+                $('.rating').each(function() {
+                    var response = data['ratings'][$(this).attr('match_player_stats_id')];
+                    $(this).raty({
+                        readOnly: !response['allowed_rate'],
+                        path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
+                        score: response['avg_rating'],
+                        click: function(score, evt) {
+                            $.post(
+                                '/api/matches/{{ match.id }}/ratings/' +
+                                    $(this)
+                                        .parent()
+                                        .find('.rating')
+                                        .attr('match_player_stats_id') +
+                                    '?rating=' +
+                                    score
+                            );
+                            update_rating();
+                        }
                     });
                 });
-            }
-            update_rating();
-
-            $('#start_time').html(moment(moment.unix("{{ match.start_time }}")).format('MMMM Do YYYY, HH:mm'));
-        });
+            });
+        }
+        update_rating();
+        $('#start_time').html(
+            moment(moment.unix('{{ match.start_time }}')).format(
+                'MMMM Do YYYY, HH:mm'
+            )
+        );
+    });
     </script>
 {% endblock %}
