@@ -20,6 +20,8 @@ services:
   dem2json:
     volumes:
       - ./dem2json/src/dem2json:/src/dem2json
+    ports:
+      - 5222:5222
 
 volumes:
   db-data:

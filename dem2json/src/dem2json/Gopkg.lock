@@ -10,10 +10,10 @@
 [[projects]]
   name = "github.com/dotabuff/manta"
   packages = [
-	".",
-	"dota"
+    ".",
+    "dota"
   ]
-  revision = "b0857b18c733c82554942b1483284039fc260041"
+  revision = "7794dd00566c62c59b0edd07693c87db85237217"
 
 [[projects]]
   branch = "master"
@@ -24,9 +24,9 @@
 [[projects]]
   name = "github.com/gin-gonic/gin"
   packages = [
-	".",
-	"binding",
-	"render"
+    ".",
+    "binding",
+    "render"
   ]
   revision = "d459835d2b077e44f7c9b453505ee29881d5d12d"
   version = "v1.2"
@@ -35,8 +35,8 @@
   branch = "master"
   name = "github.com/golang/protobuf"
   packages = [
-	"proto",
-	"protoc-gen-go/descriptor"
+    "proto",
+    "protoc-gen-go/descriptor"
   ]
   revision = "1643683e1b54a9e88ad26d98f81400c8c9d9f4f9"
 
@@ -79,6 +79,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "06899e88540cb74b7c3cad3f3161f5352e70cb5b3558737b4d4e73d95c02d5ab"
+  inputs-digest = "c2dfbec3d7270f3d13070f605f21ae40e8d4af30e92096a435ae84a9d965f66e"
   solver-name = "gps-cdcl"
   solver-version = 1
