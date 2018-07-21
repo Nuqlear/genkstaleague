@@ -1,3 +1,5 @@
+from collections import namedtuple
+
 from flask import Blueprint
 from flask import abort
 from flask import render_template
@@ -19,7 +21,7 @@ from gleague.cache import cached
 seasons_bp = Blueprint("seasons", __name__)
 
 
-def get_season_id(season_number):
+def get_season_number_and_id(season_number):
     if season_number == -1:
         season = Season.current()
     else:
@@ -33,13 +35,13 @@ def get_season_id(season_number):
 @seasons_bp.route("/<int:season_number>/players", methods=["GET"])
 @cached([Match])
 def players(season_number=-1):
-    season_number, s_id = get_season_id(season_number)
+    season_number, s_id = get_season_number_and_id(season_number)
     q = request.args.get("q")
     sort = request.args.get("sort", "pts")
     page = int(request.args.get("page", 1))
     stats = SeasonStats.get_stats(season_number, q, sort)
     stats = stats.paginate(page, current_app.config["TOP_PLAYERS_PER_PAGE"], True)
-    seasons = [e[0] for e in db.session.query(Season.number).all()]
+    seasons = [season[0] for season in db.session.query(Season.number).all()]
     return render_template(
         "/season/players.html",
         stats=stats,
@@ -53,8 +55,7 @@ def players(season_number=-1):
 @seasons_bp.route("/<int:season_number>/records", methods=["GET"])
 @cached([Match])
 def records(season_number=-1):
-    season_number, s_id = get_season_id(season_number)
-
+    season_number, s_id = get_season_number_and_id(season_number)
     subq = (
         Match.query.join(Season)
         .filter(Season.id == s_id)
@@ -64,13 +65,28 @@ def records(season_number=-1):
     longest_match = Match.query.filter(
         and_(Match.duration == subq, Match.season_id == s_id)
     ).first()
-    seasons = [e[0] for e in db.session.query(Season.number).all()]
-    template_context = {
-        "longest_match": longest_match,
-        "season_number": season_number,
-        "seasons": seasons,
-    }
+    seasons = [season[0] for season in db.session.query(Season.number).all()]
+    template_context = {"season_number": season_number, "seasons": seasons}
     if longest_match:
+        subq = (
+            Match.query.join(Season)
+            .filter(Season.id == s_id)
+            .with_entities(func.min(Match.duration))
+            .as_scalar()
+        )
+        template_context.update(
+            {
+                "longest_match": longest_match,
+                "shortest_match": Match.query.filter(
+                    Match.duration == subq, Match.season_id == s_id
+                ).first(),
+            }
+        )
+
+        # In-Season Records
+        in_season_player_records_nt = namedtuple(
+            "in_season_player_records", ["title", "player", "value"]
+        )
         subq = (
             SeasonStats.query.filter(SeasonStats.season_id == s_id)
             .with_entities(func.max(SeasonStats.longest_winstreak))
@@ -85,6 +101,13 @@ def records(season_number=-1):
             )
             .first()
         )
+        template_context["in_season_player_records"] = [
+            in_season_player_records_nt(
+                "Longest winstreak",
+                win_streak_ss.player,
+                win_streak_ss.longest_winstreak,
+            )
+        ]
 
         subq = (
             SeasonStats.query.filter(SeasonStats.season_id == s_id)
@@ -100,26 +123,12 @@ def records(season_number=-1):
             )
             .first()
         )
-
-        subq = (
-            PlayerMatchStats.query.join(SeasonStats)
-            .filter(SeasonStats.season_id == s_id)
-            .with_entities(
-                func.min(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)
+        template_context["in_season_player_records"].append(
+            in_season_player_records_nt(
+                "Longest losestreak",
+                lose_streak_ss.player,
+                lose_streak_ss.longest_losestreak,
             )
-            .as_scalar()
-        )
-        min_pts_pms = (
-            db.session.query(PlayerMatchStats)
-            .join(SeasonStats)
-            .filter(
-                and_(
-                    SeasonStats.season_id == s_id,
-                    (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == subq,
-                )
-            )
-            .order_by(PlayerMatchStats.id)
-            .first()
         )
 
         subq = (
@@ -142,7 +151,44 @@ def records(season_number=-1):
             .order_by(PlayerMatchStats.id)
             .first()
         )
+        template_context["in_season_player_records"].append(
+            in_season_player_records_nt(
+                "Max pts ever",
+                max_pts_pms.season_stats.player,
+                max_pts_pms.old_pts + max_pts_pms.pts_diff,
+            )
+        )
 
+        subq = (
+            PlayerMatchStats.query.join(SeasonStats)
+            .filter(SeasonStats.season_id == s_id)
+            .with_entities(
+                func.min(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)
+            )
+            .as_scalar()
+        )
+        min_pts_pms = (
+            db.session.query(PlayerMatchStats)
+            .join(SeasonStats)
+            .filter(
+                and_(
+                    SeasonStats.season_id == s_id,
+                    (PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff) == subq,
+                )
+            )
+            .order_by(PlayerMatchStats.id)
+            .first()
+        )
+        template_context["in_season_player_records"].append(
+            in_season_player_records_nt(
+                "Min pts ever",
+                min_pts_pms.season_stats.player,
+                min_pts_pms.old_pts + min_pts_pms.pts_diff,
+            )
+        )
+        # In-Seasons Records ENDS
+
+        # In-Match Records
         subq = (
             PlayerMatchStats.query.join(SeasonStats)
             .filter(SeasonStats.season_id == s_id)
@@ -170,6 +216,18 @@ def records(season_number=-1):
             .order_by(PlayerMatchStats.id)
             .first()
         )
+        in_match_records_nt = namedtuple(
+            "in_match_records", ["match_id", "record_name", "player", "hero", "value"]
+        )
+        template_context["in_match_records"] = [
+            in_match_records_nt(
+                max_kda_pms.match_id,
+                "Best KDA",
+                max_kda_pms.season_stats.player,
+                max_kda_pms.hero,
+                ((max_kda_pms.kills + max_kda_pms.assists) / (max_kda_pms.deaths + 1)),
+            )
+        ]
 
         subq = (
             PlayerMatchStats.query.join(SeasonStats)
@@ -184,6 +242,15 @@ def records(season_number=-1):
             .order_by(PlayerMatchStats.id)
             .first()
         )
+        template_context["in_match_records"].append(
+            in_match_records_nt(
+                max_kills_pms.match_id,
+                "Max kills",
+                max_kills_pms.season_stats.player,
+                max_kills_pms.hero,
+                max_kills_pms.kills,
+            )
+        )
 
         subq = (
             PlayerMatchStats.query.join(SeasonStats)
@@ -197,6 +264,15 @@ def records(season_number=-1):
             .filter(and_(SeasonStats.season_id == s_id, PlayerMatchStats.deaths == subq))
             .order_by(PlayerMatchStats.id)
             .first()
+        )
+        template_context["in_match_records"].append(
+            in_match_records_nt(
+                max_deaths_pms.match_id,
+                "Max deaths",
+                max_deaths_pms.season_stats.player,
+                max_deaths_pms.hero,
+                max_deaths_pms.deaths,
+            )
         )
 
         subq = (
@@ -214,6 +290,15 @@ def records(season_number=-1):
             .order_by(PlayerMatchStats.id)
             .first()
         )
+        template_context["in_match_records"].append(
+            in_match_records_nt(
+                most_lasthits_pms.match_id,
+                "Most last hits",
+                most_lasthits_pms.season_stats.player,
+                most_lasthits_pms.hero,
+                most_lasthits_pms.last_hits,
+            )
+        )
 
         subq = (
             PlayerMatchStats.query.join(SeasonStats)
@@ -230,6 +315,16 @@ def records(season_number=-1):
             .order_by(PlayerMatchStats.id)
             .first()
         )
+        if most_herodamage_pms:
+            template_context["in_match_records"].append(
+                in_match_records_nt(
+                    most_herodamage_pms.match_id,
+                    "Most hero damage",
+                    most_herodamage_pms.season_stats.player,
+                    most_herodamage_pms.hero,
+                    most_herodamage_pms.hero_damage,
+                )
+            )
 
         subq = (
             PlayerMatchStats.query.join(SeasonStats)
@@ -248,6 +343,16 @@ def records(season_number=-1):
             .order_by(PlayerMatchStats.id)
             .first()
         )
+        if most_towerdamage_pms:
+            template_context["in_match_records"].append(
+                in_match_records_nt(
+                    most_towerdamage_pms.match_id,
+                    "Most tower damage",
+                    most_towerdamage_pms.season_stats.player,
+                    most_towerdamage_pms.hero,
+                    most_towerdamage_pms.tower_damage,
+                )
+            )
 
         subq = (
             PlayerMatchStats.query.join(SeasonStats)
@@ -266,105 +371,24 @@ def records(season_number=-1):
             .order_by(PlayerMatchStats.id)
             .first()
         )
-
-        in_season_player_records = [
-            ("Longest winstreak", win_streak_ss.player, win_streak_ss.longest_winstreak),
-            (
-                "Longest losestreak",
-                lose_streak_ss.player,
-                lose_streak_ss.longest_losestreak,
-            ),
-            (
-                "Max pts ever",
-                max_pts_pms.season_stats.player,
-                max_pts_pms.old_pts + max_pts_pms.pts_diff,
-            ),
-            (
-                "Min pts ever",
-                min_pts_pms.season_stats.player,
-                min_pts_pms.old_pts + min_pts_pms.pts_diff,
-            ),
-        ]
-
-        in_match_records = [
-            (
-                max_kda_pms.match_id,
-                "Best KDA",
-                max_kda_pms.season_stats.player,
-                max_kda_pms.hero,
-                ((max_kda_pms.kills + max_kda_pms.assists) / (max_kda_pms.deaths + 1)),
-            ),
-            (
-                max_kills_pms.match_id,
-                "Max kills",
-                max_kills_pms.season_stats.player,
-                max_kills_pms.hero,
-                max_kills_pms.kills,
-            ),
-            (
-                max_deaths_pms.match_id,
-                "Max deaths",
-                max_deaths_pms.season_stats.player,
-                max_deaths_pms.hero,
-                max_deaths_pms.deaths,
-            ),
-            (
-                most_lasthits_pms.match_id,
-                "Most last hits",
-                most_lasthits_pms.season_stats.player,
-                most_lasthits_pms.hero,
-                most_lasthits_pms.last_hits,
-            ),
-        ]
-
-        if most_herodamage_pms:
-            in_match_records.append(
-                [
-                    most_herodamage_pms.match_id,
-                    "Most hero damage",
-                    most_herodamage_pms.season_stats.player,
-                    most_herodamage_pms.hero,
-                    most_herodamage_pms.hero_damage,
-                ]
-            )
-        if most_towerdamage_pms:
-            in_match_records.append(
-                [
-                    most_towerdamage_pms.match_id,
-                    "Most tower damage",
-                    most_towerdamage_pms.season_stats.player,
-                    most_towerdamage_pms.hero,
-                    most_towerdamage_pms.tower_damage,
-                ]
-            )
         if most_damagetaken_pms:
-            in_match_records.append(
-                [
+            template_context["in_match_records"].append(
+                in_match_records_nt(
                     most_damagetaken_pms.match_id,
                     "Most damage taken",
                     most_damagetaken_pms.season_stats.player,
                     most_damagetaken_pms.hero,
                     most_damagetaken_pms.damage_taken,
-                ]
+                )
             )
+        # In-Match Records ENDS
 
-        subq = (
-            Match.query.join(Season)
-            .filter(Season.id == s_id)
-            .with_entities(func.min(Match.duration))
-            .as_scalar()
-        )
-        shortest_match = Match.query.filter(
-            Match.duration == subq, Match.season_id == s_id
-        ).first()
-
-        avg_match_duration = (
+        template_context["avg_match_duration"] = (
             Match.query.join(Season)
             .filter(Season.id == s_id)
             .with_entities(func.avg(Match.duration))
-            .first()
+            .scalar()
         )
-        avg_match_duration = avg_match_duration[0] if avg_match_duration else None
 
         radiant_winrate = (
             100
@@ -376,11 +400,14 @@ def records(season_number=-1):
             * func.sum(case([(Match.radiant_win.is_(False), 1)], else_=0))
             / func.count(Match.id)
         )
-        side_winrates = (
-            Match.query.join(Season)
-            .filter(Season.id == s_id)
-            .with_entities(radiant_winrate, dire_winrate)
-            .first()
+        side_winrates_nt = namedtuple("side_winrates", ["radiant", "dire"])
+        template_context["side_winrates"] = side_winrates_nt(
+            *(
+                Match.query.join(Season)
+                .filter(Season.id == s_id)
+                .with_entities(radiant_winrate, dire_winrate)
+                .first()
+            )
         )
 
         def get_duos(is_desc=True, limit=3):
@@ -414,19 +441,13 @@ def records(season_number=-1):
             )
             return duos_result.fetchall()
 
-        template_context = {
-            "in_season_player_records": in_season_player_records,
-            "in_match_records": in_match_records,
-            "longest_match": longest_match,
-            "shortest_match": shortest_match,
-            "seasons": seasons,
-            "season_number": season_number,
-            "avg_match_duration": avg_match_duration,
-            "side_winrates": side_winrates,
-            "powerful_duos": get_duos(),
-            "powerless_duos": get_duos(False),
-        }
-
+        duo_nt = namedtuple("duo", ["player1", "player2", "pts_diff"])
+        template_context.update(
+            {
+                "powerful_duos": [duo_nt(*row) for row in get_duos()],
+                "powerless_duos": [duo_nt(*row) for row in get_duos(False)],
+            }
+        )
     return render_template("/season/records.html", **template_context)
 
 
@@ -434,7 +455,7 @@ def records(season_number=-1):
 @seasons_bp.route("/<int:season_number>/heroes", methods=["GET"])
 @cached([Match])
 def heroes(season_number=-1):
-    season_number, s_id = get_season_id(season_number)
+    season_number, s_id = get_season_number_and_id(season_number)
     sort_arg = request.args.get("sort", "played")
     if sort_arg not in ["hero", "played", "pts_diff", "winrate", "kda"]:
         sort_arg = "played"
@@ -464,14 +485,11 @@ def heroes(season_number=-1):
         .order_by(order_by)
         .all()
     )
-
-    seasons = [e[0] for e in db.session.query(Season.number).all()]
-
     return render_template(
         "/season/heroes.html",
         in_season_heroes=in_season_heroes,
         sort=sort_arg,
         is_desc=desc,
-        seasons=seasons,
+        seasons=[season[0] for season in db.session.query(Season.number).all()],
         season_number=season_number,
     )

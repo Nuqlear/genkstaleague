@@ -18,14 +18,14 @@
                         <table class="table table-sm table-borderless table-hover in_match_records_table">
                             <tbody>
                             {% for record in in_match_records %}
-                                <tr match_id="{{ record[0] }}" class="clickable">
-                                    <td>{{ record[1] }}</td>
-                                    <td><a href="{{ url_for('players.overview', steam_id=record[2].steam_id) }}"
-                                           class="link_alt">{{ record[2].nickname }}</a></td>
+                                <tr match_id="{{ record.match_id }}" class="clickable">
+                                    <td>{{ record.record_name }}</td>
+                                    <td><a href="{{ url_for('players.overview', steam_id=record.player.steam_id) }}"
+                                           class="link_alt">{{ record.player.nickname }}</a></td>
                                     <td><img class="steam_img"
-                                             src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ record[3] }}_lg.png>
+                                             src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ record.hero }}_lg.png>
                                     </td>
-                                    <td>{{ record[4] }}</td>
+                                    <td>{{ record.value }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -44,13 +44,13 @@
                             <tbody>
                             {% for record in in_season_player_records %}
                                 <tr>
-                                    <td>{{ record[0] }}</td>
+                                    <td>{{ record.title }}</td>
                                     <td>
-                                        <a href="{{ url_for('players.overview', steam_id=record[1].steam_id) }}">
-                                            {{ record[1].nickname }}
+                                        <a href="{{ url_for('players.overview', steam_id=record.player.steam_id) }}">
+                                            {{ record.player.nickname }}
                                         </a>
                                     </td>
-                                    <td>{{ record[2] }}</td>
+                                    <td>{{ record.value }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -78,13 +78,13 @@
                                 <tr>
                                     <td>Radiant Winrate</td>
                                     <td>
-                                        {{ side_winrates[0] }}%
+                                        {{ side_winrates.radiant }}%
                                     </td>
                                 </tr>
                                 <tr>
                                     <td>Dire Winrate</td>
                                     <td>
-                                        {{ side_winrates[1] }}%
+                                        {{ side_winrates.dire }}%
                                     </td>
                                 </tr>
                             {% endif %}
@@ -103,9 +103,9 @@
                             <tbody>
                             {% for duo in powerful_duos %}
                                 <tr>
-                                    <td>{{ duo[0] }}</td>
-                                    <td>{{ duo[1] }}</td>
-                                    <td>{% if duo[2] > 0 %}+{% endif %}{{ duo[2] }}</td>
+                                    <td>{{ duo.player1 }}</td>
+                                    <td>{{ duo.player2 }}</td>
+                                    <td>{% if duo.pts_diff > 0 %}+{% endif %}{{ duo.pts_diff }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -123,9 +123,9 @@
                             <tbody>
                             {% for duo in powerless_duos %}
                                 <tr>
-                                    <td>{{ duo[0] }}</td>
-                                    <td>{{ duo[1] }}</td>
-                                    <td>{% if duo[2] > 0 %}+{% endif %}{{ duo[2] }}</td>
+                                    <td>{{ duo.player1 }}</td>
+                                    <td>{{ duo.player2 }}</td>
+                                    <td>{% if duo.pts_diff > 0 %}+{% endif %}{{ duo.pts_diff }}</td>
                                 </tr>
                             {% endfor %}
                             </tbody>
@@ -197,15 +197,17 @@
 
 {% block script %}
     <script>
-        $(document).ready(function() {
-            $('.in_match_records_table tbody > tr').each(function() {
-                $(this).click(function() {
-                    window.location.href = '/matches/' + $(this).attr('match_id');
-                });
-            });
-            $('.start_time').each(function() {
-                $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
-            });
+    $(document).ready(function() {
+    $('.in_match_records_table tbody > tr').each(function() {
+        $(this).click(function() {
+            window.location.href = '/matches/' + $(this).attr('match_id');
         });
-    </script>
+    });
+    $('.start_time').each(function() {
+        $(this).html(
+            moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm')
+        );
+    });
+});
+</script>
 {% endblock %}

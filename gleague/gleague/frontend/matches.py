@@ -18,10 +18,10 @@ matches_bp = Blueprint("matches", __name__)
 @matches_bp.route("/<int:match_id>", methods=["GET"])
 @cached([Match])
 def match(match_id):
-    m = Match.query.get(match_id)
-    if not m:
+    match = Match.query.get(match_id)
+    if not match:
         return abort(404)
-    return render_template("/match.html", match=m)
+    return render_template("/match.html", match=match)
 
 
 @matches_bp.route("/", methods=["GET"])
@@ -31,10 +31,10 @@ def matches_preview():
     if not page.isdigit():
         abort(400)
     page = int(page)
-    m = Match.query.order_by(desc(Match.id)).paginate(
+    matches = Match.query.order_by(desc(Match.id)).paginate(
         page, current_app.config["HISTORY_MATCHES_PER_PAGE"], True
     )
-    return render_template("/matches.html", matches=m)
+    return render_template("/matches.html", matches=matches)
 
 
 PlayerTuple = namedtuple("PlayerTuple", ["nickname", "pts"])
@@ -57,8 +57,8 @@ def team_builder():
                     PlayerTuple("NOT REGISTERED PLAYER", SeasonStats.pts.default.arg)
                 )
             else:
-                p = Player.query.get(player_id)
-                players.append(PlayerTuple(p.nickname, p.season_stats[0].pts))
+                player = Player.query.get(player_id)
+                players.append(PlayerTuple(player.nickname, player.season_stats[0].pts))
         context["teams"] = sort_by_pts(players)
     return render_template("//team_builder.html", **context)
 

@@ -32,8 +32,8 @@ def get_season_stats(current_season_id, player):
 @players_bp.route("/<int:steam_id>/overview", methods=["GET"])
 @cached([Match, PlayerMatchRating])
 def overview(steam_id):
-    p = Player.query.filter(Player.steam_id == steam_id).first()
-    if not p:
+    player = Player.query.filter(Player.steam_id == steam_id).first()
+    if not player:
         return abort(404)
     current_season_id = Season.current().id
     stats = (
@@ -56,17 +56,15 @@ def overview(steam_id):
     pts_history = [[0, 1000]]
     for index, el in enumerate(pts_seq):
         pts_history.append([index + 1, el[0]])
-    rating_info = p.get_avg_rating()[0]
-    avg_rating = rating_info[0] or 0
-    rating_amount = rating_info[1]
+    avg_rating, rating_amount = p.get_rating_info()
     signature_heroes = (
-        p.get_heroes(current_season_id).order_by(desc("played")).limit(3).all()
+        player.get_heroes(current_season_id).order_by(desc("played")).limit(3).all()
     )
     matches_stats = stats.all()
     season_stats = get_season_stats(current_season_id, p)
     return render_template(
         "/player/overview.html",
-        player=p,
+        player=player,
         season_stats=season_stats,
         avg_rating=avg_rating,
         rating_amount=rating_amount,
@@ -79,8 +77,8 @@ def overview(steam_id):
 @players_bp.route("/<int:steam_id>/matches", methods=["GET"])
 @cached([Match, PlayerMatchRating])
 def matches(steam_id):
-    p = Player.query.get(steam_id)
-    if not p:
+    player = Player.query.get(steam_id)
+    if not player:
         return abort(404)
     page = request.args.get("page", "1")
     if not page.isdigit():
@@ -92,7 +90,7 @@ def matches(steam_id):
         .join(SeasonStats)
         .filter(SeasonStats.steam_id == steam_id)
     )
-    template_context = {"player": p}
+    template_context = {"player": player}
     hero_filter = request.args.get("hero", None)
     if hero_filter:
         template_context["hero_filter"] = hero_filter
@@ -100,9 +98,9 @@ def matches(steam_id):
     template_context["matches_stats"] = matches_stats.paginate(
         page, current_app.config["PLAYER_HISTORY_MATCHES_PER_PAGE"], True
     )
-    rating_info = p.get_avg_rating()[0]
-    template_context["avg_rating"] = rating_info[0] or 0
-    template_context["rating_amount"] = rating_info[1]
+    template_context["avg_rating"], template_context[
+        "rating_amount"
+    ] = player.get_rating_info()
     template_context["season_stats"] = get_season_stats(current_season_id, p)
     return render_template("/player/matches.html", **template_context)
 
@@ -110,8 +108,8 @@ def matches(steam_id):
 @players_bp.route("/<int:steam_id>/heroes", methods=["GET"])
 @cached([Match, PlayerMatchRating])
 def heroes(steam_id):
-    p = Player.query.get(steam_id)
-    if not p:
+    player = Player.query.get(steam_id)
+    if not player:
         return abort(404)
     sort_value = request.args.get("sort", "played")
     if sort_value not in ["hero", "played", "pts_diff", "winrate", "kda"]:
@@ -122,11 +120,11 @@ def heroes(steam_id):
         is_desc = "yes"
         order_by = desc(order_by)
     current_season_id = Season.current().id
-    heroes_stats = p.get_heroes(current_season_id).order_by(order_by).all()
-    template_context = {"player": p, "sort": sort_value, "desc": is_desc}
+    heroes_stats = player.get_heroes(current_season_id).order_by(order_by).all()
+    template_context = {"player": player, "sort": sort_value, "desc": is_desc}
+    template_context["avg_rating"], template_context[
+        "rating_amount"
+    ] = player.get_rating_info()
     template_context["heroes_stats"] = heroes_stats
-    rating_info = p.get_avg_rating()[0]
-    template_context["avg_rating"] = rating_info[0] or 0
-    template_context["rating_amount"] = rating_info[1]
     template_context["season_stats"] = get_season_stats(current_season_id, p)
     return render_template("/player/heroes.html", **template_context)
