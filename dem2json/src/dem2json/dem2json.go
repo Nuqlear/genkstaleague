@@ -4,10 +4,9 @@ import (
 	"io"
 	"net/http"
 
-	"github.com/gin-gonic/gin"
 	"github.com/dotabuff/manta"
+	"github.com/gin-gonic/gin"
 )
-
 
 func ParseFromStream(stream io.Reader) MatchData {
 	parser, _ := manta.NewStreamParser(stream)
@@ -20,15 +19,14 @@ func ParseFromStream(stream io.Reader) MatchData {
 	parser.Start()
 
 	matchData.finalize()
-    return matchData
+	return matchData
 }
-
 
 func main() {
 	router := gin.Default()
 	router.POST("/", func(c *gin.Context) {
 		output := ParseFromStream(c.Request.Body)
-        c.JSON(http.StatusOK, gin.H{"result":output})
+		c.JSON(http.StatusOK, gin.H{"result": output})
 	})
 	router.Run(":5222")
 }

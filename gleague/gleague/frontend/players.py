@@ -56,12 +56,12 @@ def overview(steam_id):
     pts_history = [[0, 1000]]
     for index, el in enumerate(pts_seq):
         pts_history.append([index + 1, el[0]])
-    avg_rating, rating_amount = p.get_rating_info()
+    avg_rating, rating_amount = player.get_rating_info()
     signature_heroes = (
         player.get_heroes(current_season_id).order_by(desc("played")).limit(3).all()
     )
     matches_stats = stats.all()
-    season_stats = get_season_stats(current_season_id, p)
+    season_stats = get_season_stats(current_season_id, player)
     return render_template(
         "/player/overview.html",
         player=player,
@@ -101,7 +101,7 @@ def matches(steam_id):
     template_context["avg_rating"], template_context[
         "rating_amount"
     ] = player.get_rating_info()
-    template_context["season_stats"] = get_season_stats(current_season_id, p)
+    template_context["season_stats"] = get_season_stats(current_season_id, player)
     return render_template("/player/matches.html", **template_context)
 
 
@@ -126,5 +126,5 @@ def heroes(steam_id):
         "rating_amount"
     ] = player.get_rating_info()
     template_context["heroes_stats"] = heroes_stats
-    template_context["season_stats"] = get_season_stats(current_season_id, p)
+    template_context["season_stats"] = get_season_stats(current_season_id, player)
     return render_template("/player/heroes.html", **template_context)

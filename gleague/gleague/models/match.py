@@ -157,6 +157,20 @@ class PlayerMatchRating(db.Model):
         return ratings
 
 
+class CMDraft(db.Model):
+    __tablename__ = "cm_draft"
+    id = Column(Integer, primary_key=True)
+    is_pick = Column(Boolean, nullable=False)
+    is_radiant = Column(Boolean, nullable=False)
+    hero = Column(String(255), nullable=False)
+    match_id = Column(
+        BigInteger,
+        ForeignKey("match.id", onupdate="CASCADE", ondelete="CASCADE"),
+        nullable=False,
+    )
+    __table_args__ = (UniqueConstraint("hero", "match_id", name="cm_draft_hero_match"),)
+
+
 class Match(db.Model):
     __tablename__ = "match"
 
@@ -165,6 +179,9 @@ class Match(db.Model):
         Integer,
         ForeignKey("season.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
+    )
+    cm_draft = relationship(
+        "CMDraft", cascade="all,delete", backref="match", order_by=CMDraft.id
     )
     players_stats = relationship(
         "PlayerMatchStats",
@@ -226,7 +243,7 @@ class Match(db.Model):
         return Match.create_from_dict(resp.json()["result"])
 
     @staticmethod
-    def create_from_dict(steamdata):
+    def create_from_dict(match_data):
         from gleague.models.player import Player
         from gleague.models.season import Season
 
@@ -234,12 +251,22 @@ class Match(db.Model):
 
         match = Match()
         match.season_id = Season.current().id
-        match.id = steamdata["match_id"]
-        match.radiant_win = bool(steamdata["radiant_win"])
+        match.id = match_data["match_id"]
+        match.radiant_win = bool(match_data["radiant_win"])
         for key in ("duration", "game_mode", "start_time"):
-            setattr(match, key, steamdata[key])
+            setattr(match, key, match_data[key])
         db.session.add(match)
-        for player_data in steamdata["players"]:
+        if match.game_mode == 2:
+            for pick_ban_data in match_data["cm_draft"]:
+                db.session.add(
+                    CMDraft(
+                        is_pick=pick_ban_data["is_pick"],
+                        is_radiant=pick_ban_data["is_radiant"],
+                        hero=pick_ban_data["hero"],
+                        match_id=match.id,
+                    )
+                )
+        for player_data in match_data["players"]:
             player_stats = PlayerMatchStats()
             account_id = "765" + str(player_data["account_id"] + 61197960265728)
             player = Player.get_or_create(account_id)
@@ -266,9 +293,10 @@ class Match(db.Model):
                 setattr(player_stats, key, player_data[key])
             player_stats.hero = player_data["hero_name"].replace("npc_dota_hero_", "")
             for item in player_data["items"]:
-                db.session.add(
-                    PlayerMatchItem(name=item, player_match_stats=player_stats)
-                )
+                if item:
+                    db.session.add(
+                        PlayerMatchItem(name=item, player_match_stats=player_stats)
+                    )
             player_stats.match_id = match.id
             db.session.add(player_stats)
             db.session.add(season_stats)
