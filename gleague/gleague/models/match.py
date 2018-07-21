@@ -10,6 +10,7 @@ from sqlalchemy import String
 from sqlalchemy import and_
 from sqlalchemy import desc
 from sqlalchemy import func
+from sqlalchemy.dialects.postgresql import ARRAY
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.schema import UniqueConstraint
@@ -157,8 +158,8 @@ class PlayerMatchRating(db.Model):
         return ratings
 
 
-class CMDraft(db.Model):
-    __tablename__ = "cm_draft"
+class CMPicksBans(db.Model):
+    __tablename__ = "cm_picks_bans"
     id = Column(Integer, primary_key=True)
     is_pick = Column(Boolean, nullable=False)
     is_radiant = Column(Boolean, nullable=False)
@@ -168,7 +169,13 @@ class CMDraft(db.Model):
         ForeignKey("match.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
-    __table_args__ = (UniqueConstraint("hero", "match_id", name="cm_draft_hero_match"),)
+    __table_args__ = (
+        UniqueConstraint("hero", "match_id", name="cm_picks_bans_hero_match"),
+    )
+
+    @property
+    def hero_img(self):
+        return self.hero.replace("npc_dota_hero_", "")
 
 
 class Match(db.Model):
@@ -180,9 +187,10 @@ class Match(db.Model):
         ForeignKey("season.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
-    cm_draft = relationship(
-        "CMDraft", cascade="all,delete", backref="match", order_by=CMDraft.id
+    cm_picks_bans = relationship(
+        "CMPicksBans", cascade="all,delete", backref="match", order_by=CMPicksBans.id
     )
+    cm_captains = Column(ARRAY(Integer))
     players_stats = relationship(
         "PlayerMatchStats",
         cascade="all,delete",
@@ -222,7 +230,7 @@ class Match(db.Model):
         return "Radiant" if self.radiant_win else "Dire"
 
     def duration_string(self):
-        return "{}:{}".format(self.duration // 60, self.duration % 60)
+        return "{}:{:02d}".format(self.duration // 60, self.duration % 60)
 
     @staticmethod
     def get_batch(amount, offset):
@@ -257,9 +265,10 @@ class Match(db.Model):
             setattr(match, key, match_data[key])
         db.session.add(match)
         if match.game_mode == 2:
-            for pick_ban_data in match_data["cm_draft"]:
+            match.cm_captains = match_data["cm_draft"]["captains"]
+            for pick_ban_data in match_data["cm_draft"]["picks_bans"]:
                 db.session.add(
-                    CMDraft(
+                    CMPicksBans(
                         is_pick=pick_ban_data["is_pick"],
                         is_radiant=pick_ban_data["is_radiant"],
                         hero=pick_ban_data["hero"],
@@ -289,6 +298,7 @@ class Match(db.Model):
                 "tower_damage",
                 "damage_taken",
                 "xp_per_min",
+                "gold_per_min",
             ):
                 setattr(player_stats, key, player_data[key])
             player_stats.hero = player_data["hero_name"].replace("npc_dota_hero_", "")

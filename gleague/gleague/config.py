@@ -22,6 +22,8 @@ class gleague_api(BaseConfig):
 
 
 class gleague_frontend(BaseConfig):
+    CACHE_ENABLED = bool(int(environ.get("CACHE_ENABLED", 0)))
+    MIN_STREAK_TO_DISPLAY = int(environ.get("MIN_STREAK_TO_DISPLAY", 3))
     PLAYER_OVERVIEW_MATCHES_AMOUNT = int(
         environ.get("PlAYER_OVERVIEW_MATCHES_AMOUNT", 14)
     )

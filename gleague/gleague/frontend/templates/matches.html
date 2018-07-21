@@ -68,13 +68,19 @@
                                 <td>{{ m.game_mode_string() }}</td>
                             </tr>
                             <tr>
-                                <td>duration: {{ m.duration_string() }}</td>
+                                <td>duration: {{ format_duration(m.duration) }}</td>
                             </tr>
                             <tr>
-                                <td>{% set winner=m.winner_string() %}
-                                    winner: <span
-                                        class="{% if winner=="Dire" %} dire_text_color {% else %} radiant_text_color {% endif %}">
-                                {{ winner }}</span>
+                                <td>
+                                    winner:
+                                    <span class="
+                                    {% if m.radiant_win %}
+                                        radiant_text_color
+                                    {% else %}
+                                        dire_text_color
+                                    {% endif %}">
+                                        {{ m.winner_string() }}
+                                    </span>
                                 </td>
                             </tr>
                             </tbody>
@@ -128,9 +134,11 @@
 {% block script %}
     <script>
     $(document).ready(function() {
-        $('.start_time').each(function() {
-            $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm'));
-        });
+    $('.start_time').each(function() {
+        $(this).html(
+            moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm')
+        );
     });
-    </script>
+});
+</script>
 {% endblock %}

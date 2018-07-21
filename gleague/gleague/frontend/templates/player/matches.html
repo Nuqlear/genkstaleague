@@ -57,7 +57,7 @@
                     <img class="steam_img" src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
                 </td>
                 <td class="start_time">{{ s.match.start_time }}</td>
-                <td>{{ s.match.duration//60 }}:{{ s.match.duration % 60 }}</td>
+                <td>{{ format_duration(s.match.duration) }}</td>
                 <td>{{ s.old_pts }}</td>
                 <td>{% if s.pts_diff > 0 %}+{% endif %}{{ s.pts_diff }}</td>
                 <td>{{ s.level }}</td>
@@ -85,22 +85,26 @@
 {% endblock %}
 
 {% block script %}
-    <script>
-        $(document).ready(function() {
-            $("[data-toggle=tooltip]").tooltip({container:'body'});
-            $('#avg_rating').raty({
-                readOnly: true,
-                path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
-                score: parseFloat("{{ avg_rating }}")
-            });
-            $('.start_time').each(function() {
-                $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
-            });
-            $('#matches tbody > tr').each(function() {
-                $(this).click(function() {
-                    window.location.href = '/matches/' + $(this).attr('match_id');
-                });
-            });
+<script>
+$(document).ready(function() {
+    $('[data-toggle=tooltip]').tooltip({ container: 'body' });
+    $('#avg_rating').raty({
+        readOnly: true,
+        path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
+        score: parseFloat('{{ avg_rating }}')
+    });
+    $('.start_time').each(function() {
+        $(this).html(
+            moment(moment.unix($(this).html())).format(
+                'MMMM Do YYYY, h:mm:ss a'
+            )
+        );
+    });
+    $('#matches tbody > tr').each(function() {
+        $(this).click(function() {
+            window.location.href = '/matches/' + $(this).attr('match_id');
         });
-    </script>
+    });
+});
+</script>
 {% endblock %}

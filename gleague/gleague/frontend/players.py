@@ -122,9 +122,8 @@ def heroes(steam_id):
     current_season_id = Season.current().id
     heroes_stats = player.get_heroes(current_season_id).order_by(order_by).all()
     template_context = {"player": player, "sort": sort_value, "desc": is_desc}
-    template_context["avg_rating"], template_context[
-        "rating_amount"
-    ] = player.get_rating_info()
+    rating_info = player.get_rating_info()
+    template_context["avg_rating"], template_context["rating_amount"] = rating_info
     template_context["heroes_stats"] = heroes_stats
     template_context["season_stats"] = get_season_stats(current_season_id, player)
     return render_template("/player/heroes.html", **template_context)

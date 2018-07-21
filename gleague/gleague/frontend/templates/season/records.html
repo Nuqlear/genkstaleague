@@ -70,7 +70,7 @@
                                 <tr>
                                     <td>Average match duration</td>
                                     <td>
-                                        {{ avg_match_duration // 60 }}:{{ (shortest_match.duration % 60) }}
+                                        {{ format_duration(avg_match_duration) }}
                                     </td>
                                 </tr>
                             {% endif %}
@@ -153,7 +153,7 @@
                                     <td>{{ longest_match.id }}</td>
                                     <td class="start_time">{{ longest_match.start_time }}</td>
                                     <td>
-                                        {{ longest_match.duration//60 }}:{{ longest_match.duration % 60 }}
+                                        {{ format_duration(longest_match.duration) }}
                                     </td>
                                 </tr>
                                 </tbody>
@@ -182,7 +182,7 @@
                                     <td>{{ shortest_match.id }}</td>
                                     <td class="start_time">{{ shortest_match.start_time }}</td>
                                     <td>
-                                        {{ shortest_match.duration//60 }}:{{ shortest_match.duration % 60 }}
+                                        {{ format_duration(shortest_match.duration) }}
                                     </td>
                                 </tr>
                                 </tbody>

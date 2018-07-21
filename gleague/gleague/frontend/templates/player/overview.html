@@ -133,7 +133,7 @@
                                  src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
                         </td>
                         <td class="start_time">{{ s.match.start_time }}</td>
-                        <td>{{ s.match.duration//60 }}:{{ s.match.duration % 60 }}</td>
+                        <td>{{ format_duration(s.match.duration) }}</td>
                         <td>{{ s.old_pts }}</td>
                         <td>{% if s.pts_diff > 0 %}+{% endif %}{{ s.pts_diff }}</td>
                         <td>{{ s.level }}</td>

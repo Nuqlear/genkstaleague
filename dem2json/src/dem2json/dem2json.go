@@ -16,6 +16,7 @@ func ParseFromStream(stream io.Reader) MatchData {
 	parser.Callbacks.OnCDemoFileInfo(matchData.OnCDemoFileInfo)
 	parser.OnEntity(matchData.OnEntity)
 	parser.Callbacks.OnCMsgDOTACombatLogEntry(matchData.OnCMsgDOTACombatLogEntry)
+	parser.Callbacks.OnCDOTAMatchMetadataFile(matchData.OnCDOTAMatchMetadataFile)
 	parser.Start()
 
 	matchData.finalize()

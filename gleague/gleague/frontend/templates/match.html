@@ -4,6 +4,147 @@
     {{ macro.render_site_title('MATCH #' ~ match.id) }}
 {% endblock %}
 
+{% macro render_match_team_table(match, is_radiant) -%}
+    {% if is_radiant %}
+        <h3 class="radiant_text_color">Radiant</h3>
+    {% else %}
+        <h3 class="dire_text_color">Dire</h3>
+    {% endif %}
+    <div class="row">
+        <div class="col-12">
+            <div class="">
+                <table class="table table-sm text-center">
+                    <thead>
+                    <tr class="header_table">
+                        <th></th>
+                        <th style="text-align:left">Player</th>
+                        <th style="text-align:left">Hero</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Level">L</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Kills">K</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Deaths">D</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Assists">A</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Last Hits">LH</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Hero Damage">HD</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Tower Damage">TD</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Damage Taken">DT</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
+                        <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
+                        <th>PTS</th>
+                        {% if match.players_stats[0].player_match_items %}
+                            <th>Items</th>
+                        {% endif %}
+                        <th>Rating</th>
+                    </tr>
+                    </thead>
+                    <tbody>
+                    {% for s in match.players_stats %}
+                        {% if is_radiant and s.player_slot < 5 or not is_radiant and s.player_slot > 5 %}
+                            <tr class="{% if s.player_slot < 5 %}radiant{% else %}dire{% endif %}_table">
+                                <td>
+                                    {% if s.season_stats.player.avatar_medium %}
+                                        <img class="steam_img" src={{ s.season_stats.player.avatar_medium }}>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:left">
+                                    {% if s.season_stats.player.nickname %}
+                                        <a class="link" href="{{ url_for('players.overview',
+                                                steam_id=s.season_stats.player.steam_id) }}">
+                                            {{ s.season_stats.player.nickname }}
+                                        </a>
+                                        {% if match.cm_captains and s.player_slot in match.cm_captains %}
+                                            <i class="fas fa-crown"
+                                                style="color: orange"
+                                                data-toggle="tooltip"
+                                                data-placement="top"
+                                                title="Drafter"
+                                            ></i>
+                                        {% endif %}
+                                    {% else %}
+                                        <span style="color: gray;">Anonymous</span>
+                                    {% endif %}
+                                </td>
+                                <td style="text-align:left" class="avatar_table">
+                                    <img class="steam_img"
+                                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
+                                </td>
+                                <td>{{ s.level }}</td>
+                                <td>{{ s.kills }}</td>
+                                <td>{{ s.deaths }}</td>
+                                <td>{{ s.assists }}</td>
+                                <td>{{ s.last_hits }}</td>
+                                <td>{{ s.hero_damage }}</td>
+                                <td>{{ s.tower_damage }}</td>
+                                <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
+                                <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
+                                <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
+                                <td>
+                                    {{ s.pts }}
+                                    {% if s.pts_diff > 0 %}<span style="color:rgb(0, 185, 0)">+{% else %}
+                                        <span style="color:red">{% endif %}{{ s.pts_diff }}</span>
+                                </td>
+                                {% if s.player_match_items %}
+                                    <td>
+                                        {% for item in s.player_match_items %}
+                                            <img class="steam_img" src="{{ item.image_url }}"/>
+                                        {% endfor %}
+                                    </td>
+                                {% endif %}
+                                <td style="cursor:default">
+                                    <div class="rating" match_player_stats_id="{{ s.id }}">
+                                    </div>
+                                </td>
+                            </tr>
+                        {% endif %}
+                    {% endfor %}
+                    </tbody>
+                </table>
+            </div>
+        </div>
+    </div>
+    <div class="row">
+        <div class="col-12">
+            <table class="table table-sm">
+                <tbody>
+                    <tr class="{% if is_radiant %}radiant{% else %}dire{% endif %}_table">
+                        {% for ban_pick in match.cm_picks_bans %}
+                            {% if is_radiant and ban_pick.is_radiant or not is_radiant and not ban_pick.is_radiant %}
+                                <td class="text-center">
+                                    <img class="steam_img"
+                                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ ban_pick.hero_img }}_lg.png>
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                    <tr class="{% if is_radiant %}radiant{% else %}dire{% endif %}_table">
+                        {% for ban_pick in match.cm_picks_bans %}
+                            {% if is_radiant and ban_pick.is_radiant or not is_radiant and not ban_pick.is_radiant %}
+                                <td class="text-center">
+                                    {% if ban_pick.is_pick %}
+                                        <i class="fas fa-check draft-icon"
+                                            style="color: green"
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Pick"
+                                        ></i>
+                                    {% else %}
+                                        <i class="fas fa-ban draft-icon"
+                                            style="color: red"
+                                            data-toggle="tooltip"
+                                            data-placement="top"
+                                            title="Ban"
+                                        ></i>
+                                    {% endif %}
+                                </td>
+                            {% endif %}
+                        {% endfor %}
+                    </tr>
+                </tbody>
+            </table>
+        </div>
+    </div>
+{%- endmacro %}
+
+
 {% block content %}
     <div class="card">
         <div class="card-header">
@@ -15,7 +156,6 @@
                 {% endif %}
             </h3>
         </div>
-
         <div class="card-body">
             <table class="table table-sm table-borderless">
                 <thead>
@@ -53,131 +193,52 @@
     {% endset %}
     {{ cache_aware(rate_block, bypass_cache) | safe }}
     <div class="card">
-        <div class="card-header">Players</div>
-        <div class="card-body">
-            <div class="row">
-                <div class="col-12">
-                    <div class="">
-                        <table class="table table-sm text-center">
-                            <thead>
-                            <tr class="header_table">
-                                <th></th>
-                                <th style="text-align:left">Player</th>
-                                <th style="text-align:left">Hero</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Level">L</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Kills">K</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Deaths">D</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Assists">A</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Last Hits">LH</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Hero Damage">HD</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Tower Damage">TD</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Damage Taken">DT</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
-                                <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
-                                <th>PTS</th>
-                                {% if match.players_stats[0].player_match_items %}
-                                    <th>Items</th>
-                                {% endif %}
-                                <th>Rating</th>
-                            </tr>
-                            </thead>
-                            <tbody>
-                            {% for s in match.players_stats %}
-                                {% if s.player_slot < 5 %}
-                                    <tr class="radiant_table">
-                                        {% else %}
-                                    <tr class="dire_table">
-                                {% endif %}
-                            <td>
-                                {% if s.season_stats.player.avatar_medium %}
-                                    <img class="steam_img" src={{ s.season_stats.player.avatar_medium }}>
-                                {% endif %}
-                            </td>
-                            <td style="text-align:left">
-                                {% if s.season_stats.player.nickname %}
-                                    <a class="link" href="{{ url_for('players.overview',
-                                            steam_id=s.season_stats.player.steam_id) }}">
-                                        {{ s.season_stats.player.nickname }}</a>
-                                {% else %}
-                                    <span style="color: gray;">Anonymous</span>
-                                {% endif %}
-                            </td>
-                            <td style="text-align:left" class="avatar_table">
-                                <img class="steam_img"
-                                     src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
-                            </td>
-                            <td>{{ s.level }}</td>
-                            <td>{{ s.kills }}</td>
-                            <td>{{ s.deaths }}</td>
-                            <td>{{ s.assists }}</td>
-                            <td>{{ s.last_hits }}</td>
-                            <td>{{ s.hero_damage }}</td>
-                            <td>{{ s.tower_damage }}</td>
-                            <td>{% if s.damage_taken %} {{ s.damage_taken }} {% else %} - {% endif %}</td>
-                            <td>{% if s.gold_per_min %} {{ s.gold_per_min }} {% else %} - {% endif %}</td>
-                            <td>{% if s.xp_per_min %} {{ s.xp_per_min }} {% else %} - {% endif %}</td>
-                            <td>
-                                {{ s.pts }}
-                                {% if s.pts_diff > 0 %}<span style="color:rgb(0, 185, 0)">+{% else %}
-                                    <span style="color:red">{% endif %}{{ s.pts_diff }}</span>
-                            </td>
-                            {% if s.player_match_items %}
-                                <td>
-                                    {% for item in s.player_match_items %}
-                                        <img class="steam_img" src="{{ item.image_url }}"/>
-                                    {% endfor %}
-                                </td>
-                            {% endif %}
-                            <td style="cursor:default">
-                                <div class="rating" match_player_stats_id="{{ s.id }}">
-                                </div>
-                            </td>
-                            </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
+        <div class="card-header">Teams</div>
+            <div class="card-body">
+                {{ render_match_team_table(match, True) }}
+                {{ render_match_team_table(match, False) }}
             </div>
         </div>
     </div>
 {% endblock %}
 
 {% block script %}
-    <script type="application/javascript">
-    $(document).ready(function() {
-        $('[data-toggle=tooltip]').tooltip({ container: 'body' });
-        function update_rating() {
-            var url = '/api/matches/{{ match.id }}/ratings/';
-            $.getJSON(url, function(data) {
-                $('.rating').each(function() {
-                    var response = data['ratings'][$(this).attr('match_player_stats_id')];
-                    $(this).raty({
-                        readOnly: !response['allowed_rate'],
-                        path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
-                        score: response['avg_rating'],
-                        click: function(score, evt) {
-                            $.post(
-                                '/api/matches/{{ match.id }}/ratings/' +
-                                    $(this)
-                                        .parent()
-                                        .find('.rating')
-                                        .attr('match_player_stats_id') +
-                                    '?rating=' +
-                                    score
-                            );
-                            update_rating();
-                        }
-                    });
+<script type="application/javascript">
+$(document).ready(function() {
+    $('[data-toggle=tooltip]').tooltip({ container: 'body' });
+    function update_rating() {
+        var url = '/api/matches/{{ match.id }}/ratings/';
+        $.getJSON(url, function(data) {
+            $('.rating').each(function() {
+                var response =
+                    data['ratings'][$(this).attr('match_player_stats_id')];
+                $(this).raty({
+                    readOnly: !response['allowed_rate'],
+                    path:
+                        'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
+                    score: response['avg_rating'],
+                    click: function(score, evt) {
+                        $.post(
+                            '/api/matches/{{ match.id }}/ratings/' +
+                                $(this)
+                                    .parent()
+                                    .find('.rating')
+                                    .attr('match_player_stats_id') +
+                                '?rating=' +
+                                score
+                        );
+                        update_rating();
+                    }
                 });
             });
-        }
-        update_rating();
-        $('#start_time').html(
-            moment(moment.unix('{{ match.start_time }}')).format(
-                'MMMM Do YYYY, HH:mm'
-            )
-        );
-    });
-    </script>
+        });
+    }
+    update_rating();
+    $('#start_time').html(
+        moment(moment.unix('{{ match.start_time }}')).format(
+            'MMMM Do YYYY, HH:mm'
+        )
+    );
+});
+</script>
 {% endblock %}

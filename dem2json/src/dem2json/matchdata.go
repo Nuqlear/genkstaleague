@@ -29,21 +29,26 @@ type MatchPlayerData struct {
 	Items         [6]string `json:"items"`
 }
 
-type MatchCaptainModeDraft struct {
+type CMDraft struct {
+	Captains  [2]uint32   `json:"captains"`
+	PicksBans []CMPickBan `json:"picks_bans"`
+}
+
+type CMPickBan struct {
 	IsPick    bool   `json:"is_pick"`
 	IsRadiant bool   `json:"is_radiant"`
 	Hero      string `json:"hero"`
 }
 
 type MatchData struct {
-	MatchId          uint64                  `json:"match_id"`
-	GameMode         int32                   `json:"game_mode"`
-	StartTime        uint32                  `json:"start_time"`
-	EndTime          uint32                  `json:"end_time"`
-	Duration         float32                 `json:"duration"`
-	RadiantWin       bool                    `json:"radiant_win"`
-	Players          [10]MatchPlayerData     `json:"players"`
-	CaptainModeDraft []MatchCaptainModeDraft `json:"cm_draft"`
+	MatchId    uint64              `json:"match_id"`
+	GameMode   int32               `json:"game_mode"`
+	StartTime  uint32              `json:"start_time"`
+	EndTime    uint32              `json:"end_time"`
+	Duration   float32             `json:"duration"`
+	RadiantWin bool                `json:"radiant_win"`
+	Players    [10]MatchPlayerData `json:"players"`
+	CMDraft    CMDraft             `json:"cm_draft"`
 
 	parser         *manta.Parser
 	heroDamageMap  map[string]uint32
@@ -169,17 +174,17 @@ func (matchData *MatchData) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 	}
 }
 
-func (matchData *MatchData) OnCDemoFileInfo(m *dota.CDemoFileInfo) error {
-	gameInfo := m.GetGameInfo().GetDota()
+func (matchData *MatchData) OnCDemoFileInfo(demoFileInfo *dota.CDemoFileInfo) error {
+	gameInfo := demoFileInfo.GetGameInfo().GetDota()
 	matchData.MatchId = gameInfo.GetMatchId()
 	matchData.GameMode = gameInfo.GetGameMode()
 	matchData.RadiantWin = (gameInfo.GetGameWinner() == 2)
 	// if Captains Mode
 	if matchData.GameMode == 2 {
 		for _, pickBan := range gameInfo.GetPicksBans() {
-			matchData.CaptainModeDraft = append(
-				matchData.CaptainModeDraft,
-				MatchCaptainModeDraft{
+			matchData.CMDraft.PicksBans = append(
+				matchData.CMDraft.PicksBans,
+				CMPickBan{
 					pickBan.GetIsPick(),
 					pickBan.GetTeam() == 2,
 					heroesMap[int32(pickBan.GetHeroId())]})
@@ -187,6 +192,16 @@ func (matchData *MatchData) OnCDemoFileInfo(m *dota.CDemoFileInfo) error {
 	}
 	matchData.StartTime = gameInfo.GetEndTime()
 	matchData.EndTime = gameInfo.GetEndTime()
+	return nil
+}
+
+func (matchData *MatchData) OnCDOTAMatchMetadataFile(metadataFile *dota.CDOTAMatchMetadataFile) error {
+	// for some reason there is 10 Teams
+	// but 2-10 teams are the same
+	teams := metadataFile.GetMetadata().GetTeams()
+	// dire player slots starts from 123, not 5
+	matchData.CMDraft.Captains = [2]uint32{
+		teams[0].GetCmCaptainPlayerId(), 123 + teams[1].GetCmCaptainPlayerId()}
 	return nil
 }
 
@@ -198,14 +213,14 @@ func (matchData *MatchData) OnEntity(entity *manta.Entity, entityOp manta.Entity
 	return nil
 }
 
-func (matchData *MatchData) OnCMsgDOTACombatLogEntry(m *dota.CMsgDOTACombatLogEntry) error {
-	t := m.GetType()
+func (matchData *MatchData) OnCMsgDOTACombatLogEntry(combatLogEntry *dota.CMsgDOTACombatLogEntry) error {
+	t := combatLogEntry.GetType()
 	switch dota.DOTA_COMBATLOG_TYPES(t) {
 	case dota.DOTA_COMBATLOG_TYPES_DOTA_COMBATLOG_DAMAGE:
-		if (m.GetIsAttackerHero() || m.GetIsAttackerIllusion()) && m.GetIsTargetHero() && !m.GetIsTargetIllusion() {
-			attacker, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(m.GetDamageSourceName()))
-			target, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(m.GetTargetSourceName()))
-			damage := m.GetValue()
+		if (combatLogEntry.GetIsAttackerHero() || combatLogEntry.GetIsAttackerIllusion()) && combatLogEntry.GetIsTargetHero() && !combatLogEntry.GetIsTargetIllusion() {
+			attacker, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetDamageSourceName()))
+			target, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetTargetSourceName()))
+			damage := combatLogEntry.GetValue()
 			// damage should be prob rescaled based on its type?
 			// fmt.Println(m.GetDamageType())
 			// fmt.Println(m.GetDamageCategory())
@@ -219,9 +234,9 @@ func (matchData *MatchData) OnCMsgDOTACombatLogEntry(m *dota.CMsgDOTACombatLogEn
 			} else {
 				matchData.damageTakenMap[target] = damage
 			}
-		} else if (m.GetIsAttackerHero() || m.GetIsAttackerIllusion()) && m.GetIsTargetBuilding() {
-			attacker, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(m.GetDamageSourceName()))
-			damage := m.GetValue()
+		} else if (combatLogEntry.GetIsAttackerHero() || combatLogEntry.GetIsAttackerIllusion()) && combatLogEntry.GetIsTargetBuilding() {
+			attacker, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetDamageSourceName()))
+			damage := combatLogEntry.GetValue()
 			if _, ok := matchData.towerDamageMap[attacker]; ok {
 				matchData.towerDamageMap[attacker] += damage
 			} else {

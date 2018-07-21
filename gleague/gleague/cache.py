@@ -4,6 +4,7 @@ import pyssdb
 from sqlalchemy import event
 from flask import request
 from flask import render_template_string
+from flask import current_app
 
 from gleague import models
 
@@ -47,13 +48,16 @@ def cached(dependencies):
 
         @wraps(f)
         def decorated_function(*args, **kwargs):
-            key = f"{request.path}?{request.query_string}"
-            res = cache.get(base, key)
-            if not res:
-                res = f(*args, **kwargs)
-                cache.set(base, key, res)
+            if current_app.config["CACHE_ENABLED"]:
+                key = f"{request.path}?{request.query_string}"
+                res = cache.get(base, key)
+                if not res:
+                    res = f(*args, **kwargs)
+                    cache.set(base, key, res)
+                else:
+                    res = res.decode("utf-8")
             else:
-                res = res.decode("utf-8")
+                res = f(*args, **kwargs)
             return render_template_string(res)
 
         return decorated_function
