@@ -120,7 +120,8 @@ var heroesMap = map[int32]string{
 	113: "npc_dota_hero_arc_warden",
 	114: "npc_dota_hero_monkey_king",
 	119: "npc_dota_hero_dark_willow",
-	120: "npc_dota_hero_pangolier"}
+	120: "npc_dota_hero_pangolier",
+	121: "npc_dota_hero_grimstroke"}
 
 var HERO_NAME_SEPARATION_RE = regexp.MustCompile(`([a-z])([A-Z])`)
 
