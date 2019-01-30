@@ -9,11 +9,11 @@ from tests import GleagueAppTestCase
 
 class GleagueDem2jsonTestCase(GleagueAppTestCase):
 
-    replay_url = 'http://replay123.valve.net/570/3214622621_845489484.dem.bz2'
+    replay_url = "http://replay137.valve.net/570/4373263421_1281369645.dem.bz2"
 
     @classmethod
     def _create_app(cls):
-        return create_app('gleague_api_tests')
+        return create_app("gleague_api_tests")
 
     def download_replay(self):
         response = urlopen(self.replay_url)
@@ -26,7 +26,11 @@ class GleagueDem2jsonTestCase(GleagueAppTestCase):
         match = Match.create_from_replay_fs(self.download_replay())
         self.assertNotEqual(match, None)
         for field in [
-            'radiant_win', 'duration', 'game_mode', 'start_time', 'season_id'
+            "radiant_win",
+            "duration",
+            "game_mode",
+            "start_time",
+            "season_id",
         ]:
             # TODO: these fields should be with nullable=False
             self.assertNotEqual(getattr(match, field), None)

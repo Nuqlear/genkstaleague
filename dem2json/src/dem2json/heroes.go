@@ -1,10 +1,5 @@
 package main
 
-import (
-	"regexp"
-	"strings"
-)
-
 var heroesMap = map[int32]string{
 	1:   "npc_dota_hero_antimage",
 	2:   "npc_dota_hero_axe",
@@ -122,11 +117,3 @@ var heroesMap = map[int32]string{
 	119: "npc_dota_hero_dark_willow",
 	120: "npc_dota_hero_pangolier",
 	121: "npc_dota_hero_grimstroke"}
-
-var HERO_NAME_SEPARATION_RE = regexp.MustCompile(`([a-z])([A-Z])`)
-
-func normalizeUnitHeroEntityClassName(className string) string {
-	heroName := strings.Split(className, "Hero_")[1]
-	heroName = strings.ToLower(HERO_NAME_SEPARATION_RE.ReplaceAllString(heroName, `${1}_${2}`))
-	return "npc_dota_hero_" + heroName
-}

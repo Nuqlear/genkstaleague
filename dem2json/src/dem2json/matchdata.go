@@ -10,23 +10,23 @@ import (
 )
 
 type MatchPlayerData struct {
-	AccountId     uint64   `json:"account_id"`
-	AccountIdOrig uint64   `json:"account_id_orig"`
-	HeroId        int32    `json:"hero_id"`
-	HeroName      string   `json:"hero_name"`
-	Kills         int32    `json:"kills"`
-	Deaths        int32    `json:"deaths"`
-	Assists       int32    `json:"assists"`
-	LastHits      int32    `json:"last_hits"`
-	Denies        int32    `json:"denies"`
-	Level         int32    `json:"level"`
-	PlayerSlot    int      `json:"player_slot"`
-	GoldPerMin    int32    `json:"gold_per_min"`
-	XpPerMin      int32    `json:"xp_per_min"`
-	HeroDamage    uint32   `json:"hero_damage"`
-	DamageTaken   uint32   `json:"damage_taken"`
-	TowerDamage   uint32   `json:"tower_damage"`
-	Items         []string `json:"items"`
+	AccountId     uint64    `json:"account_id"`
+	AccountIdOrig uint64    `json:"account_id_orig"`
+	HeroId        int32     `json:"hero_id"`
+	HeroName      string    `json:"hero_name"`
+	Kills         int32     `json:"kills"`
+	Deaths        int32     `json:"deaths"`
+	Assists       int32     `json:"assists"`
+	LastHits      int32     `json:"last_hits"`
+	Denies        int32     `json:"denies"`
+	Level         int32     `json:"level"`
+	PlayerSlot    int       `json:"player_slot"`
+	GoldPerMin    int32     `json:"gold_per_min"`
+	XpPerMin      int32     `json:"xp_per_min"`
+	HeroDamage    uint32    `json:"hero_damage"`
+	DamageTaken   uint32    `json:"damage_taken"`
+	TowerDamage   uint32    `json:"tower_damage"`
+	Items         [6]string `json:"items"`
 }
 
 type CMDraft struct {
@@ -51,7 +51,6 @@ type MatchData struct {
 	CMDraft    CMDraft             `json:"cm_draft"`
 
 	parser         *manta.Parser
-	heroItemsMap   map[string][]string
 	heroDamageMap  map[string]uint32
 	towerDamageMap map[string]uint32
 	damageTakenMap map[string]uint32
@@ -61,7 +60,6 @@ func (matchData *MatchData) init(parser *manta.Parser) {
 	matchData.heroDamageMap = make(map[string]uint32)
 	matchData.towerDamageMap = make(map[string]uint32)
 	matchData.damageTakenMap = make(map[string]uint32)
-	matchData.heroItemsMap = make(map[string][]string)
 	for index, _ := range matchData.Players {
 		matchData.Players[index].HeroDamage = 0
 		matchData.Players[index].DamageTaken = 0
@@ -73,7 +71,6 @@ func (matchData *MatchData) init(parser *manta.Parser) {
 func (matchData *MatchData) finalize() {
 	for index, player := range matchData.Players {
 		heroName := heroesMap[player.HeroId]
-		matchData.Players[index].Items = matchData.heroItemsMap[heroName]
 		matchData.Players[index].HeroName = heroName
 		matchData.Players[index].HeroDamage = matchData.heroDamageMap[heroName]
 		matchData.Players[index].DamageTaken = matchData.damageTakenMap[heroName]
@@ -160,24 +157,21 @@ func (matchData *MatchData) pull_CDOTA_Data(entity *manta.Entity) {
 func (matchData *MatchData) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 	const MAGIC = (1 << 14) - 1
 	if strings.HasPrefix(entity.GetClassName(), "CDOTA_Unit_Hero") {
-		// https://github.com/dotabuff/manta/issues/104
-		// it should be possible to connect items to players through m_iPlayerID entity property
-		// but Valve somehow changed the way integers are stored
-		// so this hacky workaround is the only easy way for now i guess
-		heroName := normalizeUnitHeroEntityClassName(entity.GetClassName())
-		if _, ok := matchData.heroItemsMap[heroName]; !ok {
-			matchData.heroItemsMap[heroName] = make([]string, 6)
-		}
 		count := 0
 		for count < 6 {
-			hItem, _ := entity.GetUint32(fmt.Sprintf("m_hItems.%04d", count))
-			itemEntity := matchData.parser.FindEntity(int32(hItem & MAGIC))
-			if itemEntity != nil {
-				itemIndex, _ := itemEntity.GetInt32("m_pEntity.m_nameStringableIndex")
-				itemName, _ := matchData.parser.LookupStringByIndex("EntityNames", itemIndex)
-				matchData.heroItemsMap[heroName][count] = itemName
-			} else {
-				matchData.heroItemsMap[heroName][count] = ""
+			hOwner, _ := entity.GetUint64("m_hOwnerEntity")
+			ownerEntity := matchData.parser.FindEntity(int32(hOwner & MAGIC))
+			if ownerEntity != nil {
+				playerId, _ := ownerEntity.GetInt32("m_iPlayerID")
+				hItem, _ := entity.GetUint32(fmt.Sprintf("m_hItems.%04d", count))
+				itemEntity := matchData.parser.FindEntity(int32(hItem & MAGIC))
+				if itemEntity != nil {
+					itemIndex, _ := itemEntity.GetInt32("m_pEntity.m_nameStringableIndex")
+					itemName, _ := matchData.parser.LookupStringByIndex("EntityNames", itemIndex)
+					matchData.Players[playerId].Items[count] = itemName
+				} else {
+					matchData.Players[playerId].Items[count] = ""
+				}
 			}
 			count++
 		}
