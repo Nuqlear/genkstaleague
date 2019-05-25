@@ -9,21 +9,20 @@ pipeline:
       - /tmp/cache:/cache
 
   test:
-    image: docker
+    image: nuqlya/docker-compose
     secrets: [ steam_api_key, docker_username, docker_password ]
     environment:
       - DOCKER_HOST=unix:///drone/docker.sock
       - STEAM_API_KEY=$$steam_api_key
     commands:
       - test -e ./docker-cache/images.tar && docker load < ./docker-cache/images.tar
-      - apk add --update py-pip && pip install docker-compose
       - docker-compose -f docker-compose.yml -f docker-compose.build.yml build
       - docker-compose -f docker-compose.yml -f docker-compose.tests.yml up --exit-code-from gleague gleague
       - test ! -e ./docker-cache && mkdir docker-cache
       - docker save $(docker images -f "dangling=false" | awk '{ if ($2 != "<none>") print $1":"$2 }' | tail -n +2) > ./docker-cache/images.tar
 
   publish:
-    image: docker
+    image: nuqlya/docker-compose
     secrets: [ docker_username, docker_password, docker_email ]
     environment:
       - DOCKER_HOST=unix:///drone/docker.sock
@@ -32,7 +31,6 @@ pipeline:
       - DOCKER_EMAIL=$$DOCKER_EMAIL
     commands:
       - docker login -u "$DOCKER_USERNAME" -p "$DOCKER_PASSWORD"
-      - apk add --update py-pip && pip install docker-compose
       - docker-compose -f docker-compose.yml -f docker-compose.build.yml push dem2json gleague
     when:
       branch: master
