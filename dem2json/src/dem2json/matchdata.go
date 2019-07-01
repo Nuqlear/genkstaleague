@@ -282,24 +282,24 @@ func (matchParser *MatchParser) OnCMsgDOTACombatLogEntry(combatLogEntry *dota.CM
 	t := combatLogEntry.GetType()
 	switch dota.DOTA_COMBATLOG_TYPES(t) {
 	case dota.DOTA_COMBATLOG_TYPES_DOTA_COMBATLOG_DAMAGE:
-		if (combatLogEntry.GetIsAttackerHero() || combatLogEntry.GetIsAttackerIllusion()) && combatLogEntry.GetIsTargetHero() && !combatLogEntry.GetIsTargetIllusion() {
+		is_attacker_hero := combatLogEntry.GetIsAttackerHero() || combatLogEntry.GetIsAttackerIllusion()
+		if is_attacker_hero && combatLogEntry.GetIsTargetHero() && !combatLogEntry.GetIsTargetIllusion() {
 			attacker, _ := matchParser.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetDamageSourceName()))
 			target, _ := matchParser.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetTargetSourceName()))
-			damage := combatLogEntry.GetValue()
-			// damage should be prob rescaled based on its type?
-			// fmt.Println(m.GetDamageType())
-			// fmt.Println(m.GetDamageCategory())
-			if _, ok := matchParser.heroDamageMap[attacker]; ok {
-				matchParser.heroDamageMap[attacker] += damage
-			} else {
-				matchParser.heroDamageMap[attacker] = damage
+			if attacker != target {
+				damage := combatLogEntry.GetValue()
+				if _, ok := matchParser.heroDamageMap[attacker]; ok {
+					matchParser.heroDamageMap[attacker] += damage
+				} else {
+					matchParser.heroDamageMap[attacker] = damage
+				}
+				if _, ok := matchParser.damageTakenMap[target]; ok {
+					matchParser.damageTakenMap[target] += damage
+				} else {
+					matchParser.damageTakenMap[target] = damage
+				}
 			}
-			if _, ok := matchParser.damageTakenMap[target]; ok {
-				matchParser.damageTakenMap[target] += damage
-			} else {
-				matchParser.damageTakenMap[target] = damage
-			}
-		} else if (combatLogEntry.GetIsAttackerHero() || combatLogEntry.GetIsAttackerIllusion()) && combatLogEntry.GetIsTargetBuilding() {
+		} else if is_attacker_hero && combatLogEntry.GetIsTargetBuilding() {
 			attacker, _ := matchParser.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetDamageSourceName()))
 			damage := combatLogEntry.GetValue()
 			if _, ok := matchParser.towerDamageMap[attacker]; ok {
