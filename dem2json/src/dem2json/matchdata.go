@@ -4,89 +4,114 @@ import (
 	"fmt"
 	"strconv"
 	"strings"
+	"time"
 
 	"github.com/dotabuff/manta"
 	"github.com/dotabuff/manta/dota"
 )
 
-type MatchPlayerData struct {
-	AccountId     uint64    `json:"account_id"`
-	AccountIdOrig uint64    `json:"account_id_orig"`
-	HeroId        int32     `json:"hero_id"`
-	HeroName      string    `json:"hero_name"`
-	Kills         int32     `json:"kills"`
-	Deaths        int32     `json:"deaths"`
-	Assists       int32     `json:"assists"`
-	LastHits      int32     `json:"last_hits"`
-	Denies        int32     `json:"denies"`
-	Level         int32     `json:"level"`
-	PlayerSlot    int       `json:"player_slot"`
-	GoldPerMin    int32     `json:"gold_per_min"`
-	XpPerMin      int32     `json:"xp_per_min"`
-	HeroDamage    uint32    `json:"hero_damage"`
-	DamageTaken   uint32    `json:"damage_taken"`
-	TowerDamage   uint32    `json:"tower_damage"`
-	Items         [6]string `json:"items"`
-}
-
-type CMDraft struct {
-	Captains  [2]uint32   `json:"captains"`
-	PicksBans []CMPickBan `json:"picks_bans"`
-}
-
-type CMPickBan struct {
-	IsPick    bool   `json:"is_pick"`
-	IsRadiant bool   `json:"is_radiant"`
-	Hero      string `json:"hero"`
-}
-
-type MatchData struct {
-	MatchId    uint64              `json:"match_id"`
-	GameMode   int32               `json:"game_mode"`
-	StartTime  uint32              `json:"start_time"`
-	EndTime    uint32              `json:"end_time"`
-	Duration   float32             `json:"duration"`
-	RadiantWin bool                `json:"radiant_win"`
-	Players    [10]MatchPlayerData `json:"players"`
-	CMDraft    CMDraft             `json:"cm_draft"`
-
+type MatchParser struct {
+	matchData      MatchData
+	gameTime       time.Duration
+	realGameTime   time.Duration
 	parser         *manta.Parser
 	heroDamageMap  map[string]uint32
 	towerDamageMap map[string]uint32
 	damageTakenMap map[string]uint32
 }
 
-func (matchData *MatchData) init(parser *manta.Parser) {
-	matchData.heroDamageMap = make(map[string]uint32)
-	matchData.towerDamageMap = make(map[string]uint32)
-	matchData.damageTakenMap = make(map[string]uint32)
-	for index, _ := range matchData.Players {
+type MatchData struct {
+	MatchID    uint64              `json:"match_id"`
+	GameMode   int32               `json:"game_mode"`
+	StartTime  uint32              `json:"start_time"`
+	EndTime    uint32              `json:"end_time"`
+	Duration   float32             `json:"duration"`
+	RadiantWin bool                `json:"radiant_win"`
+	Players    [10]MatchPlayerData `json:"players"`
+	Draft      Draft               `json:"draft"`
+}
+
+type Draft struct {
+	Captains     [2]uint32 `json:"captains"`
+	PicksAndBans []PickBan `json:"picks_and_bans"`
+}
+
+type PickBan struct {
+	IsPick    bool   `json:"is_pick"`
+	IsRadiant bool   `json:"is_radiant"`
+	Hero      string `json:"hero"`
+}
+
+type MatchPlayerData struct {
+	AccountId     uint64     `json:"account_id"`
+	AccountIdOrig uint64     `json:"account_id_orig"`
+	HeroId        int32      `json:"hero_id"`
+	HeroName      string     `json:"hero_name"`
+	Kills         int32      `json:"kills"`
+	Deaths        int32      `json:"deaths"`
+	Assists       int32      `json:"assists"`
+	LastHits      int32      `json:"last_hits"`
+	Denies        int32      `json:"denies"`
+	Level         int32      `json:"level"`
+	PlayerSlot    int        `json:"player_slot"`
+	GoldPerMin    int32      `json:"gold_per_min"`
+	XpPerMin      int32      `json:"xp_per_min"`
+	HeroDamage    uint32     `json:"hero_damage"`
+	DamageTaken   uint32     `json:"damage_taken"`
+	TowerDamage   uint32     `json:"tower_damage"`
+	Items         [6]string  `json:"items"`
+	Movement      []Position `json:"movement"`
+}
+
+type Position struct {
+	X    uint64        `json:"x"`
+	Y    uint64        `json:"y"`
+	Time time.Duration `json:"time"`
+}
+
+func (matchParser *MatchParser) init(parser *manta.Parser) {
+	matchParser.heroDamageMap = make(map[string]uint32)
+	matchParser.towerDamageMap = make(map[string]uint32)
+	matchParser.damageTakenMap = make(map[string]uint32)
+	matchParser.parser = parser
+	matchData := &matchParser.matchData
+	for index := range matchData.Players {
 		matchData.Players[index].HeroDamage = 0
 		matchData.Players[index].DamageTaken = 0
 		matchData.Players[index].TowerDamage = 0
 	}
-	matchData.parser = parser
 }
 
-func (matchData *MatchData) finalize() {
+func (matchParser *MatchParser) finalize() {
+	matchData := &matchParser.matchData
 	for index, player := range matchData.Players {
 		heroName := heroesMap[player.HeroId]
 		matchData.Players[index].HeroName = heroName
-		matchData.Players[index].HeroDamage = matchData.heroDamageMap[heroName]
-		matchData.Players[index].DamageTaken = matchData.damageTakenMap[heroName]
-		matchData.Players[index].TowerDamage = matchData.towerDamageMap[heroName]
+		matchData.Players[index].HeroDamage = matchParser.heroDamageMap[heroName]
+		matchData.Players[index].DamageTaken = matchParser.damageTakenMap[heroName]
+		matchData.Players[index].TowerDamage = matchParser.towerDamageMap[heroName]
 	}
 }
 
-func (matchData *MatchData) pull_CDOTAGamerulesProxy(entity *manta.Entity) {
+func (matchParser *MatchParser) pull_CDOTAGamerulesProxy(entity *manta.Entity) {
+	matchData := &matchParser.matchData
 	if entity.GetClassName() == "CDOTAGamerulesProxy" {
 		gameEndTime, _ := entity.GetFloat32("m_pGameRules.m_flGameEndTime")
 		gameStartTime, _ := entity.GetFloat32("m_pGameRules.m_flGameStartTime")
-		matchData.Duration = gameEndTime - gameStartTime
+		if gameTime, ok := entity.GetFloat32("m_pGameRules.m_fGameTime"); ok {
+			matchParser.gameTime = time.Duration(gameTime) * time.Second
+		}
+		if gameStartTime != 0 {
+			matchData.Duration = gameEndTime - gameStartTime
+			matchParser.realGameTime = matchParser.gameTime - time.Duration(gameStartTime)*time.Second
+		} else {
+			matchParser.realGameTime = time.Duration(0)
+		}
 	}
 }
 
-func (matchData *MatchData) pull_CDOTA_PlayerResource(entity *manta.Entity) {
+func (matchParser *MatchParser) pull_CDOTA_PlayerResource(entity *manta.Entity) {
+	matchData := &matchParser.matchData
 	count := 0
 	if entity.GetClassName() == "CDOTA_PlayerResource" {
 		for count < 10 {
@@ -125,7 +150,8 @@ func (matchData *MatchData) pull_CDOTA_PlayerResource(entity *manta.Entity) {
 	}
 }
 
-func (matchData *MatchData) pull_CDOTA_Data(entity *manta.Entity) {
+func (matchParser *MatchParser) pull_CDOTA_Data(entity *manta.Entity) {
+	matchData := &matchParser.matchData
 	count := 0
 	if entity.GetClassName() == "CDOTA_DataRadiant" || entity.GetClassName() == "CDOTA_DataDire" {
 		for count < 5 {
@@ -154,41 +180,75 @@ func (matchData *MatchData) pull_CDOTA_Data(entity *manta.Entity) {
 	}
 }
 
-func (matchData *MatchData) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
-	const MAGIC = (1 << 14) - 1
+func getRealCords(entity *manta.Entity) (realX uint64, realY uint64) {
+	const (
+		DefaultOffsetX = 64
+		DefaultOffsetY = 63
+		CellSize       = 1 << 7
+	)
+	cellX, _ := entity.GetUint64("CBodyComponent.m_cellX")
+	cellY, _ := entity.GetUint64("CBodyComponent.m_cellY")
+	offsetX, _ := entity.GetFloat32("CBodyComponent.m_vecX")
+	offsetY, _ := entity.GetFloat32("CBodyComponent.m_vecY")
+	realX = (cellX-DefaultOffsetX)*CellSize + uint64(offsetX)
+	realY = (cellY-DefaultOffsetY)*CellSize + uint64(offsetY)
+	return
+}
+
+func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
+	matchData := &matchParser.matchData
+	const Magic = (1 << 14) - 1
 	if strings.HasPrefix(entity.GetClassName(), "CDOTA_Unit_Hero") {
-		count := 0
-		for count < 6 {
-			hOwner, _ := entity.GetUint64("m_hOwnerEntity")
-			ownerEntity := matchData.parser.FindEntity(int32(hOwner & MAGIC))
-			if ownerEntity != nil {
-				playerId, _ := ownerEntity.GetInt32("m_iPlayerID")
-				hItem, _ := entity.GetUint32(fmt.Sprintf("m_hItems.%04d", count))
-				itemEntity := matchData.parser.FindEntity(int32(hItem & MAGIC))
-				if itemEntity != nil {
-					itemIndex, _ := itemEntity.GetInt32("m_pEntity.m_nameStringableIndex")
-					itemName, _ := matchData.parser.LookupStringByIndex("EntityNames", itemIndex)
-					matchData.Players[playerId].Items[count] = itemName
-				} else {
-					matchData.Players[playerId].Items[count] = ""
+		hOwner, _ := entity.GetUint64("m_hOwnerEntity")
+		ownerEntity := matchParser.parser.FindEntity(int32(hOwner & Magic))
+		if ownerEntity != nil {
+			// save movement
+			playerID, _ := ownerEntity.GetInt32("m_iPlayerID")
+			realX, realY := getRealCords(entity)
+			playerData := &matchData.Players[playerID]
+			// ignore movement after first 10 minutes of the game
+			if matchParser.realGameTime < time.Duration(600)*time.Second {
+				// save position no more othen than for every 15 seconds
+				interval := time.Duration(15) * time.Second
+				if len(playerData.Movement) == 0 || playerData.Movement[len(playerData.Movement)-1].Time < matchParser.realGameTime+interval {
+					matchData.Players[playerID].Movement = append(
+						matchData.Players[playerID].Movement,
+						Position{
+							realX,
+							realY,
+							time.Duration(matchParser.realGameTime)})
 				}
 			}
-			count++
+			// save items
+			count := 0
+			for count < 6 {
+				hItem, _ := entity.GetUint32(fmt.Sprintf("m_hItems.%04d", count))
+				itemEntity := matchParser.parser.FindEntity(int32(hItem & Magic))
+				if itemEntity != nil {
+					itemIndex, _ := itemEntity.GetInt32("m_pEntity.m_nameStringableIndex")
+					itemName, _ := matchParser.parser.LookupStringByIndex("EntityNames", itemIndex)
+					matchData.Players[playerID].Items[count] = itemName
+				} else {
+					matchData.Players[playerID].Items[count] = ""
+				}
+				count++
+			}
 		}
 	}
 }
 
-func (matchData *MatchData) OnCDemoFileInfo(demoFileInfo *dota.CDemoFileInfo) error {
+func (matchParser *MatchParser) OnCDemoFileInfo(demoFileInfo *dota.CDemoFileInfo) error {
+	matchData := &matchParser.matchData
 	gameInfo := demoFileInfo.GetGameInfo().GetDota()
-	matchData.MatchId = gameInfo.GetMatchId()
+	matchData.MatchID = gameInfo.GetMatchId()
 	matchData.GameMode = gameInfo.GetGameMode()
 	matchData.RadiantWin = (gameInfo.GetGameWinner() == 2)
 	// if Captains Mode
 	if matchData.GameMode == 2 {
 		for _, pickBan := range gameInfo.GetPicksBans() {
-			matchData.CMDraft.PicksBans = append(
-				matchData.CMDraft.PicksBans,
-				CMPickBan{
+			matchData.Draft.PicksAndBans = append(
+				matchData.Draft.PicksAndBans,
+				PickBan{
 					pickBan.GetIsPick(),
 					pickBan.GetTeam() == 2,
 					heroesMap[int32(pickBan.GetHeroId())]})
@@ -199,52 +259,53 @@ func (matchData *MatchData) OnCDemoFileInfo(demoFileInfo *dota.CDemoFileInfo) er
 	return nil
 }
 
-func (matchData *MatchData) OnCDOTAMatchMetadataFile(metadataFile *dota.CDOTAMatchMetadataFile) error {
+func (matchParser *MatchParser) OnCDOTAMatchMetadataFile(metadataFile *dota.CDOTAMatchMetadataFile) error {
+	matchData := &matchParser.matchData
 	// for some reason there is 10 Teams
 	// but 2-10 teams are the same
 	teams := metadataFile.GetMetadata().GetTeams()
 	// dire player slots starts from 123, not 5
-	matchData.CMDraft.Captains = [2]uint32{
+	matchData.Draft.Captains = [2]uint32{
 		teams[0].GetCmCaptainPlayerId(), 123 + teams[1].GetCmCaptainPlayerId()}
 	return nil
 }
 
-func (matchData *MatchData) OnEntity(entity *manta.Entity, entityOp manta.EntityOp) error {
-	matchData.pull_CDOTAGamerulesProxy(entity)
-	matchData.pull_CDOTA_PlayerResource(entity)
-	matchData.pull_CDOTA_Data(entity)
-	matchData.pull_CDOTA_Unit_Hero(entity)
+func (matchParser *MatchParser) OnEntity(entity *manta.Entity, entityOp manta.EntityOp) error {
+	matchParser.pull_CDOTAGamerulesProxy(entity)
+	matchParser.pull_CDOTA_PlayerResource(entity)
+	matchParser.pull_CDOTA_Data(entity)
+	matchParser.pull_CDOTA_Unit_Hero(entity)
 	return nil
 }
 
-func (matchData *MatchData) OnCMsgDOTACombatLogEntry(combatLogEntry *dota.CMsgDOTACombatLogEntry) error {
+func (matchParser *MatchParser) OnCMsgDOTACombatLogEntry(combatLogEntry *dota.CMsgDOTACombatLogEntry) error {
 	t := combatLogEntry.GetType()
 	switch dota.DOTA_COMBATLOG_TYPES(t) {
 	case dota.DOTA_COMBATLOG_TYPES_DOTA_COMBATLOG_DAMAGE:
 		if (combatLogEntry.GetIsAttackerHero() || combatLogEntry.GetIsAttackerIllusion()) && combatLogEntry.GetIsTargetHero() && !combatLogEntry.GetIsTargetIllusion() {
-			attacker, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetDamageSourceName()))
-			target, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetTargetSourceName()))
+			attacker, _ := matchParser.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetDamageSourceName()))
+			target, _ := matchParser.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetTargetSourceName()))
 			damage := combatLogEntry.GetValue()
 			// damage should be prob rescaled based on its type?
 			// fmt.Println(m.GetDamageType())
 			// fmt.Println(m.GetDamageCategory())
-			if _, ok := matchData.heroDamageMap[attacker]; ok {
-				matchData.heroDamageMap[attacker] += damage
+			if _, ok := matchParser.heroDamageMap[attacker]; ok {
+				matchParser.heroDamageMap[attacker] += damage
 			} else {
-				matchData.heroDamageMap[attacker] = damage
+				matchParser.heroDamageMap[attacker] = damage
 			}
-			if _, ok := matchData.damageTakenMap[target]; ok {
-				matchData.damageTakenMap[target] += damage
+			if _, ok := matchParser.damageTakenMap[target]; ok {
+				matchParser.damageTakenMap[target] += damage
 			} else {
-				matchData.damageTakenMap[target] = damage
+				matchParser.damageTakenMap[target] = damage
 			}
 		} else if (combatLogEntry.GetIsAttackerHero() || combatLogEntry.GetIsAttackerIllusion()) && combatLogEntry.GetIsTargetBuilding() {
-			attacker, _ := matchData.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetDamageSourceName()))
+			attacker, _ := matchParser.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetDamageSourceName()))
 			damage := combatLogEntry.GetValue()
-			if _, ok := matchData.towerDamageMap[attacker]; ok {
-				matchData.towerDamageMap[attacker] += damage
+			if _, ok := matchParser.towerDamageMap[attacker]; ok {
+				matchParser.towerDamageMap[attacker] += damage
 			} else {
-				matchData.towerDamageMap[attacker] = damage
+				matchParser.towerDamageMap[attacker] = damage
 			}
 		}
 	}

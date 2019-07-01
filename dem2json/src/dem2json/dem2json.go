@@ -10,17 +10,17 @@ import (
 
 func ParseFromStream(stream io.Reader) MatchData {
 	parser, _ := manta.NewStreamParser(stream)
-	var matchData = MatchData{}
-	matchData.init(parser)
+	var matchParser = MatchParser{}
+	matchParser.init(parser)
 
-	parser.Callbacks.OnCDemoFileInfo(matchData.OnCDemoFileInfo)
-	parser.OnEntity(matchData.OnEntity)
-	parser.Callbacks.OnCMsgDOTACombatLogEntry(matchData.OnCMsgDOTACombatLogEntry)
-	parser.Callbacks.OnCDOTAMatchMetadataFile(matchData.OnCDOTAMatchMetadataFile)
+	parser.Callbacks.OnCDemoFileInfo(matchParser.OnCDemoFileInfo)
+	parser.OnEntity(matchParser.OnEntity)
+	parser.Callbacks.OnCMsgDOTACombatLogEntry(matchParser.OnCMsgDOTACombatLogEntry)
+	parser.Callbacks.OnCDOTAMatchMetadataFile(matchParser.OnCDOTAMatchMetadataFile)
 	parser.Start()
 
-	matchData.finalize()
-	return matchData
+	matchParser.finalize()
+	return matchParser.matchData
 }
 
 func main() {

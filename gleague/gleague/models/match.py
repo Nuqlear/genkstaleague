@@ -265,8 +265,8 @@ class Match(db.Model):
             setattr(match, key, match_data[key])
         db.session.add(match)
         if match.game_mode == 2:
-            match.cm_captains = match_data["cm_draft"]["captains"]
-            for pick_ban_data in match_data["cm_draft"]["picks_bans"]:
+            match.cm_captains = match_data["draft"]["captains"]
+            for pick_ban_data in match_data["draft"]["picks_and_bans"]:
                 db.session.add(
                     CMPicksBans(
                         is_pick=pick_ban_data["is_pick"],
