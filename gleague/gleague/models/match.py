@@ -1,3 +1,5 @@
+import enum
+
 import requests
 from flask import current_app
 from sqlalchemy import BigInteger
@@ -21,6 +23,11 @@ from werkzeug.utils import cached_property
 from gleague.core import db
 from gleague.models.season import SeasonStats
 from gleague.utils.position import Position, detect_position
+
+
+class Role(enum.Enum):
+    core = "core"
+    support = "support"
 
 
 class PlayerMatchItem(db.Model):
@@ -76,6 +83,7 @@ class PlayerMatchStats(db.Model):
     damage_taken = Column(Integer, nullable=True)
     movement = Column(JSONB, nullable=True)
     position = Column(ChoiceType(Position))
+    role = Column(ChoiceType(Role))
     observer_wards_placed = Column(Integer)
     sentry_wards_placed = Column(Integer)
     early_last_hits = Column(Integer)
@@ -328,6 +336,20 @@ class Match(db.Model):
             db.session.add(player_stats)
             db.session.add(season_stats)
             player_stats.old_pts = season_stats.pts
+        sort_by_lh = lambda s: s.early_last_hits  # noqa
+        radiant_players = sorted(
+            filter(lambda s: s.player_slot < 5, match.players_stats), key=sort_by_lh
+        )
+        dire_players = sorted(
+            filter(lambda s: s.player_slot > 5, match.players_stats), key=sort_by_lh
+        )
+        supports_number = 2
+        supports = radiant_players[:supports_number] + dire_players[:supports_number]
+        cores = radiant_players[supports_number:] + dire_players[supports_number:]
+        for sup in supports:
+            sup.role = Role.support
+        for core in cores:
+            core.role = Role.core
         pts = dict(radiant=0, dire=0)
         for stats in match.players_stats:
             if stats.player_slot < 5:
