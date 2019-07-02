@@ -76,6 +76,10 @@ class PlayerMatchStats(db.Model):
     damage_taken = Column(Integer, nullable=True)
     movement = Column(JSONB, nullable=True)
     position = Column(ChoiceType(Position))
+    observer_wards_placed = Column(Integer)
+    sentry_wards_placed = Column(Integer)
+    early_last_hits = Column(Integer)
+    early_denies = Column(Integer)
     player_match_ratings = relationship(
         "PlayerMatchRating", cascade="all, delete", backref="player_match_stats"
     )
@@ -305,6 +309,10 @@ class Match(db.Model):
                 "xp_per_min",
                 "gold_per_min",
                 "movement",
+                "early_denies",
+                "early_last_hits",
+                "observer_wards_placed",
+                "sentry_wards_placed",
             ):
                 setattr(player_stats, key, player_data[key])
             player_stats.hero = player_data["hero_name"].replace("npc_dota_hero_", "")

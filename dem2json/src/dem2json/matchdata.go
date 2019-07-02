@@ -10,6 +10,8 @@ import (
 	"github.com/dotabuff/manta/dota"
 )
 
+const EarlyTimeMinutes = 10
+
 type MatchParser struct {
 	matchData      MatchData
 	gameTime       time.Duration
@@ -43,24 +45,28 @@ type PickBan struct {
 }
 
 type MatchPlayerData struct {
-	AccountId     uint64     `json:"account_id"`
-	AccountIdOrig uint64     `json:"account_id_orig"`
-	HeroId        int32      `json:"hero_id"`
-	HeroName      string     `json:"hero_name"`
-	Kills         int32      `json:"kills"`
-	Deaths        int32      `json:"deaths"`
-	Assists       int32      `json:"assists"`
-	LastHits      int32      `json:"last_hits"`
-	Denies        int32      `json:"denies"`
-	Level         int32      `json:"level"`
-	PlayerSlot    int        `json:"player_slot"`
-	GoldPerMin    int32      `json:"gold_per_min"`
-	XpPerMin      int32      `json:"xp_per_min"`
-	HeroDamage    uint32     `json:"hero_damage"`
-	DamageTaken   uint32     `json:"damage_taken"`
-	TowerDamage   uint32     `json:"tower_damage"`
-	Items         [6]string  `json:"items"`
-	Movement      []Position `json:"movement"`
+	AccountId           uint64     `json:"account_id"`
+	AccountIdOrig       uint64     `json:"account_id_orig"`
+	HeroId              int32      `json:"hero_id"`
+	HeroName            string     `json:"hero_name"`
+	Kills               int32      `json:"kills"`
+	Deaths              int32      `json:"deaths"`
+	Assists             int32      `json:"assists"`
+	LastHits            int32      `json:"last_hits"`
+	Denies              int32      `json:"denies"`
+	Level               int32      `json:"level"`
+	PlayerSlot          int        `json:"player_slot"`
+	GoldPerMin          int32      `json:"gold_per_min"`
+	XpPerMin            int32      `json:"xp_per_min"`
+	HeroDamage          uint32     `json:"hero_damage"`
+	DamageTaken         uint32     `json:"damage_taken"`
+	TowerDamage         uint32     `json:"tower_damage"`
+	ObserverWardsPlaced int32      `json:"observer_wards_placed"`
+	SentryWardsPlaced   int32      `json:"sentry_wards_placed"`
+	EarlyDenies         int32      `json:"early_denies"`
+	EarlyLastHits       int32      `json:"early_last_hits"`
+	Items               [6]string  `json:"items"`
+	Movement            []Position `json:"movement"`
 }
 
 type Position struct {
@@ -174,6 +180,16 @@ func (matchParser *MatchParser) pull_CDOTA_Data(entity *manta.Entity) {
 			if result, ok := entity.GetInt32(fetchFrom + ".m_iLastHitCount"); ok {
 				matchPlayerData.LastHits = result
 			}
+			if result, ok := entity.GetInt32(fetchFrom + ".m_iObserverWardsPlaced"); ok {
+				matchPlayerData.ObserverWardsPlaced = result
+			}
+			if result, ok := entity.GetInt32(fetchFrom + ".m_iSentryWardsPlaced"); ok {
+				matchPlayerData.SentryWardsPlaced = result
+			}
+			if matchParser.realGameTime < time.Duration(60*EarlyTimeMinutes)*time.Second {
+				matchPlayerData.EarlyDenies = matchPlayerData.Denies
+				matchPlayerData.EarlyLastHits = matchPlayerData.LastHits
+			}
 			matchData.Players[realCount] = matchPlayerData
 			count++
 		}
@@ -206,8 +222,8 @@ func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 			playerID, _ := ownerEntity.GetInt32("m_iPlayerID")
 			realX, realY := getRealCords(entity)
 			playerData := &matchData.Players[playerID]
-			// ignore movement after first 10 minutes of the game
-			if matchParser.realGameTime > 0 && matchParser.realGameTime < time.Duration(600)*time.Second {
+			// ignore movement after first EarlyTimeMinutes minutes of the game
+			if matchParser.realGameTime > 0 && matchParser.realGameTime < time.Duration(60*EarlyTimeMinutes)*time.Second {
 				// save position no more othen than for every 15 seconds
 				interval := time.Duration(15) * time.Second
 				if len(playerData.Movement) == 0 || playerData.Movement[len(playerData.Movement)-1].Time < matchParser.realGameTime+interval {
