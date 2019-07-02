@@ -207,7 +207,7 @@ func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 			realX, realY := getRealCords(entity)
 			playerData := &matchData.Players[playerID]
 			// ignore movement after first 10 minutes of the game
-			if matchParser.realGameTime < time.Duration(600)*time.Second {
+			if matchParser.realGameTime > 0 && matchParser.realGameTime < time.Duration(600)*time.Second {
 				// save position no more othen than for every 15 seconds
 				interval := time.Duration(15) * time.Second
 				if len(playerData.Movement) == 0 || playerData.Movement[len(playerData.Movement)-1].Time < matchParser.realGameTime+interval {
@@ -216,7 +216,7 @@ func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 						Position{
 							realX,
 							realY,
-							time.Duration(matchParser.realGameTime)})
+							matchParser.realGameTime})
 				}
 			}
 			// save items

@@ -163,3 +163,13 @@ a:hover {
 .clickable:hover {
     background-color: rgba(100, 100, 100, 1);
 }
+
+.positions-container {
+    max-width: 290px;
+}
+
+#positions-canvas {
+    position: absolute;
+    left: 15px;
+    top: 0px;
+}

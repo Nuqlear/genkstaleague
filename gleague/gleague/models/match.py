@@ -11,13 +11,16 @@ from sqlalchemy import and_
 from sqlalchemy import desc
 from sqlalchemy import func
 from sqlalchemy.dialects.postgresql import ARRAY
+from sqlalchemy.dialects.postgresql import JSONB
 from sqlalchemy.orm import relationship
 from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.schema import UniqueConstraint
+from sqlalchemy_utils.types import ChoiceType
 from werkzeug.utils import cached_property
 
 from gleague.core import db
 from gleague.models.season import SeasonStats
+from gleague.utils.position import Position, detect_position
 
 
 class PlayerMatchItem(db.Model):
@@ -71,6 +74,8 @@ class PlayerMatchStats(db.Model):
     xp_per_min = Column(Integer, nullable=True)
     gold_per_min = Column(Integer, nullable=True)
     damage_taken = Column(Integer, nullable=True)
+    movement = Column(JSONB, nullable=True)
+    position = Column(ChoiceType(Position))
     player_match_ratings = relationship(
         "PlayerMatchRating", cascade="all, delete", backref="player_match_stats"
     )
@@ -299,9 +304,13 @@ class Match(db.Model):
                 "damage_taken",
                 "xp_per_min",
                 "gold_per_min",
+                "movement",
             ):
                 setattr(player_stats, key, player_data[key])
             player_stats.hero = player_data["hero_name"].replace("npc_dota_hero_", "")
+            player_stats.position = detect_position(
+                list([[pos["x"], pos["y"]] for pos in player_stats.movement])
+            )
             for item in player_data["items"]:
                 if item:
                     db.session.add(

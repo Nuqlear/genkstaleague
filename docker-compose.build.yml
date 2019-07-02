@@ -20,4 +20,4 @@ services:
     depends_on:
       - dem2json-base
   postgres:
-    image: postgres:9.3
+    image: postgres:latest
