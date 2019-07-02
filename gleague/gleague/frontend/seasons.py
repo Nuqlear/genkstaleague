@@ -15,6 +15,9 @@ from gleague.models import Match
 from gleague.models import PlayerMatchStats
 from gleague.models import Season
 from gleague.models import SeasonStats
+from gleague.models import Player
+from gleague.models import Role
+from gleague.utils.position import Position
 from gleague.cache import cached
 
 
@@ -509,6 +512,33 @@ def records(season_number=-1):
             .with_entities(func.avg(Match.duration))
             .scalar()
         )
+
+        pts_diff = func.sum(PlayerMatchStats.pts_diff).label("pts_diff")
+        template_context["most_powerful_sups"] = (
+            PlayerMatchStats.query.join(SeasonStats)
+            .join(Player)
+            .filter(
+                PlayerMatchStats.role == Role.support, SeasonStats.season_id == s_id
+            )
+            .with_entities(Player.nickname, Player.steam_id, pts_diff)
+            .group_by(Player.nickname, Player.steam_id, PlayerMatchStats.id)
+            .order_by(desc(pts_diff))
+            .limit(3)
+        ).all()
+        template_context["most_powerful_midlaners"] = (
+            PlayerMatchStats.query.join(SeasonStats)
+            .join(Player)
+            .filter(
+                PlayerMatchStats.role == Role.core,
+                PlayerMatchStats.position == Position.middle,
+                SeasonStats.season_id == s_id,
+            )
+            .with_entities(Player.nickname, Player.steam_id, pts_diff)
+            .group_by(Player.nickname, Player.steam_id, PlayerMatchStats.id)
+            .group_by(PlayerMatchStats.id)
+            .order_by(desc(pts_diff))
+            .limit(3)
+        ).all()
 
         radiant_winrate = (
             100

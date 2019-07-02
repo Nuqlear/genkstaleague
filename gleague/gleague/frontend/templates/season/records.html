@@ -1,213 +1,262 @@
 {% extends '/base.html' %}
 
 {% block head %}
-    {{ macro.render_site_title("SEASON #" ~ season_number ~ " RECORDS") }}
+{{ macro.render_site_title("SEASON #" ~ season_number ~ " RECORDS") }}
 {% endblock %}
 
 {% block header %}
-    {% include '/_blocks/season_header.html' %}
+{% include '/_blocks/season_header.html' %}
 {% endblock %}
 
 {% block content %}
-    <div class="row">
-        <div class="col-12">
-            <div class="card">
-                <div class="card-header">In-Match Player Records</div>
-                <div class="card-body">
-                    <div class="card-text">
-                        <table class="table table-sm table-borderless table-hover in_match_records_table">
-                            <tbody>
+<div class="row">
+    <div class="col-12">
+        <div class="card">
+            <div class="card-header">In-Match Player Records</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover in_match_records_table">
+                        <tbody>
                             {% for record in in_match_records %}
-                                <tr match_id="{{ record.match_id }}" class="clickable">
-                                    <td>{{ record.record_name }}</td>
-                                    <td><a href="{{ url_for('players.overview', steam_id=record.player.steam_id) }}"
-                                           class="link_alt">{{ record.player.nickname }}</a></td>
-                                    <td><img class="steam_img"
-                                             src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ record.hero }}_lg.png>
-                                    </td>
-                                    <td>{{ record.value }}</td>
-                                </tr>
+                            <tr match_id="{{ record.match_id }}" class="clickable">
+                                <td>{{ record.record_name }}</td>
+                                <td><a href="{{ url_for('players.overview', steam_id=record.player.steam_id) }}"
+                                        class="link_alt">{{ record.player.nickname }}</a></td>
+                                <td><img class="steam_img"
+                                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ record.hero }}_lg.png>
+                                        </td> <td>{{ record.value }}</td>
+                            </tr>
                             {% endfor %}
-                            </tbody>
-                        </table>
+                        </tbody>
+                    </table>
 
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">In-Season Players Records</div>
-                <div class="card-body">
-                    <div class="card-text">
-                        <table class="table table-sm table-hover table-borderless in_season_records_table">
-                            <tbody>
-                            {% for record in in_season_player_records %}
-                                <tr>
-                                    <td>{{ record.title }}</td>
-                                    <td>
-                                        <a href="{{ url_for('players.overview', steam_id=record.player.steam_id) }}">
-                                            {{ record.player.nickname }}
-                                        </a>
-                                    </td>
-                                    <td>{{ record.value }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">In-Season Averages</div>
-                <div class="card-body">
-                    <div class="card-text">
-                        <table class="table table-sm table-borderless table-hover">
-                            <tbody>
-                            {% if avg_match_duration %}
-                                <tr>
-                                    <td>Average match duration</td>
-                                    <td>
-                                        {{ format_duration(avg_match_duration) }}
-                                    </td>
-                                </tr>
-                            {% endif %}
-                            {% if side_winrates %}
-                                <tr>
-                                    <td>Radiant Winrate</td>
-                                    <td>
-                                        {{ side_winrates.radiant }}%
-                                    </td>
-                                </tr>
-                                <tr>
-                                    <td>Dire Winrate</td>
-                                    <td>
-                                        {{ side_winrates.dire }}%
-                                    </td>
-                                </tr>
-                            {% endif %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">Most Powerful Duo</div>
-                <div class="card-body">
-                    <div class="card-text">
-                        <table class="table table-sm table-borderless table-hover">
-                            <tbody>
-                            {% for duo in powerful_duos %}
-                                <tr>
-                                    <td>{{ duo.player1 }}</td>
-                                    <td>{{ duo.player2 }}</td>
-                                    <td>{% if duo.pts_diff > 0 %}+{% endif %}{{ duo.pts_diff }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">Most Powerless Duo</div>
-                <div class="card-body">
-                    <div class="card-text">
-                        <table class="table table-sm table-borderless table-hover">
-                            <tbody>
-                            {% for duo in powerless_duos %}
-                                <tr>
-                                    <td>{{ duo.player1 }}</td>
-                                    <td>{{ duo.player2 }}</td>
-                                    <td>{% if duo.pts_diff > 0 %}+{% endif %}{{ duo.pts_diff }}</td>
-                                </tr>
-                            {% endfor %}
-                            </tbody>
-                        </table>
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">In-Season Longest Match</div>
-                <div class="card-body">
-                    <div class="card-text">
-                        {% if longest_match %}
-                            <table class="table table-sm table-borderless table-hover in_match_records_table">
-                                <thead>
-                                <tr>
-                                    <th>Match id</th>
-                                    <th>Date</th>
-                                    <th>Duration</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr match_id="{{ longest_match.id }}" class="clickable">
-                                    <td>{{ longest_match.id }}</td>
-                                    <td class="start_time">{{ longest_match.start_time }}</td>
-                                    <td>
-                                        {{ format_duration(longest_match.duration) }}
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        {% endif %}
-                    </div>
-                </div>
-            </div>
-        </div>
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">In-Season Shortest Match</div>
-                <div class="card-body">
-                    <div class="card-text">
-                        {% if shortest_match %}
-                            <table class="table table-sm table-borderless table-hover in_match_records_table">
-                                <thead>
-                                <tr>
-                                    <th>Match id</th>
-                                    <th>Date</th>
-                                    <th>Duration</th>
-                                </tr>
-                                </thead>
-                                <tbody>
-                                <tr match_id="{{ shortest_match.id }}" class="clickable">
-                                    <td>{{ shortest_match.id }}</td>
-                                    <td class="start_time">{{ shortest_match.start_time }}</td>
-                                    <td>
-                                        {{ format_duration(shortest_match.duration) }}
-                                    </td>
-                                </tr>
-                                </tbody>
-                            </table>
-                        {% endif %}
-                    </div>
                 </div>
             </div>
         </div>
     </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">In-Season Players Records</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-hover table-borderless in_season_records_table">
+                        <tbody>
+                            {% for record in in_season_player_records %}
+                            <tr>
+                                <td>{{ record.title }}</td>
+                                <td>
+                                    <a href="{{ url_for('players.overview', steam_id=record.player.steam_id) }}">
+                                        {{ record.player.nickname }}
+                                    </a>
+                                </td>
+                                <td>{{ record.value }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">In-Season Averages</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <tbody>
+                            {% if avg_match_duration %}
+                            <tr>
+                                <td>Average match duration</td>
+                                <td>
+                                    {{ format_duration(avg_match_duration) }}
+                                </td>
+                            </tr>
+                            {% endif %}
+                            {% if side_winrates %}
+                            <tr>
+                                <td>Radiant Winrate</td>
+                                <td>
+                                    {{ side_winrates.radiant }}%
+                                </td>
+                            </tr>
+                            <tr>
+                                <td>Dire Winrate</td>
+                                <td>
+                                    {{ side_winrates.dire }}%
+                                </td>
+                            </tr>
+                            {% endif %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Most Powerful Duo</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <tbody>
+                            {% for duo in powerful_duos %}
+                            <tr>
+                                <td>{{ duo.player1 }}</td>
+                                <td>{{ duo.player2 }}</td>
+                                <td>{% if duo.pts_diff > 0 %}+{% endif %}{{ duo.pts_diff }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Most Powerless Duo</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <tbody>
+                            {% for duo in powerless_duos %}
+                            <tr>
+                                <td>{{ duo.player1 }}</td>
+                                <td>{{ duo.player2 }}</td>
+                                <td>{% if duo.pts_diff > 0 %}+{% endif %}{{ duo.pts_diff }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% if most_powerful_sups %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Most Powerful Supports</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <tbody>
+                            {% for player in most_powerful_sups %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
+                                        {{ player.nickname }}
+                                    </a>
+                                </td>
+                                <td>{% if player.pts_diff > 0 %}+{% endif %}{{ player.pts_diff }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if most_powerful_midlaners %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Most Powerful Midlaners</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <tbody>
+                            {% for player in most_powerful_midlaners %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
+                                        {{ player.nickname }}
+                                    </a>
+                                </td>
+                                <td>{% if player.pts_diff > 0 %}+{% endif %}{{ player.pts_diff }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">In-Season Longest Match</div>
+            <div class="card-body">
+                <div class="card-text">
+                    {% if longest_match %}
+                    <table class="table table-sm table-borderless table-hover in_match_records_table">
+                        <thead>
+                            <tr>
+                                <th>Match id</th>
+                                <th>Date</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr match_id="{{ longest_match.id }}" class="clickable">
+                                <td>{{ longest_match.id }}</td>
+                                <td class="start_time">{{ longest_match.start_time }}</td>
+                                <td>
+                                    {{ format_duration(longest_match.duration) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">In-Season Shortest Match</div>
+            <div class="card-body">
+                <div class="card-text">
+                    {% if shortest_match %}
+                    <table class="table table-sm table-borderless table-hover in_match_records_table">
+                        <thead>
+                            <tr>
+                                <th>Match id</th>
+                                <th>Date</th>
+                                <th>Duration</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            <tr match_id="{{ shortest_match.id }}" class="clickable">
+                                <td>{{ shortest_match.id }}</td>
+                                <td class="start_time">{{ shortest_match.start_time }}</td>
+                                <td>
+                                    {{ format_duration(shortest_match.duration) }}
+                                </td>
+                            </tr>
+                        </tbody>
+                    </table>
+                    {% endif %}
+                </div>
+            </div>
+        </div>
+    </div>
+</div>
 {% endblock %}
 
 {% block script %}
-    <script>
-    $(document).ready(function() {
-    $('.in_match_records_table tbody > tr').each(function() {
-        $(this).click(function() {
-            window.location.href = '/matches/' + $(this).attr('match_id');
+<script>
+    $(document).ready(function () {
+        $('.in_match_records_table tbody > tr').each(function () {
+            $(this).click(function () {
+                window.location.href = '/matches/' + $(this).attr('match_id');
+            });
+        });
+        $('.start_time').each(function () {
+            $(this).html(
+                moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm')
+            );
         });
     });
-    $('.start_time').each(function() {
-        $(this).html(
-            moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm')
-        );
-    });
-});
 </script>
 {% endblock %}
