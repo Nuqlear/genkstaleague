@@ -118,7 +118,8 @@ def records(season_number=-1):
             db.session.query(SeasonStats)
             .filter(
                 and_(
-                    SeasonStats.season_id == s_id, SeasonStats.longest_losestreak == subq
+                    SeasonStats.season_id == s_id,
+                    SeasonStats.longest_losestreak == subq,
                 )
             )
             .first()
@@ -261,7 +262,9 @@ def records(season_number=-1):
         max_deaths_pms = (
             db.session.query(PlayerMatchStats)
             .join(SeasonStats)
-            .filter(and_(SeasonStats.season_id == s_id, PlayerMatchStats.deaths == subq))
+            .filter(
+                and_(SeasonStats.season_id == s_id, PlayerMatchStats.deaths == subq)
+            )
             .order_by(PlayerMatchStats.id)
             .first()
         )
@@ -310,7 +313,9 @@ def records(season_number=-1):
             db.session.query(PlayerMatchStats)
             .join(SeasonStats)
             .filter(
-                and_(SeasonStats.season_id == s_id, PlayerMatchStats.hero_damage == subq)
+                and_(
+                    SeasonStats.season_id == s_id, PlayerMatchStats.hero_damage == subq
+                )
             )
             .order_by(PlayerMatchStats.id)
             .first()
@@ -382,6 +387,121 @@ def records(season_number=-1):
                 )
             )
         # In-Match Records ENDS
+
+        subq = (
+            PlayerMatchStats.query.join(SeasonStats)
+            .filter(SeasonStats.season_id == s_id)
+            .with_entities(func.max(PlayerMatchStats.observer_wards_placed))
+            .as_scalar()
+        )
+        max_observer_wards_pms = (
+            db.session.query(PlayerMatchStats)
+            .join(SeasonStats)
+            .filter(
+                and_(
+                    SeasonStats.season_id == s_id,
+                    PlayerMatchStats.observer_wards_placed == subq,
+                )
+            )
+            .order_by(PlayerMatchStats.id)
+            .first()
+        )
+        if max_observer_wards_pms:
+            template_context["in_match_records"].append(
+                in_match_records_nt(
+                    max_observer_wards_pms.match_id,
+                    "Most observer wards placed",
+                    max_observer_wards_pms.season_stats.player,
+                    max_observer_wards_pms.hero,
+                    max_observer_wards_pms.observer_wards_placed,
+                )
+            )
+
+        subq = (
+            PlayerMatchStats.query.join(SeasonStats)
+            .filter(SeasonStats.season_id == s_id)
+            .with_entities(func.max(PlayerMatchStats.sentry_wards_placed))
+            .as_scalar()
+        )
+        max_sentry_wards_placed = (
+            db.session.query(PlayerMatchStats)
+            .join(SeasonStats)
+            .filter(
+                and_(
+                    SeasonStats.season_id == s_id,
+                    PlayerMatchStats.sentry_wards_placed == subq,
+                )
+            )
+            .order_by(PlayerMatchStats.id)
+            .first()
+        )
+        if max_sentry_wards_placed:
+            template_context["in_match_records"].append(
+                in_match_records_nt(
+                    max_sentry_wards_placed.match_id,
+                    "Most sentry wards placed",
+                    max_sentry_wards_placed.season_stats.player,
+                    max_sentry_wards_placed.hero,
+                    max_sentry_wards_placed.sentry_wards_placed,
+                )
+            )
+
+        subq = (
+            PlayerMatchStats.query.join(SeasonStats)
+            .filter(SeasonStats.season_id == s_id)
+            .with_entities(func.max(PlayerMatchStats.early_last_hits))
+            .as_scalar()
+        )
+        max_early_last_hits = (
+            db.session.query(PlayerMatchStats)
+            .join(SeasonStats)
+            .filter(
+                and_(
+                    SeasonStats.season_id == s_id,
+                    PlayerMatchStats.early_last_hits == subq,
+                )
+            )
+            .order_by(PlayerMatchStats.id)
+            .first()
+        )
+        if max_early_last_hits:
+            template_context["in_match_records"].append(
+                in_match_records_nt(
+                    max_early_last_hits.match_id,
+                    "Max Last Hits at 10 minutes",
+                    max_early_last_hits.season_stats.player,
+                    max_early_last_hits.hero,
+                    max_early_last_hits.early_last_hits,
+                )
+            )
+
+        subq = (
+            PlayerMatchStats.query.join(SeasonStats)
+            .filter(SeasonStats.season_id == s_id)
+            .with_entities(func.max(PlayerMatchStats.early_denies))
+            .as_scalar()
+        )
+        max_early_denies = (
+            db.session.query(PlayerMatchStats)
+            .join(SeasonStats)
+            .filter(
+                and_(
+                    SeasonStats.season_id == s_id, PlayerMatchStats.early_denies == subq
+                )
+            )
+            .order_by(PlayerMatchStats.id)
+            .first()
+        )
+        if max_early_denies:
+            template_context["in_match_records"].append(
+                in_match_records_nt(
+                    max_early_denies.match_id,
+                    "Max Denies at 10 minutes",
+                    max_early_denies.season_stats.player,
+                    max_early_denies.hero,
+                    max_early_denies.early_denies,
+                )
+            )
 
         template_context["avg_match_duration"] = (
             Match.query.join(Season)
