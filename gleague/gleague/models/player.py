@@ -101,31 +101,3 @@ class Player(db.Model):
         avg_rating, rating_amount = rating_info
         avg_rating = avg_rating or 0
         return avg_rating, rating_amount
-
-    def get_heroes(self, current_season_id=None):
-        filters = SeasonStats.steam_id == self.steam_id
-        if current_season_id is not None:
-            filters = and_(filters, SeasonStats.season_id == current_season_id)
-        query = (
-            PlayerMatchStats.query.join(SeasonStats)
-            .filter(filters)
-            .with_entities(
-                PlayerMatchStats.hero.label("hero"),
-                func.count(PlayerMatchStats.id).label("played"),
-                (
-                    100
-                    * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
-                    / func.count(PlayerMatchStats.id)
-                ).label("winrate"),
-                func.sum(PlayerMatchStats.pts_diff).label("pts_diff"),
-                (
-                    (
-                        func.avg(PlayerMatchStats.kills)
-                        + func.avg(PlayerMatchStats.assists)
-                    )
-                    / func.avg(PlayerMatchStats.deaths + 1)
-                ).label("kda"),
-            )
-            .group_by(PlayerMatchStats.hero)
-        )
-        return query

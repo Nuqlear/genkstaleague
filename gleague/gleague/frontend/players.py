@@ -5,7 +5,6 @@ from flask import abort
 from flask import current_app
 from flask import render_template
 from flask import request
-from sqlalchemy import and_
 from sqlalchemy import desc
 
 from gleague.models import Player
@@ -14,6 +13,7 @@ from gleague.models import PlayerMatchRating
 from gleague.models import Season
 from gleague.models import Match
 from gleague.models import SeasonStats
+from gleague.models.queries import player_analytic
 from gleague.cache import cached
 
 
@@ -36,41 +36,31 @@ def overview(steam_id):
     if not player:
         return abort(404)
     current_season_id = Season.current().id
-    stats = (
+    matches_stats = (
         PlayerMatchStats.query.join(SeasonStats)
         .filter(SeasonStats.steam_id == steam_id)
         .order_by(desc(PlayerMatchStats.match_id))
         .limit(current_app.config["PLAYER_OVERVIEW_MATCHES_AMOUNT"])
+        .all()
     )
-    pts_seq = (
-        PlayerMatchStats.query.join(SeasonStats)
-        .filter(
-            and_(
-                SeasonStats.season_id == current_season_id,
-                SeasonStats.steam_id == steam_id,
-            )
-        )
-        .order_by(PlayerMatchStats.match_id)
-        .values(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)
-    )
-    pts_history = [[0, 1000]]
-    for index, el in enumerate(pts_seq):
-        pts_history.append([index + 1, el[0]])
-    avg_rating, rating_amount = player.get_rating_info()
     signature_heroes = (
-        player.get_heroes(current_season_id).order_by(desc("played")).limit(3).all()
+        player_analytic.get_heroes(player.steam_id, current_season_id)
+        .order_by(desc("played"))
+        .limit(3)
+        .all()
     )
-    matches_stats = stats.all()
-    season_stats = get_season_stats(current_season_id, player)
+    avg_rating, rating_amount = player_analytic.get_rating_info(player.steam_id)
     return render_template(
         "/player/overview.html",
         player=player,
-        season_stats=season_stats,
+        season_stats=get_season_stats(current_season_id, player),
         avg_rating=avg_rating,
         rating_amount=rating_amount,
         signature_heroes=signature_heroes,
         matches_stats=matches_stats,
-        pts_history=json.dumps(pts_history),
+        pts_history=json.dumps(
+            player_analytic.get_pts_history(steam_id, current_season_id)
+        ),
     )
 
 
@@ -111,19 +101,27 @@ def heroes(steam_id):
     player = Player.query.get(steam_id)
     if not player:
         return abort(404)
-    sort_value = request.args.get("sort", "played")
-    if sort_value not in ["hero", "played", "pts_diff", "winrate", "kda"]:
-        sort_value = "played"
-    order_by = sort_value
+    sort = request.args.get("sort", "played")
+    if sort not in ["hero", "played", "pts_diff", "winrate", "kda"]:
+        sort = "played"
+    order_by = sort
     is_desc = request.args.get("desc", "yes")
     if is_desc != "no":
         is_desc = "yes"
         order_by = desc(order_by)
     current_season_id = Season.current().id
-    heroes_stats = player.get_heroes(current_season_id).order_by(order_by).all()
-    template_context = {"player": player, "sort": sort_value, "desc": is_desc}
-    rating_info = player.get_rating_info()
+    heroes_stats = (
+        player_analytic.get_heroes(player.steam_id, current_season_id)
+        .order_by(order_by)
+        .all()
+    )
+    template_context = {
+        "player": player,
+        "sort": sort,
+        "desc": is_desc,
+        "heroes_stats": heroes_stats,
+        "season_stats": get_season_stats(current_season_id, player),
+    }
+    rating_info = player_analytic.get_rating_info(player.steam_id)
     template_context["avg_rating"], template_context["rating_amount"] = rating_info
-    template_context["heroes_stats"] = heroes_stats
-    template_context["season_stats"] = get_season_stats(current_season_id, player)
     return render_template("/player/heroes.html", **template_context)
