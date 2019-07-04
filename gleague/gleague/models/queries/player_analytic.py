@@ -1,20 +1,10 @@
-from collections import namedtuple
-
-from flask import request
 from sqlalchemy import and_
 from sqlalchemy import case
-from sqlalchemy import desc
 from sqlalchemy import func
 
-from gleague.core import db
-from gleague.models import Match
 from gleague.models import PlayerMatchRating
 from gleague.models import PlayerMatchStats
-from gleague.models import Season
 from gleague.models import SeasonStats
-from gleague.models import Player
-from gleague.models import Role
-from gleague.utils.position import Position
 
 
 def get_pts_history(steam_id, season_id):

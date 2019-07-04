@@ -4,12 +4,14 @@ from flask import abort
 from flask import g
 from flask import jsonify
 from flask import request
+from flask import current_app
 
 from gleague.api import admin_required
 from gleague.api import login_required
 from gleague.core import db
 from gleague.models import Match
 from gleague.models import PlayerMatchRating
+from gleague.match_import import create_match_from_replay
 
 
 matches_bp = Blueprint("matches", __name__)
@@ -20,7 +22,8 @@ matches_bp = Blueprint("matches", __name__)
 def create_match():
     replay = request.files["file"]
     if replay:
-        Match.create_from_replay_fs(replay)
+        base_pts_diff = current_app.config.get("MATCH_BASE_PTS_DIFF", 20)
+        create_match_from_replay(replay.read(), base_pts_diff)
         return Response(status=201)
     return abort(400)
 

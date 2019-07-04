@@ -3,7 +3,7 @@ from io import BytesIO
 from urllib.request import urlopen
 
 from gleague.api import create_app
-from gleague.models import Match
+from gleague.match_import import create_match_from_replay
 from tests import GleagueAppTestCase
 
 
@@ -23,7 +23,8 @@ class GleagueDem2jsonTestCase(GleagueAppTestCase):
         return data
 
     def test_create_match_from_replay(self):
-        match = Match.create_from_replay_fs(self.download_replay())
+        base_pts_diff = 10
+        match = create_match_from_replay(self.download_replay(), base_pts_diff)
         self.assertNotEqual(match, None)
         for field in [
             "radiant_win",
