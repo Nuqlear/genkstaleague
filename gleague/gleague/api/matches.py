@@ -23,7 +23,7 @@ def create_match():
     replay = request.files["file"]
     if replay:
         base_pts_diff = current_app.config.get("MATCH_BASE_PTS_DIFF", 20)
-        create_match_from_replay(replay.read(), base_pts_diff)
+        create_match_from_replay(replay, base_pts_diff)
         return Response(status=201)
     return abort(400)
 
