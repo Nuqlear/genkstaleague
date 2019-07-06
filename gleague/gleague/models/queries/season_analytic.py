@@ -47,7 +47,7 @@ def get_in_season_records(season_id):
     )
     for agg_function, field_name, label in [
         (func.max, "longest_losestreak", "Longest winstreak"),
-        (func.min, "longest_winstreak", "Longest losestreak"),
+        (func.max, "longest_winstreak", "Longest losestreak"),
     ]:
         field = getattr(SeasonStats, field_name)
         subq = (
@@ -143,9 +143,9 @@ def get_in_match_records(season_id):
     records = [_get_best_kda(season_id)]
     for agg_function, field_name, label in [
         (func.max, "kills", "Max kills"),
-        (func.min, "deaths", "Max deaths"),
-        (func.min, "hero_damage", "Most hero damage"),
-        (func.min, "last_hits", "Most last hits"),
+        (func.max, "deaths", "Max deaths"),
+        (func.max, "hero_damage", "Most hero damage"),
+        (func.max, "last_hits", "Most last hits"),
         (func.max, "tower_damage", "Most tower damage"),
         (func.max, "damage_taken", "Most damage taken"),
         (func.max, "observer_wards_placed", "Most observer wards placed"),
@@ -200,8 +200,7 @@ def get_most_powerful_midlaners(season_id):
             SeasonStats.season_id == season_id,
         )
         .with_entities(Player.nickname, Player.steam_id, pts_diff)
-        .group_by(Player.nickname, Player.steam_id, PlayerMatchStats.id)
-        .group_by(PlayerMatchStats.id)
+        .group_by(Player.nickname, Player.steam_id, SeasonStats.id)
         .order_by(desc(pts_diff))
         .limit(3)
     ).all()
@@ -216,7 +215,7 @@ def get_most_powerful_supports(season_id):
             PlayerMatchStats.role == Role.support, SeasonStats.season_id == season_id
         )
         .with_entities(Player.nickname, Player.steam_id, pts_diff)
-        .group_by(Player.nickname, Player.steam_id, PlayerMatchStats.id)
+        .group_by(Player.nickname, Player.steam_id, SeasonStats.id)
         .order_by(desc(pts_diff))
         .limit(3)
     ).all()

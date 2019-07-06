@@ -59,6 +59,7 @@ def records(season_number=-1):
     if longest_match:
         template_context.update(
             {
+                "longest_match": longest_match,
                 "shortest_match": season_analytic.get_shortest_match(s_id),
                 "in_season_player_records": season_analytic.get_in_season_records(s_id),
                 "in_match_records": season_analytic.get_in_match_records(s_id),
