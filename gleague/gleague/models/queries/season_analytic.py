@@ -46,8 +46,8 @@ def get_in_season_records(season_id):
         "in_season_player_records", ["title", "player", "value"]
     )
     for agg_function, field_name, label in [
-        (func.max, "longest_losestreak", "Longest winstreak"),
-        (func.max, "longest_winstreak", "Longest losestreak"),
+        (func.max, "longest_losestreak", "Longest losestreak"),
+        (func.max, "longest_winstreak", "Longest winstreak"),
     ]:
         field = getattr(SeasonStats, field_name)
         subq = (
