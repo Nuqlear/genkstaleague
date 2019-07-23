@@ -13,8 +13,11 @@ class BaseConfig(object):
     _admin_steam_id = int(environ.get("ADMIN_STEAM_ID", None))
     ADMINS_STEAM_ID = [_admin_steam_id] if _admin_steam_id else []
     MATCH_BASE_PTS_DIFF = 10
-    SSDB_HOST = "ssdb"
-    SSDB_PORT = 8888
+    REDIS_HOST = "redis"
+    REDIS_PORT = 6379
+    DOGPILE_BACKEND = "dogpile.cache.redis"
+    DOGPILE_BACKEND_URL = "redis://redis:6379"
+    DOGPILE_REGIONS = [("week", 3600 * 24 * 7)]
 
 
 class gleague_api(BaseConfig):

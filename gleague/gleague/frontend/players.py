@@ -14,7 +14,6 @@ from gleague.models import Season
 from gleague.models import Match
 from gleague.models import SeasonStats
 from gleague.models.queries import player_analytic
-from gleague.cache import cached
 
 
 players_bp = Blueprint("players", __name__)
@@ -30,7 +29,6 @@ def get_season_stats(current_season_id, player):
 
 @players_bp.route("/<int:steam_id>/", methods=["GET"])
 @players_bp.route("/<int:steam_id>/overview", methods=["GET"])
-@cached([Match, PlayerMatchRating])
 def overview(steam_id):
     player = Player.query.filter(Player.steam_id == steam_id).first()
     if not player:
@@ -65,7 +63,6 @@ def overview(steam_id):
 
 
 @players_bp.route("/<int:steam_id>/matches", methods=["GET"])
-@cached([Match, PlayerMatchRating])
 def matches(steam_id):
     player = Player.query.get(steam_id)
     if not player:
@@ -96,7 +93,6 @@ def matches(steam_id):
 
 
 @players_bp.route("/<int:steam_id>/heroes", methods=["GET"])
-@cached([Match, PlayerMatchRating])
 def heroes(steam_id):
     player = Player.query.get(steam_id)
     if not player:

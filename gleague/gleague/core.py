@@ -8,8 +8,11 @@ from flask import g
 from flask import request
 from flask_sqlalchemy import SQLAlchemy
 
+from gleague.caching import DogpileCache
+
 
 db = SQLAlchemy()
+cache = DogpileCache()
 
 
 class FlaskApp(Flask):
@@ -74,8 +77,6 @@ def create_app(name):
     setup_logging(app)
     reg_gl_vars(app)
     db.init_app(app)
-    from gleague.cache import cache
-
     cache.init_app(app)
     reg_rollback_on_exc(app)
     return app

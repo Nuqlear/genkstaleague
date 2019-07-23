@@ -10,10 +10,10 @@ services:
   postgres:
     volumes:
       - db-data:/var/lib/postgresql/data
-  ssdb:
+  redis:
     volumes:
-      - ssdb-data:/ssdb/var
+      - redis-data:/data
 
 volumes:
   db-data:
-  ssdb-data:
+  redis-data:

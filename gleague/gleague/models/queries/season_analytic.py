@@ -5,8 +5,9 @@ from sqlalchemy import and_
 from sqlalchemy import case
 from sqlalchemy import desc
 from sqlalchemy import func
+from sqlalchemy import event
 
-from gleague.core import db
+from gleague.core import db, cache
 from gleague.models import Match
 from gleague.models import PlayerMatchStats
 from gleague.models import Season
@@ -40,11 +41,13 @@ def get_shortest_match(season_id):
     ).first()
 
 
+in_season_player_records_nt = namedtuple(
+    "in_season_player_records_nt", ["title", "player", "value"]
+)
+
+
 def get_in_season_records(season_id):
     records = []
-    in_season_player_records_nt = namedtuple(
-        "in_season_player_records", ["title", "player", "value"]
-    )
     for agg_function, field_name, label in [
         (func.max, "longest_losestreak", "Longest losestreak"),
         (func.max, "longest_winstreak", "Longest winstreak"),
@@ -97,7 +100,7 @@ def get_in_season_records(season_id):
 
 
 in_match_records_nt = namedtuple(
-    "in_match_records", ["match_id", "record_name", "player", "hero", "value"]
+    "in_match_records_nt", ["match_id", "record_name", "player", "hero", "value"]
 )
 
 
@@ -221,8 +224,10 @@ def get_most_powerful_supports(season_id):
     ).all()
 
 
+side_winrates_nt = namedtuple("side_winrates_nt", ["radiant", "dire"])
+
+
 def get_side_winrates(season_id):
-    side_winrates_nt = namedtuple("side_winrates", ["radiant", "dire"])
     return side_winrates_nt(
         *(
             Match.query.join(Season)
@@ -276,7 +281,7 @@ def _get_most_iconic_duos(season_id, most_powerful=True, limit=3):
     return duos_result.fetchall()
 
 
-duo_nt = namedtuple("duo", ["player1", "player2", "pts_diff"])
+duo_nt = namedtuple("duo_nt", ["player1", "player2", "pts_diff"])
 
 
 def get_most_powerful_duos(season_id):
@@ -316,3 +321,42 @@ def get_player_heroes(season_id, order_by):
         .order_by(order_by)
         .all()
     )
+
+
+@cache.cache_on_arguments("week")
+def get_all_season_records(season_id):
+    longest_match = get_longest_match(season_id)
+    if longest_match:
+        return {
+            "longest_match": longest_match,
+            "shortest_match": get_shortest_match(season_id),
+            "in_season_player_records": get_in_season_records(season_id),
+            "in_match_records": get_in_match_records(season_id),
+            "avg_match_duration": get_avg_match_duration(season_id),
+            "most_powerful_sups": get_most_powerful_supports(season_id),
+            "most_powerful_midlaners": get_most_powerful_midlaners(season_id),
+            "side_winrates": get_side_winrates(season_id),
+            "powerful_duos": get_most_powerful_duos(season_id),
+            "powerless_duos": get_most_powerless_duos(season_id),
+        }
+    return {}
+
+
+@event.listens_for(Match, "after_update", propagate=True)
+@event.listens_for(Match, "after_insert", propagate=True)
+def clear_cache_after_matches_update(mapper, connection, target):
+    get_all_season_records.invalidate(target.season_id)
+
+
+@event.listens_for(Season, "after_insert", propagate=True)
+def clear_cache_after_new_season(mapper, connection, target):
+    previous_season_number = (
+        Season.query.filter(Season.number < target.number)
+        .with_entities(func.max(Season.number))
+        .as_scalar()
+    )
+    previous_season = Season.query.filter(
+        Season.number == previous_season_number
+    ).first()
+    if previous_season:
+        get_all_season_records.invalidate(previous_season.id)
