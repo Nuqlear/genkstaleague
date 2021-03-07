@@ -8,17 +8,14 @@ from gleague import models
 app = api.create_app()
 
 
-def reinit_db():
+def start_season():
     with app.app_context():
-        db.drop_all()
-        db.create_all()
-        season = models.Season()
-        db.session.add(season)
+        models.Season.start_new()
         db.session.commit()
 
 
 if __name__ == "__main__":
-    commands = ['reinit_db']
+    commands = ['start_season']
     usage = (
         'usage: %prog [options] command \n  Possible Commands: '
         ' '.join(commands)
@@ -37,4 +34,4 @@ if __name__ == "__main__":
         )
         sys.exit(1)
     if command == commands[0]:
-        reinit_db()
+        start_season()
