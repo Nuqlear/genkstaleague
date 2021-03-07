@@ -10,7 +10,7 @@
 [[projects]]
   name = "github.com/dotabuff/manta"
   packages = [".","dota"]
-  revision = "a9a3e4d31a834e746b7929e38688f6185eddf0f3"
+  revision = "ca7ded44204954c20fcb817bc7dd946d86719d9e"
 
 [[projects]]
   name = "github.com/gin-contrib/sse"
@@ -87,6 +87,6 @@
 [solve-meta]
   analyzer-name = "dep"
   analyzer-version = 1
-  inputs-digest = "1271c2f954550fc4415a9b1503da2a2746b1c387017aa1bdc620fcc6136438a6"
+  inputs-digest = "8760951ea4fde029057400f51c4e77aa640a20035237745d7ea952082db5b072"
   solver-name = "gps-cdcl"
   solver-version = 1
