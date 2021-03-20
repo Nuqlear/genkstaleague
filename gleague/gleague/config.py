@@ -10,14 +10,17 @@ class BaseConfig(object):
     SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///")
     SECRET_KEY = environ.get("STEAM_API_KEY", "YOUR SECRET KEY")
     STEAM_API_KEY = environ.get("STEAM_API_KEY", None)
-    _admin_steam_id = int(environ.get("ADMIN_STEAM_ID", None))
-    ADMINS_STEAM_ID = [_admin_steam_id] if _admin_steam_id else []
     MATCH_BASE_PTS_DIFF = 10
     REDIS_HOST = "redis"
     REDIS_PORT = 6379
     DOGPILE_BACKEND = "dogpile.cache.redis"
     DOGPILE_BACKEND_URL = "redis://redis:6379"
     DOGPILE_REGIONS = [("week", 3600 * 24 * 7)]
+
+    _admin_steam_id = environ.get("ADMIN_STEAM_ID")
+    _admin_steam_id = _admin_steam_id.split(",")
+    _admin_steam_id = list(map(int, _admin_steam_id))
+    ADMINS_STEAM_ID = _admin_steam_id
 
 
 class gleague_api(BaseConfig):
