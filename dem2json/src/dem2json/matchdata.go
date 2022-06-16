@@ -211,6 +211,18 @@ func getRealCords(entity *manta.Entity) (realX uint64, realY uint64) {
 	return
 }
 
+func getPlayerId(entity *manta.Entity) uint32 {
+	nPlayerID, ok := entity.GetUint32("m_nPlayerID")
+	if ok {
+		nPlayerID = nPlayerID / 2
+		return nPlayerID
+	} else {
+		// fallback for older replays
+		iPlayerID, _ := entity.GetInt32("m_iPlayerID")
+		return uint32(iPlayerID)
+	}
+}
+
 func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 	matchData := &matchParser.matchData
 	const Magic = (1 << 14) - 1
@@ -218,8 +230,9 @@ func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 		hOwner, _ := entity.GetUint64("m_hOwnerEntity")
 		ownerEntity := matchParser.parser.FindEntity(int32(hOwner & Magic))
 		if ownerEntity != nil {
+			playerID := getPlayerId(ownerEntity)
+
 			// save movement
-			playerID, _ := ownerEntity.GetInt32("m_iPlayerID")
 			realX, realY := getRealCords(entity)
 			playerData := &matchData.Players[playerID]
 			// ignore movement after first EarlyTimeMinutes minutes of the game
