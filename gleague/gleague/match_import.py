@@ -139,11 +139,23 @@ def create_match_from_data(match_data, base_pts_diff):
     return match
 
 
+class Dem2jsonError(Exception):
+    pass
+
+
 def create_match_from_replay(replay_io, base_pts_diff):
     resp = requests.post(
         url="http://dem2json:5222",
         data=replay_io.read(),
         headers={"Content-Type": "application/octet-stream"},
     )
-    match_data = resp.json()["result"]
-    return create_match_from_data(match_data, base_pts_diff)
+
+    if resp.status_code == 200:
+        match_data = resp.json()["result"]
+        return create_match_from_data(match_data, base_pts_diff)
+
+    if resp.status_code == 400:
+        error = resp.json()["error"]
+        raise Dem2jsonError(error)
+
+    raise Dem2jsonError("Internal Server Error")

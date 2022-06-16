@@ -1,3 +1,5 @@
+import logging
+
 from flask import Blueprint
 from flask import Response
 from flask import abort
@@ -23,7 +25,11 @@ def create_match():
     replay = request.files["file"]
     if replay:
         base_pts_diff = current_app.config.get("MATCH_BASE_PTS_DIFF", 20)
-        create_match_from_replay(replay, base_pts_diff)
+        try:
+            create_match_from_replay(replay, base_pts_diff)
+        except Exception as exc:
+            logging.error("Creating match from replay failed: %s", str(exc))
+            abort(400)
         return Response(status=201)
     return abort(400)
 
