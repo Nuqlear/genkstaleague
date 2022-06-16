@@ -215,7 +215,7 @@
 <div id="warning" class="alert alert-warning alert-dismissable text-center">
     <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
     <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;"
-            src="http://cdn.steamcommunity.com/public/images/signinthroughsteam/sits_small.png" /></a>
+            src="{{ url_for('static', filename='img/signinsteam.png') }}" /></a>
     to rate players if you played in this match.
 </div>
 {% endif %}
