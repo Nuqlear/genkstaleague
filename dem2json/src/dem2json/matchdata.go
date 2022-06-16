@@ -34,7 +34,7 @@ type MatchData struct {
 }
 
 type Draft struct {
-	Captains     [2]uint32 `json:"captains"`
+	Captains     [2]int32  `json:"captains"`
 	PicksAndBans []PickBan `json:"picks_and_bans"`
 }
 
@@ -281,7 +281,7 @@ func (matchParser *MatchParser) OnCDOTAMatchMetadataFile(metadataFile *dota.CDOT
 	// but 2-10 teams are the same
 	teams := metadataFile.GetMetadata().GetTeams()
 	// dire player slots starts from 123, not 5
-	matchData.Draft.Captains = [2]uint32{
+	matchData.Draft.Captains = [2]int32{
 		teams[0].GetCmCaptainPlayerId(), 123 + teams[1].GetCmCaptainPlayerId()}
 	return nil
 }

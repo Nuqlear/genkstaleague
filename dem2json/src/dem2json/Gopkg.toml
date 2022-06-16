@@ -1,7 +1,0 @@
-[[constraint]]
-  name = "github.com/dotabuff/manta"
-  revision = "ca7ded44204954c20fcb817bc7dd946d86719d9e"
-
-[[constraint]]
-  name = "github.com/gin-gonic/gin"
-  version = "v1.2"
