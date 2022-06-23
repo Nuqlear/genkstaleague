@@ -5,6 +5,7 @@ from sqlalchemy import Integer
 from sqlalchemy import ForeignKey
 from sqlalchemy import BigInteger
 from sqlalchemy import DateTime
+from sqlalchemy import Boolean
 from sqlalchemy import func
 from sqlalchemy import desc
 from sqlalchemy import and_
@@ -79,6 +80,7 @@ class Season(db.Model):
                         (SeasonStats.wins + SeasonStats.losses)
                         > current_app.config.get("SEASON_CALIBRATING_MATCHES_NUM", 0)
                     ),
+                    SeasonStats.inactive.is_(False),
                 )
             )
             .with_entities(SeasonStats.steam_id, SeasonStats.pts)
@@ -122,6 +124,7 @@ class SeasonStats(db.Model):
     longest_winstreak = Column(Integer, default=0, nullable=False)
     longest_losestreak = Column(Integer, default=0, nullable=False)
     streak = Column(Integer, default=0, nullable=False)
+    inactive = Column(Boolean, default=False, nullable=False)
     player_matches_stats = relationship(
         "PlayerMatchStats", lazy="dynamic", backref="season_stats"
     )
@@ -166,6 +169,9 @@ class SeasonStats(db.Model):
 
     def calibrated(self):
         from gleague.models import PlayerMatchStats
+
+        if self.inactive:
+            return False
 
         return (
             db.session.query(func.count(PlayerMatchStats.id))

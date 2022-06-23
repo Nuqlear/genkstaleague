@@ -101,6 +101,7 @@ class SeasonView(BaseModelView):
 
 class SeasonStatsView(BaseModelView):
     column_filters = ("player", "season")
+    form_columns = ['wins', 'losses', 'pts', 'longest_winstreak', 'longest_losestreak', 'streak', 'inactive']
 
     def __init__(self, *args, **kwargs):
         super(SeasonStatsView, self).__init__(SeasonStats, *args, **kwargs)
