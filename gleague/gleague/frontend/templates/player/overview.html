@@ -15,7 +15,7 @@
         <div class="col-6">
             <div class="card">
                 <div class="card-header">
-                    Signature heroes
+                    <a href="{{ url_for('players.heroes', steam_id=player.steam_id) }}" target="_blank">Signature heroes&nbsp;<i class="fas fa-link"></i></a>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless table-hover">
@@ -86,7 +86,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <a href="{{ url_for('players.matches', steam_id=player.steam_id) }}">Matches&nbsp;<i class="fas fa-link"></i></a>
+                    <a href="{{ url_for('players.matches', steam_id=player.steam_id) }}" target="_blank">Matches&nbsp;<i class="fas fa-link"></i></a>
                 </div>
                 <div class="card-body">
                     <table id="player_matches" class="table table-sm">
