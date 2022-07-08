@@ -147,8 +147,12 @@ def get_in_match_records(season_id):
     for agg_function, field_name, label in [
         (func.max, "kills", "Max kills"),
         (func.max, "deaths", "Max deaths"),
+        (func.max, "assists", "Max assists"),
         (func.max, "hero_damage", "Most hero damage"),
         (func.max, "last_hits", "Most last hits"),
+        (func.max, "hero_healing", "Max hero healing"),
+        (func.max, "xp_per_min", "Max XP per min"),
+        (func.max, "gold_per_min", "Max gold per min"),
         (func.max, "tower_damage", "Most tower damage"),
         (func.max, "damage_taken", "Most damage taken"),
         (func.max, "observer_wards_placed", "Most observer wards placed"),
