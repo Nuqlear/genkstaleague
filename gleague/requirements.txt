@@ -17,4 +17,4 @@ sqlalchemy-utils==0.34.0
 dogpile.cache==0.7.1
 redis==3.3.4
 werkzeug==0.14
-sklearn
+sklearn==0.0
