@@ -52,7 +52,7 @@ def records(season_number=-1):
         "season_number": season_number,
         "seasons": [season[0] for season in db.session.query(Season.number).all()],
     }
-    template_context.update(season_analytic.get_all_season_records(season_number))
+    template_context.update(season_analytic.get_all_season_records(s_id))
     return render_template("/season/records.html", **template_context)
 
 
