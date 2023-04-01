@@ -5,6 +5,8 @@ github.com/davecgh/go-spew v1.1.1 h1:vj9j/u1bqnvCEfJOwUhtlOARqs3+rkHYY13jYWTU97c
 github.com/davecgh/go-spew v1.1.1/go.mod h1:J7Y8YcW2NihsgmVo/mv3lAwl/skON4iLHjSsI+c5H38=
 github.com/dotabuff/manta v1.3.7 h1:Fr7pZtsCKjrO4vejleS6JWlA1lSyhvqcujap6ozwJYg=
 github.com/dotabuff/manta v1.3.7/go.mod h1:LECH//XElrrs1Y/kK39zM22TB0fC2V4jW9aQL+rjCto=
+github.com/dotabuff/manta v1.4.1 h1:4eBPMikbPNDVDpAqYr8ltmgFtprSPbVae6P1ViTicHw=
+github.com/dotabuff/manta v1.4.1/go.mod h1:LECH//XElrrs1Y/kK39zM22TB0fC2V4jW9aQL+rjCto=
 github.com/gin-contrib/sse v0.1.0 h1:Y/yl/+YNO8GZSjAhjMsSuLt29uWRFHdHYUb5lYOV9qE=
 github.com/gin-contrib/sse v0.1.0/go.mod h1:RHrZQHXnP2xjPF+u1gW/2HnVO7nvIa9PG3Gm+fLHvGI=
 github.com/gin-gonic/gin v1.8.1 h1:4+fr/el88TOO3ewCmQr8cx/CtZ/umlIRIs5M4NTNjf8=
