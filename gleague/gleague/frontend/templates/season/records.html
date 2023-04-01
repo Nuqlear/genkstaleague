@@ -1,11 +1,12 @@
 {% extends '/base.html' %}
 
 {% block head %}
-{{ macro.render_site_title("SEASON #" ~ season_number ~ " RECORDS") }}
+    <meta name="description" content="{{ SITE_NAME }}, Dota2 season's records">
+    {{ macro.render_site_title("SEASON #" ~ season_number ~ " RECORDS") }}
 {% endblock %}
 
 {% block header %}
-{% include '/_blocks/season_header.html' %}
+    {% include '/_blocks/season_header.html' %}
 {% endblock %}
 
 {% block content %}

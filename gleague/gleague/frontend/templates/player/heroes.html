@@ -1,6 +1,7 @@
 {% extends '/base.html' %}
 
 {% block head %}
+    <meta name="description" content="{{ SITE_NAME }}, Dota2 list of {{ player.nickname }} heroes">
     {{ macro.render_site_title(player.nickname ~ " HEROES") }}
 {% endblock %}
 
