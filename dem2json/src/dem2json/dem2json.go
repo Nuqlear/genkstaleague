@@ -25,6 +25,7 @@ func ParseFromStream(stream io.Reader) (MatchData, error) {
 	parser.OnEntity(matchParser.OnEntity)
 	parser.Callbacks.OnCMsgDOTACombatLogEntry(matchParser.OnCMsgDOTACombatLogEntry)
 	parser.Callbacks.OnCDOTAMatchMetadataFile(matchParser.OnCDOTAMatchMetadataFile)
+	parser.Callbacks.OnCSVCMsg_ServerInfo(matchParser.OnCSVCMsg_ServerInfo)
 
 	err = parser.Start()
 	if err != nil {

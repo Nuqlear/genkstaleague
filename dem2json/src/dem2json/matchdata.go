@@ -13,13 +13,17 @@ import (
 const EarlyTimeMinutes = 10
 
 type MatchParser struct {
-	matchData      MatchData
-	gameTime       time.Duration
-	realGameTime   time.Duration
-	parser         *manta.Parser
-	heroDamageMap  map[string]uint32
-	towerDamageMap map[string]uint32
-	damageTakenMap map[string]uint32
+	matchData        MatchData
+	gameTime         time.Duration
+	realGameTime     time.Duration
+	tickInterval     float32
+	pauseStartTick   uint32
+	totalPausedTicks uint32
+	isPaused         bool
+	parser           *manta.Parser
+	heroDamageMap    map[string]uint32
+	towerDamageMap   map[string]uint32
+	damageTakenMap   map[string]uint32
 }
 
 type MatchData struct {
@@ -99,20 +103,43 @@ func (matchParser *MatchParser) finalize() {
 	}
 }
 
+func (matchParser *MatchParser) OnCSVCMsg_ServerInfo(m *dota.CSVCMsg_ServerInfo) error {
+	matchParser.tickInterval = m.GetTickInterval()
+	return nil
+}
+
 func (matchParser *MatchParser) pull_CDOTAGamerulesProxy(entity *manta.Entity) {
 	matchData := &matchParser.matchData
 	if entity.GetClassName() == "CDOTAGamerulesProxy" {
-		gameEndTime, _ := entity.GetFloat32("m_pGameRules.m_flGameEndTime")
 		gameStartTime, _ := entity.GetFloat32("m_pGameRules.m_flGameStartTime")
-		if gameTime, ok := entity.GetFloat32("m_pGameRules.m_fGameTime"); ok {
-			matchParser.gameTime = time.Duration(gameTime) * time.Second
+
+		if isPaused, ok := entity.GetBool("m_pGameRules.m_bGamePaused"); ok {
+			matchParser.isPaused = isPaused
+			if matchParser.isPaused {
+				if pauseStartTick, ok := entity.GetUint32("m_pGameRules.m_nPauseStartTick"); ok {
+					matchParser.pauseStartTick = pauseStartTick
+				}
+			} else {
+				if totalPausedTicks, ok := entity.GetUint32("m_pGameRules.m_nTotalPausedTicks"); ok {
+					matchParser.totalPausedTicks = totalPausedTicks
+				}
+			}
 		}
-		if gameStartTime != 0 {
-			matchData.Duration = gameEndTime - gameStartTime
-			matchParser.realGameTime = matchParser.gameTime - time.Duration(gameStartTime)*time.Second
+
+		var currentTick uint32
+		if matchParser.isPaused {
+			currentTick = matchParser.pauseStartTick
 		} else {
-			matchParser.realGameTime = time.Duration(0)
+			currentTick = matchParser.parser.NetTick
 		}
+
+		if gameStartTime != 0 {
+			ticksElapsed := currentTick - matchParser.totalPausedTicks
+			matchParser.realGameTime = time.Duration((float32(ticksElapsed)*matchParser.tickInterval)-gameStartTime) * time.Second
+		} else {
+			matchParser.realGameTime = time.Duration(0) * time.Second
+		}
+		matchData.Duration = float32(matchParser.realGameTime / time.Second)
 	}
 }
 
@@ -186,7 +213,8 @@ func (matchParser *MatchParser) pull_CDOTA_Data(entity *manta.Entity) {
 			if result, ok := entity.GetInt32(fetchFrom + ".m_iSentryWardsPlaced"); ok {
 				matchPlayerData.SentryWardsPlaced = result
 			}
-			if matchParser.realGameTime < time.Duration(60*EarlyTimeMinutes)*time.Second {
+			earlyTime := time.Duration(60*EarlyTimeMinutes) * time.Second
+			if matchParser.realGameTime < earlyTime {
 				matchPlayerData.EarlyDenies = matchPlayerData.Denies
 				matchPlayerData.EarlyLastHits = matchPlayerData.LastHits
 			}
@@ -236,10 +264,14 @@ func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 			realX, realY := getRealCords(entity)
 			playerData := &matchData.Players[playerID]
 			// ignore movement after first EarlyTimeMinutes minutes of the game
-			if matchParser.realGameTime > 0 && matchParser.realGameTime < time.Duration(60*EarlyTimeMinutes)*time.Second {
-				// save position no more othen than for every 15 seconds
-				interval := time.Duration(15) * time.Second
-				if len(playerData.Movement) == 0 || playerData.Movement[len(playerData.Movement)-1].Time < matchParser.realGameTime+interval {
+
+			earlyTime := time.Duration(60*EarlyTimeMinutes) * time.Second
+			if matchParser.realGameTime > 0 && matchParser.realGameTime < earlyTime {
+
+				// save position no more othen than for every 5 seconds
+				interval := time.Duration(5) * time.Second
+				nextMovTime := matchParser.realGameTime - interval
+				if len(playerData.Movement) == 0 || playerData.Movement[len(playerData.Movement)-1].Time < nextMovTime {
 					matchData.Players[playerID].Movement = append(
 						matchData.Players[playerID].Movement,
 						Position{
