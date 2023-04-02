@@ -13,7 +13,7 @@ from gleague.api import login_required
 from gleague.core import db
 from gleague.models import Match
 from gleague.models import PlayerMatchRating
-from gleague.match_import import create_match_from_replay
+from gleague.match_import import save_match_from_replay
 
 
 matches_bp = Blueprint("matches", __name__)
@@ -26,7 +26,7 @@ def create_match():
     if replay:
         base_pts_diff = current_app.config.get("MATCH_BASE_PTS_DIFF", 20)
         try:
-            create_match_from_replay(replay, base_pts_diff)
+            save_match_from_replay(replay, base_pts_diff)
         except Exception as exc:
             logging.error("Creating match from replay failed: %s", str(exc))
             abort(400)

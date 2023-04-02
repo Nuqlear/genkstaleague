@@ -68,6 +68,98 @@ def _set_match_players_roles(match):
         core.role = Role.core
 
 
+def save_match_data(match_data, base_pts_diff):
+    match_id = match_data["match_id"]
+    match = Match.query.get(match_id)
+    if match is None:
+        return create_match_from_data(match_data, base_pts_diff)
+    else:
+        return update_match_from_data(match, match_data)
+
+
+def update_match_from_data(match, match_data):
+    match.radiant_win = bool(match_data["radiant_win"])
+    for key in ("duration", "game_mode", "start_time"):
+        setattr(match, key, match_data[key])
+    db.session.add(match)
+    if match.game_mode == 2:
+        match.cm_captains = match_data["draft"]["captains"]
+
+        pick_bans_from_data = {
+            (
+                pick_ban_data["is_pick"],
+                pick_ban_data["is_radiant"],
+                pick_ban_data["hero"],
+            )
+            for pick_ban_data in match_data["draft"]["picks_and_bans"]
+        }
+        match_pick_bans_map = {
+            (
+                cmpb.is_pick,
+                cmpb.is_radiant,
+                cmpb.hero,
+            ): cmpb
+            for cmpb in match.cm_picks_bans
+        }
+        for data, cmpb in match_pick_bans_map.items():
+            if data not in pick_bans_from_data:
+                db.session.delete(cmpb)
+        for data in pick_bans_from_data:
+            if data not in match_pick_bans_map:
+                db.session.add(
+                    CMPicksBans(
+                        **dict(zip(("is_pick", "is_radiant", "hero"), data)),
+                        match_id=match.id,
+                    )
+                )
+
+    match_stats_map = {ms.season_stats.steam_id: ms for ms in match.players_stats}
+    for player_data in match_data["players"]:
+        player_stats = PlayerMatchStats()
+        account_id = "765" + str(player_data["account_id"] + 61197960265728)
+        player_stats = match_stats_map[int(account_id)]
+        for key in (
+            "kills",
+            "assists",
+            "level",
+            "deaths",
+            "hero_damage",
+            "last_hits",
+            "player_slot",
+            "denies",
+            "tower_damage",
+            "damage_taken",
+            "xp_per_min",
+            "gold_per_min",
+            "movement",
+            "early_denies",
+            "early_last_hits",
+            "observer_wards_placed",
+            "sentry_wards_placed",
+        ):
+            setattr(player_stats, key, player_data[key])
+        player_stats.hero = player_data["hero_name"].replace("npc_dota_hero_", "")
+        player_stats.position = detect_position(
+            list([[pos["x"], pos["y"]] for pos in player_stats.movement])
+        )
+        match_player_items_map = {
+            mpi.name: mpi for mpi in player_stats.player_match_items
+        }
+        items_from_data = {item for item in player_data["items"] if item}
+        for item, mpi in match_player_items_map.items():
+            if item not in items_from_data:
+                db.session.delete(mpi)
+        for item in items_from_data:
+            if item not in match_player_items_map:
+                db.session.add(
+                    PlayerMatchItem(name=item, player_match_stats=player_stats)
+                )
+
+    db.session.add(match)
+    db.session.flush()
+    return match
+
+
 def create_match_from_data(match_data, base_pts_diff):
     match = Match()
     match.season_id = Season.current().id
@@ -143,7 +235,7 @@ class Dem2jsonError(Exception):
     pass
 
 
-def create_match_from_replay(replay_io, base_pts_diff):
+def save_match_from_replay(replay_io, base_pts_diff):
     resp = requests.post(
         url="http://dem2json:5222",
         data=replay_io.read(),
@@ -152,7 +244,7 @@ def create_match_from_replay(replay_io, base_pts_diff):
 
     if resp.status_code == 200:
         match_data = resp.json()["result"]
-        return create_match_from_data(match_data, base_pts_diff)
+        return save_match_data(match_data, base_pts_diff)
 
     if resp.status_code == 400:
         error = resp.json()["error"]
