@@ -116,14 +116,14 @@ func (matchParser *MatchParser) pull_CDOTAGamerulesProxy(entity *manta.Entity) {
 		if isPaused, ok := entity.GetBool("m_pGameRules.m_bGamePaused"); ok {
 			matchParser.isPaused = isPaused
 			if matchParser.isPaused {
-				if pauseStartTick, ok := entity.GetUint32("m_pGameRules.m_nPauseStartTick"); ok {
-					matchParser.pauseStartTick = pauseStartTick
-				}
-			} else {
-				if totalPausedTicks, ok := entity.GetUint32("m_pGameRules.m_nTotalPausedTicks"); ok {
-					matchParser.totalPausedTicks = totalPausedTicks
+				if pauseStartTick, ok := entity.GetInt32("m_pGameRules.m_nPauseStartTick"); ok {
+					matchParser.pauseStartTick = uint32(pauseStartTick)
 				}
 			}
+		}
+
+		if totalPausedTicks, ok := entity.GetInt32("m_pGameRules.m_nTotalPausedTicks"); ok {
+			matchParser.totalPausedTicks = uint32(totalPausedTicks)
 		}
 
 		var currentTick uint32
