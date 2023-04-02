@@ -28,6 +28,7 @@ def get_season_number_and_id(season_number):
 @seasons_bp.route("/current/players", methods=["GET"])
 @seasons_bp.route("/<int:season_number>/players", methods=["GET"])
 def players(season_number=-1):
+    is_current = (season_number == -1)
     season_number, s_id = get_season_number_and_id(season_number)
     q = request.args.get("q")
     sort = request.args.get("sort", "pts")
@@ -41,16 +42,19 @@ def players(season_number=-1):
         sort=sort,
         seasons=seasons,
         season_number=season_number,
+        is_current=is_current,
     )
 
 
 @seasons_bp.route("/current/records", methods=["GET"])
 @seasons_bp.route("/<int:season_number>/records", methods=["GET"])
 def records(season_number=-1):
+    is_current = (season_number == -1)
     season_number, s_id = get_season_number_and_id(season_number)
     template_context = {
         "season_number": season_number,
         "seasons": [season[0] for season in db.session.query(Season.number).all()],
+        "is_current": is_current,
     }
     template_context.update(season_analytic.get_all_season_records(s_id))
     return render_template("/season/records.html", **template_context)
@@ -59,6 +63,7 @@ def records(season_number=-1):
 @seasons_bp.route("/current/heroes", methods=["GET"])
 @seasons_bp.route("/<int:season_number>/heroes", methods=["GET"])
 def heroes(season_number=-1):
+    is_current = (season_number == -1)
     season_number, s_id = get_season_number_and_id(season_number)
     sort = request.args.get("sort", "played")
     return render_template(
@@ -68,4 +73,5 @@ def heroes(season_number=-1):
         sort=sort,
         is_desc=desc,
         in_season_heroes=season_analytic.get_player_heroes(s_id, sort),
+        is_current=is_current,
     )

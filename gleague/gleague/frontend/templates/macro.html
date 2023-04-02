@@ -19,6 +19,14 @@
     <title>{{ SITE_NAME }} | {{ page }}</title>
 {%- endmacro %}
 
+{% macro render_season_site_title(page) -%}
+    {% if is_current %}
+        <title>{{ SITE_NAME }} | CURRENT SEASON {{ page }}</title>
+    {% else %}
+        <title>{{ SITE_NAME }} | SEASON #{{ season_number }} {{ page }}</title>
+    {% endif %}
+{%- endmacro %}
+
 {% macro render_pagination(pagination, url) %}
     {% set view_args = kwargs %}
     <div id="pagination">
