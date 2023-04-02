@@ -271,11 +271,11 @@ def _get_most_iconic_duos(season_id, most_powerful=True, limit=3):
             FROM season_stats ss1
             JOIN season_stats ss2 ON ss1.steam_id < ss2.steam_id
             AND ss1.season_id=ss2.season_id AND ss1.season_id=:season_id
-            ORDER BY sum {order_direction_desc}
         ) result
         JOIN player p1 ON p1.steam_id=result.steam_id_1
         JOIN player p2 ON p2.steam_id=result.steam_id_2
         WHERE result.sum is not NULL
+        ORDER BY result.sum {order_direction_desc}
         LIMIT :limit;
         """.format(
             order_direction_desc=("DESC" if most_powerful else "ASC")
