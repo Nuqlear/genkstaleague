@@ -21,6 +21,7 @@ class BaseConfig(object):
     _admin_steam_id = _admin_steam_id.split(",")
     _admin_steam_id = list(map(int, _admin_steam_id))
     ADMINS_STEAM_ID = _admin_steam_id
+    REPLAY_PARSER_HOST = environ.get("REPLAY_PARSER_HOST", "http://dem2json:5222")
 
 
 class gleague_api(BaseConfig):

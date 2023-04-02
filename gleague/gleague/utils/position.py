@@ -1,6 +1,7 @@
 import enum
 from collections import OrderedDict
 from collections import Counter
+from typing import Optional, List
 
 from sklearn.cluster import KMeans
 import numpy as np
@@ -22,7 +23,9 @@ positions = OrderedDict(
 )
 
 
-def detect_position(points):
+def detect_position(points: List[dict]) -> Optional[Position]:
+    if not points:
+        return None
     init = np.array(list(positions.keys()))
     kmeans = KMeans(n_clusters=3, init=init)
     result = kmeans.fit(points).labels_
