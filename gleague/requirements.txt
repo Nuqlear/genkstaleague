@@ -14,7 +14,7 @@ pyssdb==0.4.1
 sqlalchemy-utils==0.34.0
 dogpile.cache==0.7.1
 redis==3.3.4
-werkzeug==0.14.1
+werkzeug==2.2.3
 sklearn==0.0
 gunicorn==19.9.0
 gevent==1.3.4
