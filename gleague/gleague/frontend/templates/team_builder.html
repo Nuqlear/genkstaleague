@@ -202,25 +202,29 @@
         {% endif %}
 
         <textarea disabled id="teams-text" class="form-control invisible">
-            url: {{ base_url }}{{ url_for('matches.team_builder', seed_id=seed.id) }}
-
             Radiant:
-            {% for seed_player in seed.team_seed_players -%}
-                {% if seed_player.player %}
-                    {{ seed_player.player.nickname }}
-                {% else %}
-                    {{ non_registered_player }}
-                {% endif %}
-            {%- endfor %}
+            {%- for seed_player in seed.team_seed_players %}
+                {%- if seed_player.is_radiant -%}
+                    {% if seed_player.player %}
+                        {{ seed_player.player.nickname }}
+                    {%- else -%}
+                        {{ non_registered_player }}
+                    {%- endif -%}
+                {%- endif -%}
+            {% endfor %}
 
             Dire:
-            {% for seed_player in seed.team_seed_players -%}
-                {% if seed_player.player %}
-                    {{ seed_player.player.nickname }}
-                {% else %}
-                    {{ non_registered_player }}
-                {% endif %}
-            {%- endfor %}
+            {%- for seed_player in seed.team_seed_players %}
+                {%- if not seed_player.is_radiant -%}
+                    {% if seed_player.player %}
+                        {{ seed_player.player.nickname }}
+                    {%- else -%}
+                        {{ non_registered_player }}
+                    {%- endif -%}
+                {%- endif -%}
+            {% endfor %}
+
+            {{ base_url }}{{ url_for('matches.team_builder', seed_id=seed.id) }}
         </textarea>
     {% endif %}
 
