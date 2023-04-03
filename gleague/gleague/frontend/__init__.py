@@ -42,7 +42,8 @@ def create_app(name=__name__):
     @app.route("/sitemap.xml", methods=["GET"])
     def sitemap():
         base_url = app.config["SITE_ADDRESS"]
-        base_url = "https://" + base_url
+        proto = app.config["SITE_PROTOCOL"].lower()
+        base_url = proto + "://" + base_url
         pages = []
         ten_days_ago = datetime.now() - timedelta(days=10)
         ten_days_ago = ten_days_ago.date().isoformat()

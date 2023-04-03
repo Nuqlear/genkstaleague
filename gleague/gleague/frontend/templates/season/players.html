@@ -70,22 +70,7 @@
                                            href="{{ url_for('players.overview', steam_id=s.steam_id) }}">
                                             {{ s.player.nickname }}
                                         </a>
-                                        {% if s.streak > 3 %}
-                                            <i class="fas fa-angle-double-up"
-                                                style="color: green"
-                                                data-toggle="tooltip"
-                                                data-placement="top"
-                                                title="on winstreak, {{ s.streak }} wins"
-                                            ></i>
-                                        {% endif %}
-                                        {% if s.streak < -3 %}
-                                            <i class="fas fa-angle-double-down"
-                                                style="color: red"
-                                                data-toggle="tooltip"
-                                                data-placement="top"
-                                                title="on losestreak, {{ -1 * s.streak }} losses"
-                                            ></i>
-                                        {% endif %}
+                                        {{ macro.render_streak(s) }}
                                     </td>
                                     <td> {{ s.pts }} </td>
                                     <td> {{ s.wins }} </td>

@@ -27,6 +27,25 @@
     {% endif %}
 {%- endmacro %}
 
+{% macro render_streak(season_stats) -%}
+    {% if season_stats.streak > 3 %}
+    <i class="fas fa-angle-double-up"
+        style="color: green"
+        data-toggle="tooltip"
+        data-placement="top"
+        title="on winstreak, {{ season_stats.streak }} wins"
+    ></i>
+    {% endif %}
+    {% if season_stats.streak < -3 %}
+    <i class="fas fa-angle-double-down"
+        style="color: red"
+        data-toggle="tooltip"
+        data-placement="top"
+        title="on losestreak, {{ -1 * season_stats.streak }} losses"
+    ></i>
+    {% endif %}
+{%- endmacro %}
+
 {% macro render_pagination(pagination, url) %}
     {% set view_args = kwargs %}
     <div id="pagination">

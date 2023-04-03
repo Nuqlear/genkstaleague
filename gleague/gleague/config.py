@@ -1,3 +1,4 @@
+import datetime
 from os import environ
 
 
@@ -22,6 +23,10 @@ class BaseConfig(object):
     _admin_steam_id = list(map(int, _admin_steam_id))
     ADMINS_STEAM_ID = _admin_steam_id
     REPLAY_PARSER_HOST = environ.get("REPLAY_PARSER_HOST", "http://dem2json:5222")
+    DOUBLE_DOWN_ENABLED = environ.get("DOUBLE_DOWN_ENABLED", "1") == "1"
+    DOUBLE_DOWN_TIME = datetime.timedelta(
+        seconds=int(environ.get("DOUBLE_DOWN_TIME", "300"))
+    )
 
 
 class gleague_api(BaseConfig):
@@ -47,6 +52,7 @@ class gleague_frontend(BaseConfig):
     )
     SITE_NAME = environ.get("SITE_NAME", "GENKSTAleague")
     SITE_ADDRESS = environ.get("SITE_ADDRESS", "localhost")
+    SITE_PROTOCOL = environ.get("SITE_PROTOCOL", "HTTPS")
 
 
 class BaseTestingConfig(BaseConfig):

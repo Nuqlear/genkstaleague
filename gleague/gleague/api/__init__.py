@@ -19,7 +19,9 @@ def create_app(name=__name__):
     oid.init_app(app)
     admin.init_admin(app)
     from gleague.api.matches import matches_bp
+    from gleague.api.team_seeds import team_seeds_bp
     app.register_blueprint(matches_bp, url_prefix='/matches')
+    app.register_blueprint(team_seeds_bp, url_prefix='/team_seeds')
     return app
 
 

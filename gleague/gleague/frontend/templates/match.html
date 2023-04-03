@@ -81,6 +81,7 @@
                         <th data-toggle="tooltip" data-placement="top" title="Gold Per Minute">GPM</th>
                         <th data-toggle="tooltip" data-placement="top" title="Experience Per Minute">XPM</th>
                         <th>PTS</th>
+                        <th></th>
                         <th>Items</th>
                         <th>Rating</th>
                     </tr>
@@ -125,6 +126,16 @@
                             {{ s.pts }}
                             {% if s.pts_diff > 0 %}<span style="color:rgb(0, 185, 0)">+{% else %}
                                 <span style="color:red">{% endif %}{{ s.pts_diff }}</span>
+                        </td>
+                        <td>
+                            {% if s.is_double_down %}
+                            <i class="fas fa-check-double pts-double-down"
+                                data-toggle="tooltip"
+                                data-placement="top"
+                                title="Did Activate Double Down"
+                            >
+                            </i>
+                            {% endif %}
                         </td>
                         <td>
                             {% if s.player_match_items %}
@@ -238,8 +249,19 @@
     </div>
 </div>
 {% endif %}
+
+{% if g.user and g.user.is_admin() %}
+<div class="card">
+    <div class="card-body">
+        <a class="btn btn-xs btn-success" role="button" style="width: 100%;"
+            href="{{ url_for('matches.team_builder', from_match_id=match.id) }}"
+        >
+            Reshuffle Players
+        </a>
+    </div>
 </div>
-</div>
+{% endif %}
+
 {% endblock %}
 
 {% block script %}

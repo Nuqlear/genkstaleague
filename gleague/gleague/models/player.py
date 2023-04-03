@@ -4,8 +4,6 @@ from flask import current_app
 from sqlalchemy import BigInteger
 from sqlalchemy import Column
 from sqlalchemy import String
-from sqlalchemy import and_
-from sqlalchemy import case
 from sqlalchemy import func
 from sqlalchemy.orm import relationship
 

@@ -7,3 +7,5 @@ from gleague.models.match import CMPicksBans
 from gleague.models.match import PlayerMatchItem
 from gleague.models.match import PlayerMatchStats
 from gleague.models.match import PlayerMatchRating
+from gleague.models.team_seed import TeamSeed
+from gleague.models.team_seed import TeamSeedPlayer

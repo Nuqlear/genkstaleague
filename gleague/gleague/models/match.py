@@ -10,9 +10,9 @@ from sqlalchemy import String
 from sqlalchemy import and_
 from sqlalchemy import desc
 from sqlalchemy import func
-from sqlalchemy.dialects.postgresql import ARRAY
-from sqlalchemy.dialects.postgresql import JSONB
+from sqlalchemy.dialects import postgresql
 from sqlalchemy.orm import relationship
+from sqlalchemy.orm import backref
 from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy_utils.types import ChoiceType
@@ -62,6 +62,7 @@ class PlayerMatchStats(db.Model):
         ForeignKey("match.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
+    is_double_down = Column(Boolean, nullable=True, default=False)
     old_pts = Column(Integer, nullable=False)
     pts_diff = Column(Integer, nullable=False)
     kills = Column(Integer, nullable=False)
@@ -78,7 +79,7 @@ class PlayerMatchStats(db.Model):
     xp_per_min = Column(Integer, nullable=True)
     gold_per_min = Column(Integer, nullable=True)
     damage_taken = Column(Integer, nullable=True)
-    movement = Column(JSONB, nullable=True)
+    movement = Column(postgresql.JSONB, nullable=True)
     position = Column(ChoiceType(Position))
     role = Column(ChoiceType(Role))
     observer_wards_placed = Column(Integer)
@@ -201,15 +202,24 @@ class Match(db.Model):
         ForeignKey("season.id", onupdate="CASCADE", ondelete="CASCADE"),
         nullable=False,
     )
+    team_seed_id = Column(
+        postgresql.UUID,
+        ForeignKey("team_seed.id"),
+        nullable=True,
+    )
     cm_picks_bans = relationship(
         "CMPicksBans", cascade="all,delete", backref="match", order_by=CMPicksBans.id
     )
-    cm_captains = Column(ARRAY(Integer))
+    cm_captains = Column(postgresql.ARRAY(Integer))
     players_stats = relationship(
         "PlayerMatchStats",
         cascade="all,delete",
         backref="match",
         order_by=PlayerMatchStats.player_slot,
+    )
+    team_seed = relationship(
+        "TeamSeed",
+        backref=backref("match", uselist=False),
     )
     radiant_win = Column(Boolean)
     duration = Column(Integer)

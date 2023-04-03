@@ -1,7 +1,11 @@
+import math
+from typing import Optional
+
 import dataclasses as dc
 import requests
 
 from gleague.core import db
+from gleague.models import TeamSeed
 from gleague.models import Match
 from gleague.models import Season
 from gleague.models import CMPicksBans
@@ -17,7 +21,9 @@ from gleague.utils.position import detect_position
 class ReplayDataProcessor:
     base_pts_diff: int
 
-    def save_replay_data(self, replay_data: dict) -> Match:
+    def save_replay_data(
+        self, replay_data: dict, team_seed: Optional[TeamSeed] = None
+    ) -> Match:
         match_id = replay_data["match_id"]
         match = Match.query.get(match_id)
         if match is None:
@@ -26,19 +32,24 @@ class ReplayDataProcessor:
                 id=replay_data["match_id"],
             )
         db.session.add(match)
-        return self.update_match(match, replay_data)
+        return self.update_match(match, replay_data, team_seed)
 
-    def update_match(self, match: Match, replay_data: dict) -> Match:
-        self._save_match_attributes(match, replay_data)
+    def update_match(
+        self, match: Match, replay_data: dict, team_seed: Optional[TeamSeed] = None
+    ) -> Match:
+        self._save_match_attributes(match, replay_data, team_seed)
         self._save_match_game_mode_attributes(match, replay_data)
         self._save_match_players(match, replay_data)
         db.session.flush()
         return match
 
-    def _save_match_attributes(self, match: Match, replay_data: dict):
+    def _save_match_attributes(
+        self, match: Match, replay_data: dict, team_seed: Optional[TeamSeed] = None
+    ):
         match.radiant_win = bool(replay_data["radiant_win"])
         for key in ("duration", "game_mode", "start_time"):
             setattr(match, key, replay_data[key])
+        match.team_seed = team_seed
 
     def _save_match_game_mode_attributes(self, match: Match, replay_data: dict):
         if match.game_mode == 2:
@@ -76,6 +87,10 @@ class ReplayDataProcessor:
         match_stats_map = {
             str(ms.season_stats.steam_id): ms for ms in match.players_stats
         }
+        player_seed_map = {
+            str(ps.steam_id): ps
+            for ps in (match.team_seed and match.team_seed.team_seed_players or [])
+        }
         for player_data in replay_data["players"]:
             account_id = "765" + str(player_data["account_id"] + 61197960265728)
             try:
@@ -95,6 +110,8 @@ class ReplayDataProcessor:
                     pts_diff=20,
                     old_pts=season_stats.pts,
                 )
+            if account_id in player_seed_map:
+                player_stats.is_double_down = player_seed_map[account_id].is_double_down
             db.session.add(player_stats)
             for key in (
                 "kills",
@@ -148,11 +165,18 @@ class ReplayDataProcessor:
             pts_diff += pts_deviation
         else:
             pts_diff -= pts_deviation
+
+        winners_pts_diff = pts_diff
         for stats in match.players_stats:
+            if not stats.is_winner() and stats.is_double_down:
+                winners_pts_diff += math.floor(pts_diff / 5)
+
+        for stats in match.players_stats:
+            multiplier = 2 if stats.is_double_down else 1
             if stats.is_winner():
-                stats.pts_diff = pts_diff
+                stats.pts_diff = winners_pts_diff * multiplier
             else:
-                stats.pts_diff = -pts_diff
+                stats.pts_diff = -pts_diff * multiplier
             stats.season_stats.pts += stats.pts_diff
 
     def _set_match_players_roles(self, match):

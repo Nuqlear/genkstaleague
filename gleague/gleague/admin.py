@@ -15,6 +15,8 @@ from gleague.models import PlayerMatchRating
 from gleague.models import PlayerMatchStats
 from gleague.models import Season
 from gleague.models import SeasonStats
+from gleague.models import TeamSeed
+from gleague.models import TeamSeedPlayer
 
 
 class AdminAccessMixin(object):
@@ -55,6 +57,24 @@ class MatchView(BaseModelView):
 
     def __init__(self, *args, **kwargs):
         super(MatchView, self).__init__(Match, *args, **kwargs)
+
+
+class SeedView(BaseModelView):
+    column_display_pk = True
+    can_edit = False
+    can_delete = True
+
+    def __init__(self, *args, **kwargs):
+        super(SeedView, self).__init__(TeamSeed, *args, **kwargs)
+
+
+class SeedPlayerView(BaseModelView):
+    column_display_pk = False
+    can_edit = True
+    can_delete = False
+
+    def __init__(self, *args, **kwargs):
+        super().__init__(TeamSeedPlayer, *args, **kwargs)
 
 
 class PlayerMatchRatingView(BaseModelView):
@@ -115,6 +135,8 @@ def init_admin(app):
     admin.add_view(SeasonView())
     admin.add_view(SeasonStatsView())
     admin.add_view(MatchView())
+    admin.add_view(SeedView())
+    admin.add_view(SeedPlayerView())
     admin.add_view(PlayerMatchStatsView())
     admin.add_view(PlayerMatchRatingView())
     admin.add_view(GoToIndex(name='go to "/"'))

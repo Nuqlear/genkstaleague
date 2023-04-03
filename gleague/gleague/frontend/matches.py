@@ -1,14 +1,18 @@
-import random
-from collections import namedtuple
-
 from flask import Blueprint
 from flask import abort
 from flask import current_app
 from flask import render_template
 from flask import request
+from flask import redirect
+from flask import url_for
+from flask import g
 from sqlalchemy import desc
 
-from gleague.models import Match, Season, SeasonStats, Player
+from gleague.core import db
+from gleague.models import Match
+from gleague.models import Season
+from gleague.models import TeamSeed
+from gleague.team_builder import TeamBuilderService
 
 
 matches_bp = Blueprint("matches", __name__)
@@ -34,61 +38,52 @@ def matches_preview():
     return render_template("/matches.html", matches=matches)
 
 
-PlayerTuple = namedtuple("PlayerTuple", ["nickname", "pts"])
-
-
 @matches_bp.route("/team_builder", methods=["GET", "POST"])
-def team_builder():
-    cs_id = Season.current().id
-    season_stats = sorted(
-        SeasonStats.query.filter(SeasonStats.season_id == cs_id).all(),
-        key=lambda ss: ss.player.nickname.lower(),
-    )
-    context = {"season_stats": season_stats}
+@matches_bp.route("/team_builder/<seed_id>", methods=["GET", "POST"])
+def team_builder(seed_id=None):
+    seed = None
+    season = Season.current()
+    builder = TeamBuilderService(season)
+    player_ids = []
+
+    if seed_id is not None:
+        seed = TeamSeed.query.get(str(seed_id))
+        if seed is None:
+            abort(404)
+        if seed.match:
+            return redirect(url_for("matches.match", match_id=seed.match.id))
+        player_ids = [
+            p.steam_id for p in seed.team_seed_players
+        ]
+
     if request.method == "POST":
-        players = []
-        for i in range(1, 11):
-            player_id = request.form.get("player-%i" % i)
-            if player_id == "None":
-                players.append(
-                    PlayerTuple("NOT REGISTERED PLAYER", SeasonStats.pts.default.arg)
-                )
-            else:
-                player = Player.query.get(player_id)
-                players.append(PlayerTuple(player.nickname, player.season_stats[0].pts))
-        context["teams"] = sort_by_pts(players)
-    return render_template("//team_builder.html", **context)
+        player_ids = [
+            request.form.get("player-%i" % num) or None for num in range(1, 11)
+        ]
+        teams = builder.shuffle_teams(player_ids)
+        seed = builder.save_seed(teams)
+        db.session.commit()
+        return redirect(url_for("matches.team_builder", seed_id=seed.id))
+    elif "from_match_id" in request.args and not seed_id:
+        from_match_id = request.args.get("from_match_id")
+        match = Match.query.get(from_match_id)
+        player_ids = [
+            ps.season_stats.steam_id
+            for ps in match.players_stats
+        ]
+        teams = builder.shuffle_teams(player_ids)
 
+    user_seed = None
+    if g.user:
+        for seed_player in (seed and seed.team_seed_players or []):
+            if seed_player.steam_id == g.user.steam_id:
+                user_seed = seed_player
+                break
 
-def sort_by_pts(players, t=50):
-    def total_pts(players):
-        return sum((players[i].pts for i in range(len(players))))
-
-    def pts_diff(radiant, dire):
-        return abs(total_pts(radiant) - total_pts(dire))
-
-    def shuffle(players):
-        teams = [[], []]
-        radiant = teams[0]
-        dire = teams[1]
-        for i in range(0, len(players), 2):
-            if random.randrange(0, 2):
-                radiant.append(players[i])
-                dire.append(players[i + 1])
-            else:
-                radiant.append(players[i + 1])
-                dire.append(players[i])
-        return teams
-
-    sorted_players = sorted(players, key=lambda p: p.pts)
-    best_attempt = shuffle(sorted_players)
-    best_diff = pts_diff(*best_attempt)
-
-    for __ in range(t):
-        attempt = shuffle(sorted_players)
-        diff = pts_diff(*attempt)
-        if diff < best_diff:
-            best_diff = diff
-            best_attempt = attempt
-
-    return best_attempt
+    return render_template(
+        "/team_builder.html",
+        players=builder.get_players(),
+        seed=seed,
+        selected_player_ids=player_ids,
+        user_seed=user_seed,
+    )

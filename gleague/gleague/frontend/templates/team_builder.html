@@ -5,65 +5,361 @@
     {{ macro.render_site_title('TEAMBUILDER') }}
 {% endblock %}
 
-{% block content %}
-    {% set non_registered_player='NOT REGISTERED PLAYER' %}
-    <div class="card">
-        <div class="card-body">
-            <h5 class="card-title">Team builder</h5>
-            <div class="row">
-                <div class="col-10 offset-1">
-                    <form method="POST" action="">
-                        {% for i in range(1, 11) %}
-                            <div class="form-group">
-                                <label for="player-{{ i }}">Player {{ i }}</label>
-                                <select id="player-{{ i }}" name="player-{{ i }}" class="form-control select2-multiple">
-                                    <option value="None"
-                                        {% if teams and teams[(i-1)//5][(i-1)%5].nickname==non_registered_player %}
-                                            selected="selected"
-                                        {% endif %}>
-                                        {{ non_registered_player }}
-                                    </option>
-                                    {% for ss in season_stats %}
-                                        <option value={{ ss.steam_id }}
-                                                    {% if teams and teams[(i-1)//5][(i-1)%5].nickname==ss.player.nickname %}
-                                                        selected="selected"
-                                                    {% endif %}>
-                                            {{ ss.player.nickname }}
-                                        </option>
-                                    {% endfor %}
-                                </select>
-                            </div>
-                        {% endfor %}
-                        <div class="form-group">
-                            <input type="submit" value="Get teams" class="btn btn-success" style="margin:20px">
-                        </div>
-                        <textarea disabled class="form-control" rows="28">
-                    {% if teams %}
-                        Radiant:
-                        {% for player in teams[0] %}
-                            {{ player.nickname }}
-                        {% endfor %}
+{% set double_down_btn_text = 'Double Down' %}
+{% set un_double_down_btn_text = 'Un-Double Down' %}
+{% set non_registered_player = 'NOT REGISTERED' %}
+{% set base_url = config.SITE_PROTOCOL.lower() ~ '://' ~ config.SITE_ADDRESS %}
 
-                        Dire:
-                        {% for player in teams[1] %}
-                            {{ player.nickname }}
-                        {% endfor %}
+{% macro render_seed_team(seed, is_radiant) -%}
+    <table class="table table-sm table-borderless table-hover">
+        <caption class="radiant_text_color"
+                style="text-align: left; font-weight: bold; font-size: 16pt; caption-side: top;">
+            {{ "Radiant" if is_radiant else "Dire" }}
+        </caption>
+        <thead>
+        <tr>
+            <th></th>
+            <th>Nickname</th>
+            <th>PTS</th>
+            <th></th>
+        </tr>
+        </thead>
+        <tbody>
+        {% for seed_player in seed.team_seed_players %}
+            {% if seed_player.is_radiant == is_radiant %}
+            <tr>
+                <td>
+                    {% if seed_player.player %}
+                        <img class="steam_img" src={{ seed_player.player.avatar_medium }}>
                     {% endif %}
-                </textarea>
-                    </form>
+                </td>
+                <td>
+                    {% if seed_player.player %}
+                        <a class="link_alt"
+                        href="{{ url_for('players.overview', steam_id= seed_player.player.steam_id) }}">
+                            {{  seed_player.player.nickname }}
+                        </a>
+                        {{ macro.render_streak(seed_player.player.season_stats[0]) }}
+                    {% else %}
+                        {{ non_registered_player }}
+                    {% endif %}
+                </td>
+                <td>
+                    {% if seed_player.player %}
+                        {{ seed_player.player.season_stats[0].pts }}
+                    {% else %}
+                        1000
+                    {% endif %}
+                </td>
+                <td>
+                    <i class="fas fa-check-double pts-double-down
+                    {% if not seed_player.is_double_down %}
+                    invisible
+                    {% endif %}"
+                        data-toggle="tooltip"
+                        data-placement="top"
+                        title="Double Down (Double PTS lose & gain)"
+                        id="double-down-{{ seed_player.steam_id }}"
+                    >
+                    </i>
+                </td>
+            </tr>
+            {% endif %}
+        {% endfor %}
+        </tbody>
+    </table>
+{%- endmacro %}
+
+{% block content %}
+    {% if g.user and g.user.is_admin() %}
+        <div class="card">
+            <div class="card-body">
+                <div class="row">
+                    <div class="col-10 offset-1">
+                        <form method="POST" action="">
+                            {% for i in range(1, 11) %}
+                                <div class="form-group">
+                                    <label for="player-{{ i }}">Player {{ i }}</label>
+                                    <select
+                                        id="player-{{ i }}"
+                                        name="player-{{ i }}"
+                                        class="form-control select2-multiple"
+                                    >
+                                        <option value=""
+                                            {%
+                                                if (selected_player_ids|length + 1) >= i
+                                                and selected_player_ids[i-1] is none
+                                            %}
+                                                selected="selected"
+                                            {% endif %}>
+                                            {{ non_registered_player }}
+                                        </option>
+                                        {% for player in players %}
+                                            <option
+                                                value={{ player.steam_id }}
+                                                data-image={{ player.avatar_medium }}
+                                                {%
+                                                    if (selected_player_ids|length + 1) >= i
+                                                    and selected_player_ids[i-1] == player.steam_id
+                                                %}
+                                                    selected="selected"
+                                                {% endif %}>
+                                                {{ player.nickname }}
+                                            </option>
+                                        {% endfor %}
+                                    </select>
+                                </div>
+                            {% endfor %}
+                            <div class="form-group">
+                                <input
+                                    type="submit"
+                                    value="Get teams"
+                                    class="btn btn-success"
+                                    style="margin:20px">
+                            </div>
+                        </form>
+                    </div>
                 </div>
+
             </div>
 
         </div>
-    </div>
+    {% endif %}
+
+    {% if seed %}
+
+        {% if not g.user and config.DOUBLE_DOWN_ENABLED %}
+            <div id="warning" class="alert alert-warning alert-dismissable text-center">
+                <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;"
+                        src="{{ url_for('static', filename='img/signinsteam.png') }}" /></a>
+                to apply a double down if you are going to play in this match
+            </div>
+        {% endif %}
+        <div class="card">
+            <div class="card-header">Teams</div>
+            <div class="card-body">
+                <div class="matches_table row">
+                    <div class="col-4">
+                        {{ render_seed_team(seed, True) }}
+                    </div>
+                    <div class="col-4 offset-4">
+                        {{ render_seed_team(seed, False) }}
+                    </div>
+                </div>
+            </div>
+            <div style="margin:20px;">
+                {% if user_seed and config.DOUBLE_DOWN_ENABLED is true %}
+                    <div
+                        id="double-down"
+                        class="btn btn-warning disabled"
+                        style="width: 100%; margin-bottom: 10px"
+                    >
+                        <span id="double-down-text">
+                            {% if user_seed.is_double_down %}
+                                {{ un_double_down_btn_text }}
+                            {% else %}
+                                {{ double_down_btn_text }}
+                            {% endif %}
+                        </span>
+                        <span id="timer"></span>
+                    </div>
+                {% endif %}
+                <div id="copy-clipboard"
+                    class="btn btn-success"
+                    style="width: 100%;"
+                >
+                    Copy to clipboard
+                </div>
+            </div>
+        </div>
+
+        {% if g.user and g.user.is_admin() %}
+            <div class="card">
+                <div class="card-header">Upload a replay</div>
+                <div class="card-body">
+                    <form id="upload_file_form">
+                        <div class="row">
+                            <div class="col-10 offset-1">
+                                <div id="upload_file_form_error_container">
+                                </div>
+                                <div class="form-group add_match">
+                                    <input type="file" id="file_input" name="file">
+                                </div>
+                            </div>
+                        </div>
+                        <button type="button"
+                            id="upload_file_btn"
+                            data-loading-text="Loading..."
+                            class="btn btn-xs btn-success"
+                            style="width:100%"
+                        >
+                            Upload
+                        </button>
+                    </form>
+                </div>
+            </div>
+        {% endif %}
+
+        <textarea disabled id="teams-text" class="form-control invisible">
+            url: {{ base_url }}{{ url_for('matches.team_builder', seed_id=seed.id) }}
+
+            Radiant:
+            {% for seed_player in seed.team_seed_players -%}
+                {% if seed_player.player %}
+                    {{ seed_player.player.nickname }}
+                {% else %}
+                    {{ non_registered_player }}
+                {% endif %}
+            {%- endfor %}
+
+            Dire:
+            {% for seed_player in seed.team_seed_players -%}
+                {% if seed_player.player %}
+                    {{ seed_player.player.nickname }}
+                {% else %}
+                    {{ non_registered_player }}
+                {% endif %}
+            {%- endfor %}
+        </textarea>
+    {% endif %}
+
 {% endblock %}
 
 {% block script %}
     <script type="application/javascript">
         $(document).ready(function () {
+            $('[data-toggle=tooltip]').tooltip({ container: 'body' });
+
+            function formatSelect2(selection) {
+                if (!selection.id) { return selection.text; }
+                var image = $(selection.element).data('image');
+                if(!image){
+                    return selection.text;
+                } else {
+                    var $selection = $(
+                        '<img class="steam_img" src="' + image + '" alt=""><span class="img-changer-text">' + $(selection.element).text() + '</span>'
+                    );
+                    return $selection;
+                }
+            }
+
             $('.select2-multiple').each(function () {
-                $(this).select2({});
+                $(this).select2({
+                    templateResult: formatSelect2,
+                    templateSelection: formatSelect2,
+                });
             });
+            $('#copy-clipboard').click(function() {
+                var text = $('#teams-text').val();
+                navigator.clipboard.writeText(text);
+            });
+
+            var formData;
+            function handleFileSelect(evt) {
+                var files = evt.target.files; // FileList object
+                formData = new FormData();
+                formData.append('file', files[0]);
+                formData.append('seed_id', "{{ seed.id }}");
+            }
+            $('#file_input').change(handleFileSelect);
+
+            function btnLoading(elem) {
+                $(elem).attr("data-original-text", $(elem).html());
+                $(elem).prop("disabled", true);
+                $(elem).html('<i class="spinner-border spinner-border-sm"></i> Loading...');
+            }
+
+            function btnReset(elem) {
+                $(elem).prop("disabled", false);
+                $(elem).html($(elem).attr("data-original-text"));
+            }
+
+            var fileUploadErrorPopup = (
+                `<div id="error" class="alert alert-danger alert-dismissable">
+                    <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
+                    <strong>Error!</strong> <span id="error_text">Something goes wrong.</span>
+                </div>`
+            );
+            $('#upload_file_btn').click(function () {
+                var btn = $(this);
+                btnLoading(btn);
+                $.ajax({
+                    type: 'POST',
+                    url: '/api/matches/',
+                    data: formData,
+                    cache: false,
+                    processData: false,
+                    contentType: false,
+                    async: true,
+                    success: function(data) {
+                        location.reload(false);
+                    },
+                    error: function(errorData) {
+                        btnReset(btn);
+                        $("#upload_file_form_error_container").html(fileUploadErrorPopup);
+                    }
+                })
+            });
+
+            {% if user_seed %}
+                console.log("{{ user_seed.is_double_down }}");
+                var isDoubleDown = "{{ user_seed.is_double_down }}" == "True";
+
+                var seedCreatedAt = moment.utc('{{ seed.created_at }}');
+                var secondDoubleDown = {{ config.DOUBLE_DOWN_TIME.total_seconds() }};
+                var seedTimeOut = seedCreatedAt.add(secondDoubleDown - 10, 'seconds');
+                var duration =  moment.duration(seedTimeOut.diff(moment.utc(), 'seconds'), 'seconds');
+                var interval = 1000;
+
+                var btn = $("#double-down");
+                var doubleDownText = $("#double-down-text");
+
+                btn.click(function() {
+                    $.ajax({
+                        url: "/api/team_seeds/{{ seed.id }}/players/{{ g.user.steam_id}}",
+                        type: "PUT",
+                        contentType: "application/json",
+                        data: JSON.stringify({
+                            is_double_down: !isDoubleDown,
+                        }),
+                        success: function() {
+                            isDoubleDown = !isDoubleDown;
+                            if (isDoubleDown) {
+                                doubleDownText.text("{{ un_double_down_btn_text }}");
+                                $("#double-down-{{ g.user.steam_id }}").removeClass("invisible");
+                            } else {
+                                doubleDownText.text("{{ double_down_btn_text }}");
+                                $("#double-down-{{ g.user.steam_id }}").addClass("invisible");
+                            }
+                        }
+                    });
+                });
+
+                function setTimerText() {
+                    duration = moment.duration(duration.asSeconds() - 1, 'seconds');
+                    if (duration) {
+                        var text = "(available for " + duration.asSeconds() + " seconds...)";
+                        $('#timer').text(text);
+                    } else {
+                        $('#timer').text("");
+                    }
+                }
+
+                if (duration.asSeconds() > 0) {
+                    btn.removeClass("disabled");
+                    setTimerText();
+                }
+
+                var intervalId = setInterval(function(){
+                    if (duration.asSeconds() <= 0) {
+                        clearInterval(intervalId);
+                        btn.addClass('disabled', true);
+                        return;
+                    }
+                    setTimerText();
+                }, interval);
+            {% endif %}
         });
     </script>
 {% endblock %}
