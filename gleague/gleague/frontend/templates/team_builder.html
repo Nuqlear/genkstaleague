@@ -59,7 +59,7 @@
                         data-toggle="tooltip"
                         data-placement="top"
                         title="Double Down (Double PTS lose & gain)"
-                        id="double-down-{{ seed_player.steam_id }}"
+                        data-double-down-steam-id="{{ seed_player.steam_id }}"
                     >
                     </i>
                 </td>
@@ -306,7 +306,7 @@
                 })
             });
 
-            {% if user_seed %}
+            {% if user_seed and config.DOUBLE_DOWN_ENABLED %}
                 console.log("{{ user_seed.is_double_down }}");
                 var isDoubleDown = "{{ user_seed.is_double_down }}" == "True";
 
@@ -314,10 +314,25 @@
                 var secondDoubleDown = {{ config.DOUBLE_DOWN_TIME.total_seconds() }};
                 var seedTimeOut = seedCreatedAt.add(secondDoubleDown - 10, 'seconds');
                 var duration =  moment.duration(seedTimeOut.diff(moment.utc(), 'seconds'), 'seconds');
-                var interval = 1000;
 
                 var btn = $("#double-down");
+                var userDoubleDownIcon = $('*[data-double-down-steam-id="{{ g.user.steam_id }}"]');
                 var doubleDownText = $("#double-down-text");
+
+                function setDoubleDownIcon(icon, isEnabled) {
+                    if (isEnabled) {
+                        icon.removeClass("invisible");
+                    } else {
+                        icon.addClass("invisible");
+                    }
+                    if (icon == userDoubleDownIcon) {
+                        if (isEnabled) {
+                            doubleDownText.text("{{ un_double_down_btn_text }}");
+                        } else {
+                            doubleDownText.text("{{ double_down_btn_text }}");
+                        }
+                    }
+                }
 
                 btn.click(function() {
                     $.ajax({
@@ -329,20 +344,14 @@
                         }),
                         success: function() {
                             isDoubleDown = !isDoubleDown;
-                            if (isDoubleDown) {
-                                doubleDownText.text("{{ un_double_down_btn_text }}");
-                                $("#double-down-{{ g.user.steam_id }}").removeClass("invisible");
-                            } else {
-                                doubleDownText.text("{{ double_down_btn_text }}");
-                                $("#double-down-{{ g.user.steam_id }}").addClass("invisible");
-                            }
+                            setDoubleDownIcon(userDoubleDownIcon, isDoubleDown);
                         }
                     });
                 });
 
                 function setTimerText() {
                     duration = moment.duration(duration.asSeconds() - 1, 'seconds');
-                    if (duration) {
+                    if (duration > 0) {
                         var text = "(available for " + duration.asSeconds() + " seconds...)";
                         $('#timer').text(text);
                     } else {
@@ -353,16 +362,41 @@
                 if (duration.asSeconds() > 0) {
                     btn.removeClass("disabled");
                     setTimerText();
-                }
 
-                var intervalId = setInterval(function(){
-                    if (duration.asSeconds() <= 0) {
-                        clearInterval(intervalId);
-                        btn.addClass('disabled', true);
-                        return;
-                    }
-                    setTimerText();
-                }, interval);
+                    var doubleDownSyncPeriod = 1000;
+                    var doubleDownSyncInterval = setInterval(function(){
+                        $.ajax({
+                            url: "/api/team_seeds/{{ seed.id }}/players",
+                            type: "GET",
+                            dataType: "json",
+                            async: true,
+                            success: function(data) {
+                                doubleDownedPlayerIds = data.team_seed_players
+                                    .filter(function(item) {
+                                        return item.steam_id && item.is_double_down;
+                                    })
+                                    .map(function(item) {
+                                        return item.steam_id;
+                                    })
+                                $("[data-double-down-steam-id]").each(function() {
+                                    var elem = $(this);
+                                    var steamId = elem.data("double-down-steam-id");
+                                    setDoubleDownIcon(elem, doubleDownedPlayerIds.includes(steamId));
+                                })
+                            }
+                        });
+                    }, doubleDownSyncPeriod);
+
+                    var doubleDownTimerPeriod = 1000;
+                    var doubleDownTimerInterval = setInterval(function(){
+                        setTimerText();
+                        if (duration.asSeconds() <= 0) {
+                            clearInterval(doubleDownTimerInterval);
+                            clearInterval(doubleDownSyncInterval);
+                            btn.addClass('disabled', true);
+                        }
+                    }, doubleDownTimerPeriod);
+                }
             {% endif %}
         });
     </script>
