@@ -6,6 +6,8 @@ from sqlalchemy import case
 from sqlalchemy import desc
 from sqlalchemy import func
 from sqlalchemy import event
+from sqlalchemy import select
+from sqlalchemy.orm import aliased
 
 from gleague.core import db, cache
 from gleague.models import Match
@@ -254,38 +256,85 @@ def get_side_winrates(season_id):
 
 
 def _get_most_iconic_duos(season_id, most_powerful=True, limit=3):
-    duos_result = db.session.execute(
-        """
-        SELECT p1.nickname, p2.nickname, result.sum FROM (
-            SELECT ss1.steam_id as steam_id_1, ss2.steam_id as steam_id_2,
-            (
-                SELECT SUM(pms1.pts_diff)
-                FROM player_match_stats pms1
-                WHERE pms1.season_stats_id=ss1.id
-                AND EXISTS(
-                    SELECT * FROM player_match_stats pms2
-                    WHERE pms2.match_id=pms1.match_id AND pms2.pts_diff=pms1.pts_diff
-                    AND pms2.season_stats_id=ss2.id
+    ss1 = SeasonStats.__table__.alias()
+    ss2 = SeasonStats.__table__.alias()
+    pms1 = PlayerMatchStats.__table__.alias()
+    pms2 = PlayerMatchStats.__table__.alias()
+    query = (
+        select(
+            [
+                ss1.c.steam_id.label("steam_id_1"),
+                ss2.c.steam_id.label("steam_id_2"),
+                func.sum(pms1.c.pts_diff).label("pts_diff_1"),
+                func.sum(pms2.c.pts_diff).label("pts_diff_2"),
+            ]
+        )
+        .select_from(
+            pms1.join(
+                pms2,
+                and_(
+                    pms2.c.match_id == pms1.c.match_id,
+                    func.sign(pms2.c.pts_diff) == func.sign(pms1.c.pts_diff),
+                    pms2.c.season_stats_id < pms1.c.season_stats_id,
                 )
-            ) as sum
-            FROM season_stats ss1
-            JOIN season_stats ss2 ON ss1.steam_id < ss2.steam_id
-            AND ss1.season_id=ss2.season_id AND ss1.season_id=:season_id
-        ) result
-        JOIN player p1 ON p1.steam_id=result.steam_id_1
-        JOIN player p2 ON p2.steam_id=result.steam_id_2
-        WHERE result.sum is not NULL
-        ORDER BY result.sum {order_direction_desc}
-        LIMIT :limit;
-        """.format(
-            order_direction_desc=("DESC" if most_powerful else "ASC")
-        ),
-        {"season_id": season_id, "limit": limit},
+            ).join(
+                Match,
+                and_(
+                    Match.id == pms1.c.match_id,
+                    Match.season_id == season_id,
+                )
+            ).join(
+                ss1,
+                ss1.c.id == pms1.c.season_stats_id,
+            ).join(
+                ss2,
+                ss2.c.id == pms2.c.season_stats_id,
+            )
+        )
+        .group_by(ss1.c.steam_id, ss2.c.steam_id)
     )
-    return duos_result.fetchall()
+    pts_gain_cte = query.cte()
+
+    p1 = aliased(Player)
+    p2 = aliased(Player)
+
+    query = (
+        db.session.query(
+            p1,
+            p2,
+            pts_gain_cte.c.pts_diff_1,
+            pts_gain_cte.c.pts_diff_2,
+        ).select_from(
+            pts_gain_cte.join(
+                p1,
+                pts_gain_cte.c.steam_id_1 == p1.steam_id
+            ).join(
+                p2,
+                pts_gain_cte.c.steam_id_2 == p2.steam_id
+            ),
+        )
+    )
+
+    if most_powerful:
+        query = query.order_by(
+            func.greatest(
+                pts_gain_cte.c.pts_diff_1,
+                pts_gain_cte.c.pts_diff_2,
+            ).desc()
+        )
+    else:
+        query = query.order_by(
+            func.least(
+                pts_gain_cte.c.pts_diff_1,
+                pts_gain_cte.c.pts_diff_2,
+            ).asc()
+        )
+
+    query = query.limit(limit)
+    return query.all()
 
 
-duo_nt = namedtuple("duo_nt", ["player1", "player2", "pts_diff"])
+duo_nt = namedtuple("duo_nt", ["player1", "player2", "player_1_pts_diff", "player_2_pts_diff"])
 
 
 def get_most_powerful_duos(season_id):
