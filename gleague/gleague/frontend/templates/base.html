@@ -31,7 +31,7 @@
             <li class="nav-item {{ 'active' if endpoint[1] == 'matches_preview' else None }}">
                 <a href="{{ url_for('matches.matches_preview') }}" class="nav-link">MATCH HISTORY</a>
             </li>
-            {% if g.user and g.user.is_admin() %}
+            {% if g.user and g.user.is_admin %}
                 <li class="nav-item {{ 'active' if endpoint[1] == 'team_builder' else None }}">
                     <a href="{{ url_for('matches.team_builder') }}" class="nav-link">TEAM BUILDER</a>
                 </li>

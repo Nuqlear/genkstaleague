@@ -35,7 +35,7 @@ class GleagueApiTestCase(GleagueAppTestCase):
         self.set_user(user.steam_id)
         response = self.add_match()
         self.assertEqual(403, response.status_code)
-        user = PlayerFactory(steam_id=self.app.config['ADMINS_STEAM_ID'][0])
+        user = PlayerFactory(is_admin=True)
         self.set_user(user.steam_id)
         response = self.add_match()
         self.assertEqual(400, response.status_code)

@@ -8,8 +8,8 @@ from flask import jsonify
 from flask import request
 from flask import current_app
 
-from gleague.api import admin_required
-from gleague.api import login_required
+from gleague.auth import admin_required
+from gleague.auth import login_required
 from gleague.core import db
 from gleague.models import Match
 from gleague.models import PlayerMatchRating

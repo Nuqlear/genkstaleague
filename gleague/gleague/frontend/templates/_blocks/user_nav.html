@@ -1,5 +1,5 @@
 {% if g.user %}
-    {% if g.user.is_admin() %}
+    {% if g.user.is_admin %}
         <li class="nav-item">
             <a href="{{ url_for('admin.index') }}" class="nav-link">ADMIN</a>
         </li>

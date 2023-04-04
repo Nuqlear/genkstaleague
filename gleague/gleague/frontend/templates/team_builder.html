@@ -71,7 +71,7 @@
 {%- endmacro %}
 
 {% block content %}
-    {% if g.user and g.user.is_admin() %}
+    {% if g.user and g.user.is_admin %}
         <div class="card">
             <div class="card-body">
                 <div class="row">
@@ -174,7 +174,7 @@
             </div>
         </div>
 
-        {% if g.user and g.user.is_admin() %}
+        {% if g.user and g.user.is_admin %}
             <div class="card">
                 <div class="card-header">Upload a replay</div>
                 <div class="card-body">

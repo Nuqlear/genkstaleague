@@ -1,9 +1,5 @@
-from functools import wraps
-
 from flask import jsonify
-from flask import g
-from flask import Response
-from flask import current_app
+
 from flask_openid import OpenID
 
 from gleague import core
@@ -33,23 +29,3 @@ def handle_error(e):
     if hasattr(e, 'code'):
         code = e.code
     return jsonify({'error': msg}), code
-
-
-def login_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not g.user:
-            return Response(status=401)
-        return f(*args, **kwargs)
-    return decorated_function
-
-
-def admin_required(f):
-    @wraps(f)
-    def decorated_function(*args, **kwargs):
-        if not g.user or (
-            g.user.steam_id not in current_app.config['ADMINS_STEAM_ID']
-        ):
-            return Response(status=403)
-        return f(*args, **kwargs)
-    return decorated_function

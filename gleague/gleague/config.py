@@ -17,11 +17,6 @@ class BaseConfig(object):
     DOGPILE_BACKEND = "dogpile.cache.redis"
     DOGPILE_BACKEND_URL = "redis://redis:6379"
     DOGPILE_REGIONS = [("week", 3600 * 24 * 7)]
-
-    _admin_steam_id = environ.get("ADMIN_STEAM_ID")
-    _admin_steam_id = _admin_steam_id.split(",")
-    _admin_steam_id = list(map(int, _admin_steam_id))
-    ADMINS_STEAM_ID = _admin_steam_id
     REPLAY_PARSER_HOST = environ.get("REPLAY_PARSER_HOST", "http://dem2json:5222")
     DOUBLE_DOWN_ENABLED = environ.get("DOUBLE_DOWN_ENABLED", "1") == "1"
     DOUBLE_DOWN_TIME = datetime.timedelta(
@@ -56,8 +51,7 @@ class gleague_frontend(BaseConfig):
 
 
 class BaseTestingConfig(BaseConfig):
-    # SQLALCHEMY_DATABASE_URI = 'postgresql://genksta:1@localhost/gleague_test'
-    ADMINS_STEAM_ID = [123456789]
+    pass
 
 
 class gleague_api_tests(gleague_api, BaseTestingConfig):

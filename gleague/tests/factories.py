@@ -35,6 +35,7 @@ class PlayerFactory(Factory):
 
     steam_id = Sequence(lambda n: n)
     nickname = Sequence(lambda n: 'Player #%s' % n)
+    is_admin = False
 
 
 class MatchFactory(Factory):

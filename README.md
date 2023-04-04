@@ -9,7 +9,6 @@ Technically it is very simple and is unsuitable for something serious, because a
 
 ## How to run it
 - Add STEAM_API_KEY to .env file
-- Add ADMIN_STEAM_ID to .env file
 - Build docker images:  
   `docker-compose -f docker-compose.yml -f docker-compose.build.yml build`
 - Run docker-compose with either dev or prod setup:
@@ -19,9 +18,11 @@ Technically it is very simple and is unsuitable for something serious, because a
   `docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec gleague alembic upgrade head`
 - Create a season:
   `docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec gleague python cli.py start_season`
-- Go to http://localhost:5000, open admin panel and upload a match
-
-I guess it should be possible to run the project without Docker too, but i am not doing it and so will not cover such way here.
+- Go to http://localhost:5000 and login
+- Connect to the database and give yourself admin rights:
+    - `docker-compose -f docker-compose.yml -f docker-compose.prod.yml exec gleague psql -h postgres -d gleague -U gleague`  
+    - `UPDATE player SET is_admin = true WHERE steam_id = <steam_id>`
+-  Open http://localhost:5000/admin and upload a match
 
 ## Credits
 Thanks to [Dotabuff](https://github.com/dotabuff) for open sourcing [Manta](https://github.com/dotabuff/manta), what made replay parsing possible.

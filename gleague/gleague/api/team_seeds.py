@@ -7,7 +7,7 @@ from flask import request
 from flask import Response
 from flask import jsonify
 
-from gleague.api import login_required
+from gleague.auth import login_required
 from gleague.models import TeamSeedPlayer
 from gleague.core import db
 from gleague.core import cache

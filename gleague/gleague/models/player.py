@@ -4,6 +4,7 @@ from flask import current_app
 from sqlalchemy import BigInteger
 from sqlalchemy import Column
 from sqlalchemy import String
+from sqlalchemy import Boolean
 from sqlalchemy import func
 from sqlalchemy.orm import relationship
 
@@ -24,6 +25,7 @@ class Player(db.Model):
     nickname = Column(String(80))
     avatar = Column(String(255))
     avatar_medium = Column(String(255))
+    is_admin = Column(Boolean, nullable=True, default=False)
     season_stats = relationship(
         "SeasonStats",
         lazy="dynamic",
@@ -70,9 +72,6 @@ class Player(db.Model):
             db.session.add(SeasonStats(season_id=cs.id, steam_id=p.steam_id))
         db.session.flush()
         return p
-
-    def is_admin(self):
-        return self.steam_id in current_app.config.get("ADMINS_STEAM_ID", [])
 
     def update_from_steam(self):
         steamdata = get_steam_user_info(
