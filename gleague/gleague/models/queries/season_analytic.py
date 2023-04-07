@@ -16,6 +16,7 @@ from gleague.models import Season
 from gleague.models import SeasonStats
 from gleague.models import Player
 from gleague.models import Role
+from gleague.heroes import get_human_readable_hero_name
 from gleague.utils.position import Position
 
 
@@ -276,17 +277,20 @@ def _get_most_iconic_duos(season_id, most_powerful=True, limit=3):
                     pms2.c.match_id == pms1.c.match_id,
                     func.sign(pms2.c.pts_diff) == func.sign(pms1.c.pts_diff),
                     pms2.c.season_stats_id < pms1.c.season_stats_id,
-                )
-            ).join(
+                ),
+            )
+            .join(
                 Match,
                 and_(
                     Match.id == pms1.c.match_id,
                     Match.season_id == season_id,
-                )
-            ).join(
+                ),
+            )
+            .join(
                 ss1,
                 ss1.c.id == pms1.c.season_stats_id,
-            ).join(
+            )
+            .join(
                 ss2,
                 ss2.c.id == pms2.c.season_stats_id,
             )
@@ -298,21 +302,15 @@ def _get_most_iconic_duos(season_id, most_powerful=True, limit=3):
     p1 = aliased(Player)
     p2 = aliased(Player)
 
-    query = (
-        db.session.query(
-            p1,
-            p2,
-            pts_gain_cte.c.pts_diff_1,
-            pts_gain_cte.c.pts_diff_2,
-        ).select_from(
-            pts_gain_cte.join(
-                p1,
-                pts_gain_cte.c.steam_id_1 == p1.steam_id
-            ).join(
-                p2,
-                pts_gain_cte.c.steam_id_2 == p2.steam_id
-            ),
-        )
+    query = db.session.query(
+        p1,
+        p2,
+        pts_gain_cte.c.pts_diff_1,
+        pts_gain_cte.c.pts_diff_2,
+    ).select_from(
+        pts_gain_cte.join(p1, pts_gain_cte.c.steam_id_1 == p1.steam_id).join(
+            p2, pts_gain_cte.c.steam_id_2 == p2.steam_id
+        ),
     )
 
     if most_powerful:
@@ -334,7 +332,9 @@ def _get_most_iconic_duos(season_id, most_powerful=True, limit=3):
     return query.all()
 
 
-duo_nt = namedtuple("duo_nt", ["player1", "player2", "player_1_pts_diff", "player_2_pts_diff"])
+duo_nt = namedtuple(
+    "duo_nt", ["player1", "player2", "player_1_pts_diff", "player_2_pts_diff"]
+)
 
 
 def get_most_powerful_duos(season_id):
@@ -353,7 +353,7 @@ def get_player_heroes(season_id, order_by):
     if is_desc != "no":
         is_desc = "yes"
         order_by = desc(order_by)
-    return (
+    heroes = (
         PlayerMatchStats.query.join(SeasonStats)
         .filter(SeasonStats.season_id == season_id)
         .with_entities(
@@ -372,8 +372,23 @@ def get_player_heroes(season_id, order_by):
         )
         .group_by(PlayerMatchStats.hero)
         .order_by(order_by)
-        .all()
     )
+    heroes = [
+        {
+            "hero": row.hero,
+            "hero_human_readable": get_human_readable_hero_name(row.hero),
+            "played": row.played,
+            "winrate": row.winrate,
+            "pts_diff": row.pts_diff,
+            "kda": row.kda,
+        }
+        for row in heroes
+    ]
+    if order_by == "hero":
+        heroes = sorted(
+            heroes, key=lambda el: el["hero_human_readable"], reverse=is_desc == "yes"
+        )
+    return heroes
 
 
 @cache.cache_on_arguments("week")

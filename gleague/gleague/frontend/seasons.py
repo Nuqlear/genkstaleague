@@ -6,7 +6,6 @@ from flask import current_app
 from sqlalchemy import desc
 
 from gleague.core import db
-from gleague.models import Match
 from gleague.models import Season
 from gleague.models import SeasonStats
 from gleague.models.queries import season_analytic
