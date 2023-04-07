@@ -129,7 +129,7 @@
     {% if seed %}
 
         {% if not g.user and config.DOUBLE_DOWN_ENABLED %}
-            <div id="warning" class="alert alert-warning alert-dismissable text-center">
+            <div id="sign-in-alert" class="alert alert-warning alert-dismissable text-center">
                 <button type="button" class="close" data-dismiss="alert" aria-hidden="true">&times;</button>
                 <a href="{{ url_for('auth.login') }}"><img stlyle="height: 50px;"
                         src="{{ url_for('static', filename='img/signinsteam.png') }}" /></a>
@@ -306,16 +306,14 @@
                 })
             });
 
-            {% if user_seed and config.DOUBLE_DOWN_ENABLED %}
-                console.log("{{ user_seed.is_double_down }}");
-                var isDoubleDown = "{{ user_seed.is_double_down }}" == "True";
-
+            {% if seed and config.DOUBLE_DOWN_ENABLED %}
                 var seedCreatedAt = moment.utc('{{ seed.created_at }}');
                 var secondDoubleDown = {{ config.DOUBLE_DOWN_TIME.total_seconds() }};
                 var seedTimeOut = seedCreatedAt.add(secondDoubleDown - 10, 'seconds');
                 var duration =  moment.duration(seedTimeOut.diff(moment.utc(), 'seconds'), 'seconds');
 
                 var btn = $("#double-down");
+                var loginAlert = $("#sign-in-alert");
                 var userDoubleDownIcon = $('*[data-double-down-steam-id="{{ g.user.steam_id }}"]');
                 var doubleDownText = $("#double-down-text");
 
@@ -334,20 +332,24 @@
                     }
                 }
 
-                btn.click(function() {
-                    $.ajax({
-                        url: "/api/team_seeds/{{ seed.id }}/players/{{ g.user.steam_id}}",
-                        type: "PUT",
-                        contentType: "application/json",
-                        data: JSON.stringify({
-                            is_double_down: !isDoubleDown,
-                        }),
-                        success: function() {
-                            isDoubleDown = !isDoubleDown;
-                            setDoubleDownIcon(userDoubleDownIcon, isDoubleDown);
-                        }
+                {% if user_seed %}
+                    var isDoubleDown = "{{ user_seed.is_double_down }}" == "True";
+
+                    btn.click(function() {
+                        $.ajax({
+                            url: "/api/team_seeds/{{ seed.id }}/players/{{ g.user.steam_id}}",
+                            type: "PUT",
+                            contentType: "application/json",
+                            data: JSON.stringify({
+                                is_double_down: !isDoubleDown,
+                            }),
+                            success: function() {
+                                isDoubleDown = !isDoubleDown;
+                                setDoubleDownIcon(userDoubleDownIcon, isDoubleDown);
+                            }
+                        });
                     });
-                });
+                {% endif %}
 
                 function setTimerText() {
                     duration = moment.duration(duration.asSeconds() - 1, 'seconds');
@@ -360,8 +362,22 @@
                 }
 
                 if (duration.asSeconds() > 0) {
-                    btn.removeClass("disabled");
-                    setTimerText();
+
+                    {% if user_seed %}
+                        btn.removeClass("disabled");
+                        setTimerText();
+
+                        var doubleDownTimerPeriod = 1000;
+                        var doubleDownTimerInterval = setInterval(function(){
+                            setTimerText();
+                            if (duration.asSeconds() <= 0) {
+                                clearInterval(doubleDownTimerInterval);
+                                clearInterval(doubleDownSyncInterval);
+                                btn.addClass('disabled', true);
+                                loginAlert.hide();
+                            }
+                        }, doubleDownTimerPeriod);
+                    {% endif %}
 
                     var doubleDownSyncPeriod = 1000;
                     var doubleDownSyncInterval = setInterval(function(){
@@ -386,16 +402,6 @@
                             }
                         });
                     }, doubleDownSyncPeriod);
-
-                    var doubleDownTimerPeriod = 1000;
-                    var doubleDownTimerInterval = setInterval(function(){
-                        setTimerText();
-                        if (duration.asSeconds() <= 0) {
-                            clearInterval(doubleDownTimerInterval);
-                            clearInterval(doubleDownSyncInterval);
-                            btn.addClass('disabled', true);
-                        }
-                    }, doubleDownTimerPeriod);
                 }
             {% endif %}
         });

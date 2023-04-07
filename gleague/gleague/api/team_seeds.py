@@ -17,7 +17,6 @@ team_seeds_bp = Blueprint("team_seeds", __name__)
 
 
 @team_seeds_bp.route("/<seed_id>/players", methods=["GET"])
-@login_required
 @cache.cache_on_arguments("week")
 def get_seed_players(seed_id):
     query = TeamSeedPlayer.query
