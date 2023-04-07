@@ -39,13 +39,16 @@
                         href="{{ url_for('players.overview', steam_id= seed_player.player.steam_id) }}">
                             {{  seed_player.player.nickname }}
                         </a>
-                        {{ macro.render_streak(seed_player.player.season_stats[0]) }}
+                        {% if seed_player.player.season_stats[0].season.ended is none %}
+                            {{ macro.render_streak(seed_player.player.season_stats[0]) }}
+                        {% endif %}
                     {% else %}
                         {{ non_registered_player }}
                     {% endif %}
                 </td>
                 <td>
-                    {% if seed_player.player %}
+                    {% if seed_player.player
+                        and seed_player.player.season_stats[0].season.ended is none %}
                         {{ seed_player.player.season_stats[0].pts }}
                     {% else %}
                         1000
