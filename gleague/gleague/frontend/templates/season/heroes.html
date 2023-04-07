@@ -18,11 +18,14 @@
                    <thead>
                     <tr>
                         <th>
+                        </th>
+                        <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero',
-                            desc='no', season_number=season_number) }}">Hero
-                            {% if sort == 'hero' %}
-                                &nbsp;<i class="fas fa-sort-amount-down"></i>
-                            {% endif %}
+                            desc='no', season_number=season_number) }}">
+                                Hero
+                                {% if sort == 'hero' %}
+                                    &nbsp;<i class="fas fa-sort-amount-down"></i>
+                                {% endif %}
                             </a>
                         </th>
                         <th>
@@ -62,8 +65,13 @@
                     <tbody>
                     {% for h in in_season_heroes %}
                     <tr>
-                        <td><img class="steam_img"
-                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ h.hero }}_lg.png></td>
+                        <td>
+                            <img class="steam_img"
+                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ h.hero }}_lg.png>&nbsp;
+                        </td>
+                        <td>
+                            {{ h.hero_human_readable }}
+                        </td>
                         <td>{{ h.played }}</td>
                         <td>{{ '%i' % h.winrate }}%</td>
                         <td>{{ h.pts_diff }}</td>
