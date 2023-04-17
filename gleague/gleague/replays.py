@@ -1,5 +1,6 @@
 import math
 from typing import Optional
+from itertools import zip_longest
 
 import dataclasses as dc
 import requests
@@ -54,30 +55,22 @@ class ReplayDataProcessor:
     def _save_match_game_mode_attributes(self, match: Match, replay_data: dict):
         if match.game_mode == 2:
             match.cm_captains = replay_data["draft"]["captains"]
-            pick_bans_from_data = {
-                (
-                    pick_ban_data["is_pick"],
-                    pick_ban_data["is_radiant"],
-                    pick_ban_data["hero"],
-                )
-                for pick_ban_data in replay_data["draft"]["picks_and_bans"]
-            }
-            match_pick_bans_map = {
-                (
-                    cmpb.is_pick,
-                    cmpb.is_radiant,
-                    cmpb.hero,
-                ): cmpb
-                for cmpb in match.cm_picks_bans
-            }
-            for data, cmpb in match_pick_bans_map.items():
-                if data not in pick_bans_from_data:
+            for cmpb, data in zip_longest(
+                match.cm_picks_bans, replay_data["draft"]["picks_and_bans"]
+            ):
+                if cmpb is not None and data is not None:
+                    cmpb.is_pick = data["is_pick"]
+                    cmpb.is_radiant = data["is_radiant"]
+                    cmpb.hero = data["hero"]
+                    db.session.add(cmpb)
+                elif cmpb is not None and data is None:
                     db.session.delete(cmpb)
-            for data in pick_bans_from_data:
-                if data not in match_pick_bans_map:
+                elif cmpb is None and data is not None:
                     db.session.add(
                         CMPicksBans(
-                            **dict(zip(("is_pick", "is_radiant", "hero"), data)),
+                            is_pick=data["is_pick"],
+                            is_radiant=data["is_radiant"],
+                            hero=data["hero"],
                             match=match,
                         )
                     )
