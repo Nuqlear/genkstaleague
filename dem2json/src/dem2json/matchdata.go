@@ -378,7 +378,7 @@ func (matchParser *MatchParser) OnCMsgDOTACombatLogEntry(combatLogEntry *dota.CM
 		// heal combat log attacker entity is the one doing heals
 		if !combatLogEntry.GetIsAttackerHero() && !combatLogEntry.GetIsAttackerIllusion() {
 			// skip entry if we can't attribute attacker properly
-			// TODO: check if Juggernaut ward is being counted, if not - find similar mechanics and all all of them as exceptions
+			// TODO: check if Juggernaut ward is being counted, if not - find similar mechanics and all of them as exceptions
 			// TODO: check Arc Warden clones, check if attacked being illusion here won't count as heal for someone other
 			break;
 		}
