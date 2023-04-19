@@ -22,6 +22,7 @@ type MatchParser struct {
 	isPaused         bool
 	parser           *manta.Parser
 	heroDamageMap    map[string]uint32
+	heroHealMap      map[string]uint32
 	towerDamageMap   map[string]uint32
 	damageTakenMap   map[string]uint32
 }
@@ -63,6 +64,7 @@ type MatchPlayerData struct {
 	GoldPerMin          int32      `json:"gold_per_min"`
 	XpPerMin            int32      `json:"xp_per_min"`
 	HeroDamage          uint32     `json:"hero_damage"`
+	HeroHeal            uint32     `json:"hero_heal"`
 	DamageTaken         uint32     `json:"damage_taken"`
 	TowerDamage         uint32     `json:"tower_damage"`
 	ObserverWardsPlaced int32      `json:"observer_wards_placed"`
@@ -81,12 +83,14 @@ type Position struct {
 
 func (matchParser *MatchParser) init(parser *manta.Parser) {
 	matchParser.heroDamageMap = make(map[string]uint32)
+	matchParser.heroHealMap = make(map[string]uint32)
 	matchParser.towerDamageMap = make(map[string]uint32)
 	matchParser.damageTakenMap = make(map[string]uint32)
 	matchParser.parser = parser
 	matchData := &matchParser.matchData
 	for index := range matchData.Players {
 		matchData.Players[index].HeroDamage = 0
+		matchData.Players[index].HeroHeal = 0
 		matchData.Players[index].DamageTaken = 0
 		matchData.Players[index].TowerDamage = 0
 	}
@@ -98,6 +102,7 @@ func (matchParser *MatchParser) finalize() {
 		heroName := heroesMap[player.HeroId]
 		matchData.Players[index].HeroName = heroName
 		matchData.Players[index].HeroDamage = matchParser.heroDamageMap[heroName]
+		matchData.Players[index].HeroHeal = matchParser.heroHealMap[heroName]
 		matchData.Players[index].DamageTaken = matchParser.damageTakenMap[heroName]
 		matchData.Players[index].TowerDamage = matchParser.towerDamageMap[heroName]
 	}
@@ -368,6 +373,25 @@ func (matchParser *MatchParser) OnCMsgDOTACombatLogEntry(combatLogEntry *dota.CM
 			} else {
 				matchParser.towerDamageMap[attacker] = damage
 			}
+		}
+	case dota.DOTA_COMBATLOG_TYPES_DOTA_COMBATLOG_HEAL:
+		// heal combat log attacker entity is the one doing heals
+		if !combatLogEntry.GetIsAttackerHero() && !combatLogEntry.GetIsAttackerIllusion() {
+			// skip entry if we can't attribute attacker properly
+			// TODO: check if Juggernaut ward is being counted, if not - find similar mechanics and all of them as exceptions
+			// TODO: check Arc Warden clones, check if attacked being illusion here won't count as heal for someone other
+			break;
+		}
+		if combatLogEntry.GetTargetIsSelf() {
+			// do not count self heals (via self lifesteal sources too)
+			break;
+		}
+		attacker, _ := matchParser.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetAttackerName()))
+		heal := combatLogEntry.GetValue()
+		if _, ok := matchParser.heroHealMap[attacker]; ok {
+			matchParser.heroHealMap[attacker] += heal
+		} else {
+			matchParser.heroHealMap[attacker] = heal
 		}
 	}
 	return nil
