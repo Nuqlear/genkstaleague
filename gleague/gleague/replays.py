@@ -128,7 +128,8 @@ class ReplayDataProcessor:
                 setattr(player_stats, key, player_data[key])
             player_stats.hero = player_data["hero_name"].replace("npc_dota_hero_", "")
             player_stats.position = detect_position(
-                list([[pos["x"], pos["y"]] for pos in player_stats.movement])
+                list([[pos["x"], pos["y"]] for pos in player_stats.movement]),
+                player_stats.is_radiant(),
             )
             match_player_items_map = {
                 mpi.name: mpi for mpi in player_stats.player_match_items

@@ -12,20 +12,31 @@ class Position(enum.Enum):
     bottom = "bottom"
     middle = "middle"
     roam = "roam"
+    safelane = "safelane"
+    offlane = "offlane"
 
 
-positions = OrderedDict(
+positions_radiant = OrderedDict(
     {
-        (3500, 11000): Position.top,
-        (11500, 4000): Position.bottom,
+        (4500, 8000): Position.offlane,
+        (7500, 5500): Position.safelane,
+        (7200, 7200): Position.middle,
+    }
+)
+
+positions_dire = OrderedDict(
+    {
+        (7000, 10000): Position.safelane,
+        (10500, 8000): Position.offlane,
         (7200, 7200): Position.middle,
     }
 )
 
 
-def detect_position(points: List[dict]) -> Optional[Position]:
+def detect_position(points: List[dict], is_radiant: bool) -> Optional[Position]:
     if not points:
         return None
+    positions = positions_radiant if is_radiant else positions_dire
     init = np.array(list(positions.keys()))
     kmeans = KMeans(n_clusters=3, init=init)
     result = kmeans.fit(points).labels_
