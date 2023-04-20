@@ -15,9 +15,9 @@ class Position(enum.Enum):
 
 
 def point_position(point: List[int]):
-    if abs(pair[0] - pair[1]) < MID_THRESHOLD:
+    if abs(point[0] - point[1]) < MID_THRESHOLD:
         return Position.middle
-    if pair[0] - pair[1] < 0:
+    if point[0] - point[1] < 0:
         return Position.top
     return Position.bottom
 
