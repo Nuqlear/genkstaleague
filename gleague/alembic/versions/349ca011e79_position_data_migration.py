@@ -74,12 +74,17 @@ def upgrade():
             ]
         )
         .where(v_player_match_stats.c.movement.isnot(None))
-    ).fetchall()
+    )
+
+    new_poses = {}
 
     for id_, _, movement in results:
         pos = detect_position(list([[pos["x"], pos["y"]] for pos in movement]))
+        new_poses[id_] = pos
+
+    for id_, new_pos in new_poses.items():
         connection.execute(
             v_player_match_stats.update()
             .where(v_player_match_stats.c.id == id_)
-            .values(position=pos)
+            .values(position=new_pos)
         )
