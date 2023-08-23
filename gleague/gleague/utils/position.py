@@ -3,8 +3,8 @@ from collections import OrderedDict
 from collections import Counter
 from typing import Optional, List
 
-from sklearn.cluster import KMeans
-import numpy as np
+
+MID_THRESHOLD = 2000
 
 
 class Position(enum.Enum):
@@ -14,24 +14,21 @@ class Position(enum.Enum):
     roam = "roam"
 
 
-positions = OrderedDict(
-    {
-        (3500, 11000): Position.top,
-        (11500, 4000): Position.bottom,
-        (7200, 7200): Position.middle,
-    }
-)
+def point_position(point: List[int]):
+    if abs(point[0] - point[1]) < MID_THRESHOLD:
+        return Position.middle
+    if point[0] - point[1] < 0:
+        return Position.top
+    return Position.bottom
 
 
-def detect_position(points: List[dict]) -> Optional[Position]:
+def detect_position(points: List[List[int]]) -> Optional[Position]:
     if not points:
         return None
-    init = np.array(list(positions.keys()))
-    kmeans = KMeans(n_clusters=3, init=init)
-    result = kmeans.fit(points).labels_
+    result = [point_position(point) for point in points]
     most_common, num_most_common = Counter(result).most_common(1)[0]
     if (len(points) / num_most_common) > 0.6:
-        position = list(positions.items())[most_common][-1]
+        position = most_common
     else:
         position = Position.roam
     return position

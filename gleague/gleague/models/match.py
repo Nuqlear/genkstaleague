@@ -100,8 +100,11 @@ class PlayerMatchStats(db.Model):
             self.match_id,
         )
 
+    def is_radiant(self):
+        return self.player_slot < 5
+
     def is_winner(self):
-        return self.match.radiant_win == (self.player_slot < 5)
+        return self.match.radiant_win == self.is_radiant()
 
 
 class PlayerMatchRating(db.Model):
