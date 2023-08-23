@@ -24,4 +24,4 @@ services:
       - POSTGRES_USER=${POSTGRES_USER}
       - POSTGRES_DB=${POSTGRES_DB}
   redis:
-    image: redis
+    image: redis:7.0.10
