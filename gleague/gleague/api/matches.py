@@ -32,7 +32,11 @@ def create_match():
         try:
             parser = ReplayParserService(current_app.config["REPLAY_PARSER_HOST"])
             replay_data = parser.parse_replay(replay)
-            ReplayDataProcessor(base_pts_diff).save_replay_data(replay_data, team_seed)
+            replay_processor = ReplayDataProcessor(
+                base_pts_diff,
+                current_app.config.get("DOUBLE_DOWN_FROM_DOUBLE_DOWN", False),
+            )
+            replay_processor.save_replay_data(replay_data, team_seed)
         except Exception as exc:
             logging.error("Creating match from replay failed: %s", str(exc))
             abort(400)

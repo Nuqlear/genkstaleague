@@ -21,6 +21,7 @@ from gleague.utils.position import detect_position
 @dc.dataclass
 class ReplayDataProcessor:
     base_pts_diff: int
+    double_down_from_double_down: bool
 
     def save_replay_data(
         self, replay_data: dict, team_seed: Optional[TeamSeed] = None
@@ -159,15 +160,20 @@ class ReplayDataProcessor:
         else:
             pts_diff -= pts_deviation
 
-        winners_pts_diff = pts_diff
+        bonus_pts_diff = 0
         for stats in match.players_stats:
             if not stats.is_winner() and stats.is_double_down:
-                winners_pts_diff += math.floor(pts_diff / 5)
+                bonus_pts_diff += math.floor(pts_diff / 5)
 
         for stats in match.players_stats:
             multiplier = 2 if stats.is_double_down else 1
             if stats.is_winner():
-                stats.pts_diff = winners_pts_diff * multiplier
+                winner_diff = pts_diff * multiplier
+                if self.double_down_from_double_down:
+                    winner_diff += bonus_pts_diff * multiplier
+                else:
+                    winner_diff += bonus_pts_diff
+                stats.pts_diff = winner_diff
             else:
                 stats.pts_diff = -pts_diff * multiplier
             stats.season_stats.pts += stats.pts_diff

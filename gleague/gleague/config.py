@@ -18,6 +18,9 @@ class BaseConfig(object):
     DOGPILE_BACKEND_URL = "redis://redis:6379"
     DOGPILE_REGIONS = [("week", 3600 * 24 * 7)]
     REPLAY_PARSER_HOST = environ.get("REPLAY_PARSER_HOST", "http://dem2json:5222")
+    DOUBLE_DOWN_FROM_DOUBLE_DOWN = (
+        environ.get("DOUBLE_DOWN_FROM_DOUBLE_DOWN", "0") == "1"
+    )
     DOUBLE_DOWN_ENABLED = environ.get("DOUBLE_DOWN_ENABLED", "1") == "1"
     DOUBLE_DOWN_TIME = datetime.timedelta(
         seconds=int(environ.get("DOUBLE_DOWN_TIME", "300"))

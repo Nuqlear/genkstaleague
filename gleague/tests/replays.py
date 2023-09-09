@@ -373,7 +373,7 @@ class TestReplayDataProcessor(GleagueAppTestCase):
 
     def test_when_save_replay_data_then_match_created(self):
         base_pts_diff = 10
-        processor = ReplayDataProcessor(base_pts_diff)
+        processor = ReplayDataProcessor(base_pts_diff, False)
         match = processor.save_replay_data(REPLAY_DATA)
         self.assertNotEqual(match, None)
 
