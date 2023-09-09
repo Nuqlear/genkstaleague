@@ -231,7 +231,7 @@ def get_most_powerful_supports(season_id):
     ).all()
 
 
-side_winrates_nt = namedtuple("side_winrates_nt", ["radiant", "dire"])
+side_winrates_nt = namedtuple("side_winrates_nt", ["dire", "radiant"])
 
 
 def get_side_winrates(season_id):
