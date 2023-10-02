@@ -11,6 +11,7 @@ import (
 )
 
 const EarlyTimeMinutes = 10
+const MAGIC = (1 << 14) - 1
 
 type MatchParser struct {
 	matchData        MatchData
@@ -256,12 +257,30 @@ func getPlayerId(entity *manta.Entity) uint32 {
 	}
 }
 
+func getPlayerItems(matchParser MatchParser, entity *manta.Entity, playerID uint32) ([6]string, bool) {
+	items := [6]string{"", "", "", "", "", ""}
+	hasItems := false
+	for count := 0; count < 6; count++ {
+		if hItem, ok := entity.GetUint32(fmt.Sprintf("m_hItems.%04d", count)); ok {
+			itemEntity := matchParser.parser.FindEntity(int32(hItem & MAGIC))
+			if itemEntity != nil {
+				itemIndex, _ := itemEntity.GetInt32("m_pEntity.m_nameStringableIndex")
+				if itemName, ok := matchParser.parser.LookupStringByIndex("EntityNames", itemIndex); ok {
+					hasItems = true
+					items[count] = itemName
+				}
+			}
+		}
+	}
+	return items, hasItems
+}
+
 func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 	matchData := &matchParser.matchData
-	const Magic = (1 << 14) - 1
+
 	if strings.HasPrefix(entity.GetClassName(), "CDOTA_Unit_Hero") {
 		hOwner, _ := entity.GetUint64("m_hOwnerEntity")
-		ownerEntity := matchParser.parser.FindEntity(int32(hOwner & Magic))
+		ownerEntity := matchParser.parser.FindEntity(int32(hOwner & MAGIC))
 		if ownerEntity != nil {
 			playerID := getPlayerId(ownerEntity)
 
@@ -272,7 +291,6 @@ func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 
 			earlyTime := time.Duration(60*EarlyTimeMinutes) * time.Second
 			if matchParser.realGameTime > 0 && matchParser.realGameTime < earlyTime {
-
 				// save position no more othen than for every 5 seconds
 				interval := time.Duration(5) * time.Second
 				nextMovTime := matchParser.realGameTime - interval
@@ -285,19 +303,9 @@ func (matchParser *MatchParser) pull_CDOTA_Unit_Hero(entity *manta.Entity) {
 							matchParser.realGameTime})
 				}
 			}
-			// save items
-			count := 0
-			for count < 6 {
-				hItem, _ := entity.GetUint32(fmt.Sprintf("m_hItems.%04d", count))
-				itemEntity := matchParser.parser.FindEntity(int32(hItem & Magic))
-				if itemEntity != nil {
-					itemIndex, _ := itemEntity.GetInt32("m_pEntity.m_nameStringableIndex")
-					itemName, _ := matchParser.parser.LookupStringByIndex("EntityNames", itemIndex)
-					matchData.Players[playerID].Items[count] = itemName
-				} else {
-					matchData.Players[playerID].Items[count] = ""
-				}
-				count++
+
+			if items, notEmpty := getPlayerItems(*matchParser, entity, playerID); notEmpty {
+				matchData.Players[playerID].Items = items
 			}
 		}
 	}
@@ -380,11 +388,11 @@ func (matchParser *MatchParser) OnCMsgDOTACombatLogEntry(combatLogEntry *dota.CM
 			// skip entry if we can't attribute attacker properly
 			// TODO: check if Juggernaut ward is being counted, if not - find similar mechanics and all of them as exceptions
 			// TODO: check Arc Warden clones, check if attacked being illusion here won't count as heal for someone other
-			break;
+			break
 		}
 		if combatLogEntry.GetTargetIsSelf() {
 			// do not count self heals (via self lifesteal sources too)
-			break;
+			break
 		}
 		attacker, _ := matchParser.parser.LookupStringByIndex("CombatLogNames", int32(combatLogEntry.GetAttackerName()))
 		heal := combatLogEntry.GetValue()
