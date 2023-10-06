@@ -250,6 +250,14 @@
 </div>
 {% endif %}
 
+{% if teams_stats_history %}
+<div class="card">
+    <div class="card-header">Team Advantage</div>
+    <div class="card-body" id="teams-stats-history" style="height: 400px">
+    </div>
+</div>
+{% endif %}
+
 {% if g.user and g.user.is_admin %}
 <div class="card">
     <div class="card-body">
@@ -324,6 +332,123 @@
             ctx.stroke();
         }
         // drawPositionsMap();
+
+        {% if teams_stats_history %}
+        var teamsStatsHistory = {{ teams_stats_history | safe}};
+
+        function fmtSeconds(seconds) {
+            var minutes = parseInt(seconds / 60);
+            var seconds = seconds % 60;
+            if (seconds < 10) {
+                seconds = "0" + seconds;
+            }
+            return minutes + ":" + seconds;
+        }
+
+        function fmtParam(param) {
+            const team = param.data > 0 ? 'Radiant' : 'Dire';
+            const className = param.data > 0 ? 'radiant_text_color' : 'dire_text_color';
+            fmt = `<div style="font-weight:900"> ${param.marker}`;
+            fmt += `<span class=${className}> ${team} ${param.seriesName} </span>`;
+            fmt += `<span class=${className} `
+            fmt += 'style="float:right;margin-left:20px;font-size:14px;">';
+            fmt += Math.abs(param.data);
+            fmt += "</span>";
+            fmt += "</div>";
+            return fmt
+        }
+
+        var chartDom = document.getElementById('teams-stats-history');
+        var chart = echarts.init(chartDom);
+        const centerCoord = [0, 0];
+        const labels = teamsStatsHistory.time.map((v) => fmtSeconds(v));
+        var option = {
+            tooltip: {
+                trigger: 'axis',
+                formatter: function(params, ticket, callback) {
+                    var fmt = "<div class='text-center'>" + params[0].axisValueLabel + "</div>"
+                    fmt += fmtParam(params[0]);
+                    fmt += fmtParam(params[1]);
+                    return fmt;
+                }
+            },
+            legend: {
+                icon: 'rect',
+                type: 'plain',
+                data: ['NW', 'XP'],
+                right: 10,
+                top: 0,
+                bottom: 'auto',
+            },
+            grid: {
+                left: '0',
+                right: '0',
+                bottom: '0',
+                top: '25px',
+                containLabel: true
+            },
+            xAxis: {
+                type: 'category',
+                boundaryGap: false,
+                data: labels,
+            },
+            yAxis: {
+                type: 'value',
+                axisLabel: {
+                    formatter: val => Math.abs(val),
+                },
+            },
+            series: [
+                {
+                    name: 'NW',
+                    type: 'line',
+                    data: teamsStatsHistory.radiant_advantage_networth,
+                    symbol: 'none',
+                    itemStyle: {color: '#f5cc00'},
+                },
+                {
+                    name: 'XP',
+                    type: 'line',
+                    data: teamsStatsHistory.radiant_advantage_xp,
+                    symbol: 'none',
+                    itemStyle: {color: '#7f8bad'},
+                },
+                {
+                    type: 'line',
+                    markArea: {
+                        data: [
+                            [
+                                {
+                                    coord: [centerCoord[0], centerCoord[1]],
+                                    itemStyle: {
+                                        color: '#263d26d6',
+                                        opacity: 1
+                                    }
+                                },
+                                {
+                                    coord: [Number.MAX_SAFE_INTEGER, Number.MAX_SAFE_INTEGER]
+                                }
+                            ],
+                            [
+                                {
+                                    coord: [centerCoord[0], centerCoord[1]],
+                                    itemStyle: {
+                                        color: '#2e2020d4',
+                                        opacity: 1
+                                    }
+                                },
+                                {
+                                    coord: [Number.MAX_SAFE_INTEGER, Number.MIN_SAFE_INTEGER]
+                                }
+                            ]
+                        ]
+                    }
+                }
+            ],
+        };
+
+        chart.setOption(option);
+        {% endif %}
     });
 </script>
 {% endblock %}

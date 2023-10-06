@@ -80,6 +80,8 @@ class PlayerMatchStats(db.Model):
     gold_per_min = Column(Integer, nullable=True)
     damage_taken = Column(Integer, nullable=True)
     movement = Column(postgresql.JSONB, nullable=True)
+    xp = Column(postgresql.JSONB, nullable=True)
+    networth = Column(postgresql.JSONB, nullable=True)
     position = Column(ChoiceType(Position))
     role = Column(ChoiceType(Role))
     observer_wards_placed = Column(Integer)

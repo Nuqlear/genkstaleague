@@ -12,6 +12,7 @@ from gleague.core import db
 from gleague.models import Match
 from gleague.models import Season
 from gleague.models import TeamSeed
+from gleague.models.queries.match_analytic import get_teams_stats_history
 from gleague.team_builder import TeamBuilderService
 
 
@@ -23,7 +24,14 @@ def match(match_id):
     match = Match.query.get(match_id)
     if not match:
         return abort(404)
-    return render_template("/match.html", match=match)
+    teams_stats_history = get_teams_stats_history(match)
+    return render_template(
+        "/match.html",
+        match=match,
+        teams_stats_history=teams_stats_history.to_dict()
+        if teams_stats_history
+        else None,
+    )
 
 
 @matches_bp.route("/", methods=["GET"])
@@ -52,9 +60,7 @@ def team_builder(seed_id=None):
             abort(404)
         if seed.match:
             return redirect(url_for("matches.match", match_id=seed.match.id))
-        player_ids = [
-            p.steam_id for p in seed.team_seed_players
-        ]
+        player_ids = [p.steam_id for p in seed.team_seed_players]
 
     if request.method == "POST":
         player_ids = [
@@ -67,15 +73,12 @@ def team_builder(seed_id=None):
     elif "from_match_id" in request.args and not seed_id:
         from_match_id = request.args.get("from_match_id")
         match = Match.query.get(from_match_id)
-        player_ids = [
-            ps.season_stats.steam_id
-            for ps in match.players_stats
-        ]
+        player_ids = [ps.season_stats.steam_id for ps in match.players_stats]
         teams = builder.shuffle_teams(player_ids)
 
     user_seed = None
     if g.user:
-        for seed_player in (seed and seed.team_seed_players or []):
+        for seed_player in seed and seed.team_seed_players or []:
             if seed_player.steam_id == g.user.steam_id:
                 user_seed = seed_player
                 break

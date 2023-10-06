@@ -121,6 +121,8 @@ class ReplayDataProcessor:
                 "xp_per_min",
                 "gold_per_min",
                 "movement",
+                "xp",
+                "networth",
                 "early_denies",
                 "early_last_hits",
                 "observer_wards_placed",

@@ -81,6 +81,8 @@ REPLAY_DATA = {
                 "item_bfury",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 298683250,
@@ -113,6 +115,8 @@ REPLAY_DATA = {
                 "",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 90180366,
@@ -145,6 +149,8 @@ REPLAY_DATA = {
                 "item_vladmir",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 35504297,
@@ -177,6 +183,8 @@ REPLAY_DATA = {
                 "item_arcane_boots",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 73401082,
@@ -209,6 +217,8 @@ REPLAY_DATA = {
                 "",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 412413765,
@@ -241,6 +251,8 @@ REPLAY_DATA = {
                 "item_wraith_band",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 137855976,
@@ -273,6 +285,8 @@ REPLAY_DATA = {
                 "item_hood_of_defiance",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 84385735,
@@ -305,6 +319,8 @@ REPLAY_DATA = {
                 "item_magic_wand",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 110819366,
@@ -337,6 +353,8 @@ REPLAY_DATA = {
                 "item_ogre_axe",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
     ],
     "draft": {"captains": [0, 123], "picks_and_bans": None},
@@ -361,8 +379,9 @@ class TestReplayParserService(GleagueAppTestCase):
         parser = ReplayParserService(current_app.config["REPLAY_PARSER_HOST"])
         data = parser.parse_replay(self.download_replay())
         for p in data["players"]:
-            assert p.pop("movement") is not None
-            p["movement"] = []
+            for key in ["movement", "networth", "xp"]:
+                assert p.pop(key) is not None
+                p[key] = []
         assert data == REPLAY_DATA
 
 
