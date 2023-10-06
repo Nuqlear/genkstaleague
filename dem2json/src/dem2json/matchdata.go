@@ -74,12 +74,24 @@ type MatchPlayerData struct {
 	EarlyLastHits       int32      `json:"early_last_hits"`
 	Items               [6]string  `json:"items"`
 	Movement            []Position `json:"movement"`
+	Networth            []Networth `json:"networth"`
+	XP                  []XP       `json:"xp"`
 }
 
 type Position struct {
 	X    uint64        `json:"x"`
 	Y    uint64        `json:"y"`
 	Time time.Duration `json:"time"`
+}
+
+type Networth struct {
+	Value int32         `json:"value"`
+	Time  time.Duration `json:"time"`
+}
+
+type XP struct {
+	Value int32         `json:"value"`
+	Time  time.Duration `json:"time"`
 }
 
 func (matchParser *MatchParser) init(parser *manta.Parser) {
@@ -149,17 +161,21 @@ func (matchParser *MatchParser) pull_CDOTAGamerulesProxy(entity *manta.Entity) {
 	}
 }
 
+func getPlayerSlot(vecPlayerDataId int) int {
+	if vecPlayerDataId > 4 {
+		return vecPlayerDataId + 123
+	} else {
+		return vecPlayerDataId
+	}
+}
+
 func (matchParser *MatchParser) pull_CDOTA_PlayerResource(entity *manta.Entity) {
 	matchData := &matchParser.matchData
 	count := 0
 	if entity.GetClassName() == "CDOTA_PlayerResource" {
 		for count < 10 {
 			matchPlayerData := matchData.Players[count]
-			if count > 4 {
-				matchPlayerData.PlayerSlot = count + 123
-			} else {
-				matchPlayerData.PlayerSlot = count
-			}
+			matchPlayerData.PlayerSlot = getPlayerSlot(count)
 			fetchFrom := "m_vecPlayerData.000" + strconv.Itoa(count)
 			if result, ok := entity.GetUint64(fetchFrom + ".m_iPlayerSteamID"); ok && matchPlayerData.AccountId == 0 {
 				matchPlayerData.AccountIdOrig = result
@@ -190,6 +206,9 @@ func (matchParser *MatchParser) pull_CDOTA_PlayerResource(entity *manta.Entity) 
 }
 
 func (matchParser *MatchParser) pull_CDOTA_Data(entity *manta.Entity) {
+	timedSyncInterval := time.Duration(5) * time.Second
+	nextTimedSyncTime := matchParser.realGameTime - timedSyncInterval
+
 	matchData := &matchParser.matchData
 	count := 0
 	if entity.GetClassName() == "CDOTA_DataRadiant" || entity.GetClassName() == "CDOTA_DataDire" {
@@ -223,6 +242,24 @@ func (matchParser *MatchParser) pull_CDOTA_Data(entity *manta.Entity) {
 			if matchParser.realGameTime < earlyTime {
 				matchPlayerData.EarlyDenies = matchPlayerData.Denies
 				matchPlayerData.EarlyLastHits = matchPlayerData.LastHits
+			}
+			if len(matchPlayerData.XP) == 0 || matchPlayerData.XP[len(matchPlayerData.XP)-1].Time < nextTimedSyncTime {
+				if result, ok := entity.GetInt32(fetchFrom + ".m_iTotalEarnedXP"); ok {
+					matchPlayerData.XP = append(
+						matchPlayerData.XP,
+						XP{
+							result,
+							matchParser.realGameTime,
+						})
+				}
+				if result, ok := entity.GetInt32(fetchFrom + ".m_iNetWorth"); ok {
+					matchPlayerData.Networth = append(
+						matchPlayerData.Networth,
+						Networth{
+							result,
+							matchParser.realGameTime,
+						})
+				}
 			}
 			matchData.Players[realCount] = matchPlayerData
 			count++
