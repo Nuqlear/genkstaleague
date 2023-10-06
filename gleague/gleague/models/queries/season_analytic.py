@@ -2,6 +2,7 @@ from collections import namedtuple
 
 from flask import request
 from sqlalchemy import and_
+from sqlalchemy import or_
 from sqlalchemy import case
 from sqlalchemy import desc
 from sqlalchemy import func
@@ -256,7 +257,12 @@ def get_side_winrates(season_id):
     )
 
 
-def _get_most_iconic_duos(season_id, most_powerful=True, limit=3):
+def _get_most_iconic_duos(
+    season_id,
+    most_powerful=True,
+    player_id=None,
+    limit=3,
+):
     ss1 = SeasonStats.__table__.alias()
     ss2 = SeasonStats.__table__.alias()
     pms1 = PlayerMatchStats.__table__.alias()
@@ -297,6 +303,13 @@ def _get_most_iconic_duos(season_id, most_powerful=True, limit=3):
         )
         .group_by(ss1.c.steam_id, ss2.c.steam_id)
     )
+    if player_id is not None:
+        query = query.where(
+            or_(
+                ss1.c.steam_id == player_id,
+                ss2.c.steam_id == player_id,
+            )
+        )
     pts_gain_cte = query.cte()
 
     p1 = aliased(Player)
@@ -337,12 +350,12 @@ duo_nt = namedtuple(
 )
 
 
-def get_most_powerful_duos(season_id):
-    return [duo_nt(*row) for row in _get_most_iconic_duos(season_id)]
+def get_most_powerful_duos(season_id, player_id=None):
+    return [duo_nt(*row) for row in _get_most_iconic_duos(season_id, True, player_id)]
 
 
-def get_most_powerless_duos(season_id):
-    return [duo_nt(*row) for row in _get_most_iconic_duos(season_id, False)]
+def get_most_powerless_duos(season_id, player_id=None):
+    return [duo_nt(*row) for row in _get_most_iconic_duos(season_id, False, player_id)]
 
 
 def get_player_heroes(season_id, order_by):

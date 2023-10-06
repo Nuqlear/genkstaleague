@@ -72,3 +72,7 @@
         </ul>
     </div>
 {% endmacro %}
+
+{% macro render_pts_diff(pts_diff) %}
+    {% if pts_diff > 0 %}+{% endif %}{{ pts_diff }}
+{% endmacro %}

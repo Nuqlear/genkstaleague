@@ -9,14 +9,48 @@
     {% include '/_blocks/player_header.html' %}
 {% endblock %}
 
+{% macro render_team_mates_table(team_mates) %}
+<table class="table table-sm table-borderless table-hover">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Player</th>
+        <th>PTS diff</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for tm in team_mates %}
+        {% if tm.player1 == player %}
+            {% set mate = tm.player2 %}
+            {% set mate_diff = tm.player_2_pts_diff %}
+        {% else %}
+            {% set mate = tm.player1 %}
+            {% set mate_diff = tm.player_1_pts_diff %}
+        {% endif %}
+        <tr>
+            <td>
+                <img class="steam_img" src={{ mate.avatar_medium }}>
+            </td>
+            <td>
+                <a href="{{ url_for('players.overview', steam_id=mate.steam_id) }}">
+                    {{ mate.nickname }}
+                </a>
+            </td>
+            <td>{{ macro.render_pts_diff(mate_diff) }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}
+
 {% block content %}
     {% include '/_blocks/player_card.html' with context %}
 
     <div class="row">
         <div class="col-6">
-            <div class="card">
+            <div class="card profile-row-1">
                 <div class="card-header">
-                    <a href="{{ url_for('players.heroes', steam_id=player.steam_id) }}" target="_blank">Signature heroes&nbsp;<i class="fas fa-link"></i></a>
+                    <a href="{{ url_for('players.heroes', steam_id=player.steam_id) }}" target="_blank">Signature Heroes&nbsp;<i class="fas fa-link"></i></a>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless table-hover">
@@ -36,12 +70,40 @@
                                          src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png></td>
                                 <td>{{ s.played }}</td>
                                 <td>{{ '%i' % s.winrate }}%</td>
-                                <td>{{ s.pts_diff }}</td>
+                                <td>{{ macro.render_pts_diff(s.pts_diff) }}</td>
                                 <td>{{ '%0.2f' % s.kda }}</td>
                             </tr>
                         {% endfor %}
                         </tbody>
                     </table>
+                </div>
+            </div>
+
+            <div class="card">
+                <div class="card-header">
+                    Pts trends
+                </div>
+                <div class="card-body">
+                    <canvas id="pts_trends" height="210px"></canvas>
+                </div>
+            </div>
+
+        </div>
+        <div class="col-6">
+            <div class="card profile-row-1">
+                <div class="card-header">
+                    Best Teammates
+                </div>
+                <div class="card-body">
+                    {{ render_team_mates_table(best_team_mates) }}
+                </div>
+            </div>
+            <div class="card ">
+                <div class="card-header">
+                    Worst Teammates
+                </div>
+                <div class="card-body">
+                    {{ render_team_mates_table(worst_team_mates) }}
                 </div>
             </div>
 
@@ -70,16 +132,7 @@
                     </table>
                 </div>
             </div>
-        </div>
-        <div class="col-6">
-            <div class="card">
-                <div class="card-header">
-                    Pts trends
-                </div>
-                <div class="card-body">
-                    <canvas id="pts_trends" height="210px"></canvas>
-                </div>
-            </div>
+
         </div>
     </div>
 

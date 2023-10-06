@@ -9,10 +9,6 @@
     {% include '/_blocks/season_header.html' %}
 {% endblock %}
 
-{% macro render_pts_diff(pts_diff) %}
-    {% if pts_diff > 0 %}+{% endif %}{{ pts_diff }}
-{% endmacro %}
-
 {% block content %}
 <div class="row">
     <div class="col-12">
@@ -117,8 +113,8 @@
                                         {{ duo.player2.nickname }}
                                     </a>
                                 </td>
-                                <td>{{ render_pts_diff(duo.player_1_pts_diff) }}</td>
-                                <td>{{ render_pts_diff(duo.player_2_pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(duo.player_1_pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(duo.player_2_pts_diff) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -146,8 +142,8 @@
                                         {{ duo.player2.nickname }}
                                     </a>
                                 </td>
-                                <td>{{ render_pts_diff(duo.player_1_pts_diff) }}</td>
-                                <td>{{ render_pts_diff(duo.player_2_pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(duo.player_1_pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(duo.player_2_pts_diff) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -171,7 +167,7 @@
                                         {{ player.nickname }}
                                     </a>
                                 </td>
-                                <td>{{ render_pts_diff(player.pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -196,7 +192,7 @@
                                         {{ player.nickname }}
                                     </a>
                                 </td>
-                                <td>{{ render_pts_diff(player.pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

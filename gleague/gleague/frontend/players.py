@@ -9,11 +9,11 @@ from sqlalchemy import desc
 
 from gleague.models import Player
 from gleague.models import PlayerMatchStats
-from gleague.models import PlayerMatchRating
 from gleague.models import Season
-from gleague.models import Match
 from gleague.models import SeasonStats
 from gleague.models.queries import player_analytic
+from gleague.models.queries.season_analytic import get_most_powerful_duos
+from gleague.models.queries.season_analytic import get_most_powerless_duos
 
 
 players_bp = Blueprint("players", __name__)
@@ -48,6 +48,14 @@ def overview(steam_id):
         .all()
     )
     avg_rating, rating_amount = player_analytic.get_rating_info(player.steam_id)
+    best_team_mates = get_most_powerful_duos(
+        current_season_id,
+        steam_id,
+    )
+    worst_team_mates = get_most_powerless_duos(
+        current_season_id,
+        steam_id,
+    )
     return render_template(
         "/player/overview.html",
         player=player,
@@ -56,6 +64,8 @@ def overview(steam_id):
         rating_amount=rating_amount,
         signature_heroes=signature_heroes,
         matches_stats=matches_stats,
+        best_team_mates=best_team_mates,
+        worst_team_mates=worst_team_mates,
         pts_history=json.dumps(
             player_analytic.get_pts_history(steam_id, current_season_id)
         ),
