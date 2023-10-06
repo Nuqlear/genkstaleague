@@ -49,6 +49,8 @@ REPLAY_DATA = {
                 "item_boots",
             ],
             "movement": [],
+            "networth": [],
+            "xp": [],
         },
         {
             "account_id": 86751819,
