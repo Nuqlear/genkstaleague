@@ -22,10 +22,10 @@
     {% for tm in team_mates %}
         {% if tm.player1 == player %}
             {% set mate = tm.player2 %}
-            {% set mate_diff = tm.player_2_pts_diff %}
+            {% set mate_diff = tm.player_1_pts_diff %}
         {% else %}
             {% set mate = tm.player1 %}
-            {% set mate_diff = tm.player_1_pts_diff %}
+            {% set mate_diff = tm.player_2_pts_diff %}
         {% endif %}
         <tr>
             <td>

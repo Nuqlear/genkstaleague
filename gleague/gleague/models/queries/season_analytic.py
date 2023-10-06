@@ -326,20 +326,28 @@ def _get_most_iconic_duos(
         ),
     )
 
+    if player_id is not None:
+        order_column = case(
+            [
+                (pts_gain_cte.c.steam_id_1 == player_id, pts_gain_cte.c.pts_diff_1),
+                (pts_gain_cte.c.steam_id_2 == player_id, pts_gain_cte.c.pts_diff_2),
+            ]
+        )
+
     if most_powerful:
-        query = query.order_by(
-            func.greatest(
+        if player_id is None:
+            order_column = func.greatest(
                 pts_gain_cte.c.pts_diff_1,
                 pts_gain_cte.c.pts_diff_2,
-            ).desc()
-        )
+            )
+        query = query.order_by(order_column.desc())
     else:
-        query = query.order_by(
-            func.least(
+        if player_id is None:
+            order_column = func.least(
                 pts_gain_cte.c.pts_diff_1,
                 pts_gain_cte.c.pts_diff_2,
-            ).asc()
-        )
+            )
+        query = query.order_by(order_column.asc())
 
     query = query.limit(limit)
     return query.all()
