@@ -64,13 +64,19 @@ def records(season_number=-1):
 def heroes(season_number=-1):
     is_current = (season_number == -1)
     season_number, s_id = get_season_number_and_id(season_number)
-    sort = request.args.get("sort", "played")
+    sort = request.args.get("sort", "pick_count")
+    is_desc = request.args.get("desc", "yes") == 'yes'
     return render_template(
         "/season/heroes.html",
         season_number=season_number,
         seasons=[season[0] for season in db.session.query(Season.number).all()],
         sort=sort,
         is_desc=desc,
-        in_season_heroes=season_analytic.get_player_heroes(s_id, sort),
+        in_season_heroes=season_analytic.get_heroes(
+            s_id,
+            order_by=sort,
+            is_desc=is_desc,
+            limit=None,
+        ),
         is_current=is_current,
     )

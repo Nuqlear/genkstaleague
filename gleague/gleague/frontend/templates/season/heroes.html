@@ -29,9 +29,17 @@
                             </a>
                         </th>
                         <th>
-                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='played',
-                            desc='yes', season_number=season_number) }}">Matches
-                            {% if not sort or sort == 'played' %}
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pick_count',
+                            desc='yes', season_number=season_number) }}">Picked
+                            {% if not sort or sort == 'pick_count' %}
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='ban_count',
+                            desc='yes', season_number=season_number) }}">Banned
+                            {% if not sort or sort == 'ban_count' %}
                                 &nbsp;<i class="fas fa-sort-amount-down"></i>
                             {% endif %}
                             </a>
@@ -67,12 +75,13 @@
                     <tr>
                         <td>
                             <img class="steam_img"
-                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ h.hero }}_lg.png>&nbsp;
+                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ h.hero_name }}_lg.png>&nbsp;
                         </td>
                         <td>
                             {{ h.hero_human_readable }}
                         </td>
-                        <td>{{ h.played }}</td>
+                        <td>{{ h.pick_count }}</td>
+                        <td>{{ h.ban_count }}</td>
                         <td>{{ '%i' % h.winrate }}%</td>
                         <td>{{ h.pts_diff }}</td>
                         <td>{{ '%0.2f' % h.kda }}</td>

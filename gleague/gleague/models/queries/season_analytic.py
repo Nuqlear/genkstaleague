@@ -1,4 +1,6 @@
+import dataclasses as dc
 from collections import namedtuple
+from typing import List
 
 from flask import request
 from sqlalchemy import and_
@@ -9,6 +11,7 @@ from sqlalchemy import func
 from sqlalchemy import event
 from sqlalchemy import select
 from sqlalchemy.orm import aliased
+from sqlalchemy.sql.expression import nullsfirst, nullslast
 
 from gleague.core import db, cache
 from gleague.models import Match
@@ -17,6 +20,7 @@ from gleague.models import Season
 from gleague.models import SeasonStats
 from gleague.models import Player
 from gleague.models import Role
+from gleague.models import CMPicksBans
 from gleague.heroes import get_human_readable_hero_name
 from gleague.utils.position import Position
 
@@ -366,15 +370,114 @@ def get_most_powerless_duos(season_id, player_id=None):
     return [duo_nt(*row) for row in _get_most_iconic_duos(season_id, False, player_id)]
 
 
-def get_player_heroes(season_id, order_by):
-    if order_by not in ["hero", "played", "pts_diff", "winrate", "kda"]:
-        order_by = "played"
-    order_by = order_by
-    is_desc = request.args.get("desc", "yes")
-    if is_desc != "no":
-        is_desc = "yes"
-        order_by = desc(order_by)
-    heroes = (
+@dc.dataclass
+class SeasonHero:
+    hero_name: str
+    hero_human_readable: str
+    pick_count: int
+    ban_count: int
+    winrate: float
+    kda: float
+    pts_diff: int
+
+
+def get_heroes(
+    season_id: int,
+    *,
+    order_by: str = "pick_count",
+    is_desc: bool = True,
+    limit: int = 3,
+) -> List[SeasonHero]:
+    played_cte = query_played_heroes(season_id=season_id).cte()
+
+    banned_cte = (
+        CMPicksBans.query.join(
+            Match,
+            and_(
+                Match.id == CMPicksBans.match_id,
+                Match.season_id == season_id,
+            ),
+        )
+        .with_entities(
+            Match.season_id.label("season_id"),
+            CMPicksBans.is_pick.label("is_pick"),
+            CMPicksBans.hero.label("hero"),
+            func.count(CMPicksBans.id).label("cnt"),
+        )
+        .group_by(
+            Match.season_id,
+            CMPicksBans.is_pick,
+            CMPicksBans.hero,
+        )
+    ).cte()
+
+    order = {
+        "hero": played_cte.c.hero,
+        "pts_diff": played_cte.c.pts_diff,
+        "pick_count": played_cte.c.played,
+        "winrate": played_cte.c.winrate,
+        "pts_diff": played_cte.c.pts_diff,
+        "kda": played_cte.c.kda,
+        "ban_count": banned_cte.c.cnt,
+    }[order_by]
+
+    if is_desc:
+        order = desc(order)
+
+    if order_by == "ban_count":
+        order = nullslast(order)
+
+    query = (
+        CMPicksBans.query.join(
+            Match,
+            and_(
+                Match.id == CMPicksBans.match_id,
+                Match.season_id == season_id,
+            ),
+        )
+        .outerjoin(
+            banned_cte,
+            and_(
+                banned_cte.c.hero == CMPicksBans.hero,
+                banned_cte.c.is_pick.is_(False),
+            ),
+        )
+        .join(
+            played_cte,
+            func.concat("npc_dota_hero_", played_cte.c.hero) == CMPicksBans.hero,
+        )
+        .with_entities(
+            CMPicksBans.hero,
+            played_cte.c.played.label("pick_count"),
+            banned_cte.c.cnt.label("ban_count"),
+            played_cte.c.kda,
+            played_cte.c.winrate,
+            played_cte.c.pts_diff,
+        )
+        .order_by(order)
+        .distinct()
+        .limit(limit)
+    )
+
+    items = []
+    for row in query:
+        hero_name = row.hero.replace("npc_dota_hero_", "")
+        items.append(
+            SeasonHero(
+                hero_name=hero_name,
+                hero_human_readable=get_human_readable_hero_name(hero_name),
+                pick_count=row.pick_count or 0,
+                ban_count=row.ban_count or 0,
+                winrate=row.winrate,
+                kda=row.kda,
+                pts_diff=row.pts_diff,
+            )
+        )
+    return items
+
+
+def query_played_heroes(season_id):
+    query = (
         PlayerMatchStats.query.join(SeasonStats)
         .filter(SeasonStats.season_id == season_id)
         .with_entities(
@@ -392,24 +495,8 @@ def get_player_heroes(season_id, order_by):
             ).label("kda"),
         )
         .group_by(PlayerMatchStats.hero)
-        .order_by(order_by)
     )
-    heroes = [
-        {
-            "hero": row.hero,
-            "hero_human_readable": get_human_readable_hero_name(row.hero),
-            "played": row.played,
-            "winrate": row.winrate,
-            "pts_diff": row.pts_diff,
-            "kda": row.kda,
-        }
-        for row in heroes
-    ]
-    if order_by == "hero":
-        heroes = sorted(
-            heroes, key=lambda el: el["hero_human_readable"], reverse=is_desc == "yes"
-        )
-    return heroes
+    return query
 
 
 @cache.cache_on_arguments("week")
@@ -427,6 +514,8 @@ def get_all_season_records(season_id):
             "side_winrates": get_side_winrates(season_id),
             "powerful_duos": get_most_powerful_duos(season_id),
             "powerless_duos": get_most_powerless_duos(season_id),
+            "most_picked_heroes": get_heroes(season_id, order_by="pick_count", is_desc=True),
+            "most_banned_heroes": get_heroes(season_id, order_by="ban_count", is_desc=True),
         }
     return {}
 

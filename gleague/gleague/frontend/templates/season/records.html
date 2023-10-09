@@ -35,6 +35,80 @@
             </div>
         </div>
     </div>
+
+    {% if most_picked_heroes %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <a href="{{ url_for('seasons.heroes', season_number=season_number, sort='pick_count', is_desc=True) }}">Most Picked Heroes</a></div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th>Hero</th>
+                                <th>Total Picked</th>
+                                <th>Total Banned</th>
+                                <th>Winrate</th>
+                                <th>PTS Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hero in most_picked_heroes %}
+                            <tr>
+                                <td><img class="steam_img"
+                                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ hero.hero_name }}_lg.png>
+                                </td>
+                                <td>{{ hero.pick_count }}</td>
+                                <td>{{ hero.ban_count }}</td>
+                                <td>{{ hero.winrate }}%</td>
+                                <td>{{ hero.pts_diff }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if most_banned_heroes %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">
+                <a href="{{ url_for('seasons.heroes', season_number=season_number, sort='ban_count', is_desc=True) }}">Most Banned Heroes</a></div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th>Hero</th>
+                                <th>Total Picked</th>
+                                <th>Total Banned</th>
+                                <th>Winrate</th>
+                                <th>PTS Diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for hero in most_banned_heroes %}
+                            <tr>
+                                <td><img class="steam_img"
+                                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ hero.hero_name }}_lg.png>
+                                </td>
+                                <td>{{ hero.pick_count }}</td>
+                                <td>{{ hero.ban_count }}</td>
+                                <td>{{ hero.winrate }}%</td>
+                                <td>{{ hero.pts_diff }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+
     <div class="col-6">
         <div class="card">
             <div class="card-header">In-Season Players Records</div>
