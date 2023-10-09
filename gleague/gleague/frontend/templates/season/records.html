@@ -276,6 +276,72 @@
         </div>
     </div>
     {% endif %}
+    {% if most_successful_drafters %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Best Drafters</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Matches</th>
+                                <th>PTS diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for player in most_successful_drafters %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
+                                        {{ player.nickname }}
+                                    </a>
+                                </td>
+                                <td>{{ player.played }}</td>
+                                <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
+    {% if least_successful_drafters %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Worst Drafters</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Matches</th>
+                                <th>PTS diff</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for player in least_successful_drafters %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
+                                        {{ player.nickname }}
+                                    </a>
+                                </td>
+                                <td>{{ player.played }}</td>
+                                <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    {% endif %}
     <div class="col-6">
         <div class="card">
             <div class="card-header">In-Season Longest Match</div>

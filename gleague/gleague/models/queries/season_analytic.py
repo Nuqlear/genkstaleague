@@ -499,6 +499,49 @@ def query_played_heroes(season_id):
     return query
 
 
+def get_most_successful_drafters(season_id, is_desc=True):
+    order_by = "pts_diff"
+    if is_desc:
+        order_by = desc(order_by)
+    query = (
+        PlayerMatchStats.query.join(
+            Match,
+            and_(
+                Match.id == PlayerMatchStats.match_id,
+                Match.season_id == season_id,
+                Match.cm_captains.isnot(None),
+                Match.cm_captains.any(PlayerMatchStats.player_slot),
+            ),
+        )
+        .join(
+            SeasonStats,
+            SeasonStats.id == PlayerMatchStats.season_stats_id,
+        )
+        .join(
+            Player,
+            Player.steam_id == SeasonStats.steam_id,
+        )
+        .with_entities(
+            Player.steam_id,
+            Player.nickname,
+            func.count(PlayerMatchStats.id).label("played"),
+            func.sum(PlayerMatchStats.pts_diff).label("pts_diff"),
+            (
+                100
+                * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
+                / func.count(PlayerMatchStats.id)
+            ).label("winrate"),
+        )
+        .group_by(
+            Player.steam_id,
+            Player.nickname,
+        )
+        .order_by(order_by)
+        .limit(3)
+    )
+    return query.all()
+
+
 @cache.cache_on_arguments("week")
 def get_all_season_records(season_id):
     longest_match = get_longest_match(season_id)
@@ -514,8 +557,16 @@ def get_all_season_records(season_id):
             "side_winrates": get_side_winrates(season_id),
             "powerful_duos": get_most_powerful_duos(season_id),
             "powerless_duos": get_most_powerless_duos(season_id),
-            "most_picked_heroes": get_heroes(season_id, order_by="pick_count", is_desc=True),
-            "most_banned_heroes": get_heroes(season_id, order_by="ban_count", is_desc=True),
+            "most_picked_heroes": get_heroes(
+                season_id, order_by="pick_count", is_desc=True
+            ),
+            "most_banned_heroes": get_heroes(
+                season_id, order_by="ban_count", is_desc=True
+            ),
+            "most_successful_drafters": get_most_successful_drafters(season_id),
+            "least_successful_drafters": get_most_successful_drafters(
+                season_id, is_desc=False
+            ),
         }
     return {}
 
