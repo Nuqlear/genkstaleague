@@ -20,7 +20,7 @@ from gleague.models import Season
 from gleague.models import SeasonStats
 from gleague.models import Player
 from gleague.models import Role
-from gleague.models import CMPicksBans
+from gleague.models import CMPicksBans, TeamSeed, TeamSeedPlayer
 from gleague.heroes import get_human_readable_hero_name
 from gleague.utils.position import Position
 
@@ -205,7 +205,13 @@ def get_avg_match_duration(season_id):
 
 
 def get_most_powerful_midlaners(season_id):
+    played = func.count(PlayerMatchStats.id).label("played")
     pts_diff = func.sum(PlayerMatchStats.pts_diff).label("pts_diff")
+    winrate = (
+        100
+        * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
+        / played
+    ).label("winrate")
     return (
         PlayerMatchStats.query.join(SeasonStats)
         .join(Player)
@@ -214,7 +220,13 @@ def get_most_powerful_midlaners(season_id):
             PlayerMatchStats.position == Position.middle,
             SeasonStats.season_id == season_id,
         )
-        .with_entities(Player.nickname, Player.steam_id, pts_diff)
+        .with_entities(
+            Player.nickname,
+            Player.steam_id,
+            pts_diff,
+            played,
+            winrate,
+        )
         .group_by(Player.nickname, Player.steam_id, SeasonStats.id)
         .order_by(desc(pts_diff))
         .limit(3)
@@ -222,14 +234,26 @@ def get_most_powerful_midlaners(season_id):
 
 
 def get_most_powerful_supports(season_id):
+    played = func.count(PlayerMatchStats.id).label("played")
     pts_diff = func.sum(PlayerMatchStats.pts_diff).label("pts_diff")
+    winrate = (
+        100
+        * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
+        / played
+    ).label("winrate")
     return (
         PlayerMatchStats.query.join(SeasonStats)
         .join(Player)
         .filter(
             PlayerMatchStats.role == Role.support, SeasonStats.season_id == season_id
         )
-        .with_entities(Player.nickname, Player.steam_id, pts_diff)
+        .with_entities(
+            Player.nickname,
+            Player.steam_id,
+            pts_diff,
+            winrate,
+            played,
+        )
         .group_by(Player.nickname, Player.steam_id, SeasonStats.id)
         .order_by(desc(pts_diff))
         .limit(3)
@@ -542,6 +566,80 @@ def get_most_successful_drafters(season_id, is_desc=True):
     return query.all()
 
 
+def get_double_downs_stat(season_id: int, is_desc: bool, limit: int = 3):
+    order_by = "double_down_diff"
+    if is_desc == True:
+        order_by = desc(order_by)
+    query = (
+        PlayerMatchStats.query.join(
+            Match,
+            Match.id == PlayerMatchStats.match_id,
+        ).join(
+            SeasonStats,
+            and_(
+                SeasonStats.id == PlayerMatchStats.season_stats_id,
+                SeasonStats.season_id == season_id,
+            )
+        ).join(
+            Player,
+            Player.steam_id == SeasonStats.steam_id,
+        ).outerjoin(
+            TeamSeedPlayer,
+            and_(
+                TeamSeedPlayer.seed_id == Match.team_seed_id,
+                TeamSeedPlayer.steam_id == SeasonStats.steam_id,
+            )
+        ).with_entities(
+            SeasonStats.steam_id,
+            Player.nickname,
+            func.count(PlayerMatchStats.id).label("played"),
+            func.sum(
+                case([
+                    (
+                        and_(
+                            TeamSeedPlayer.is_double_down.is_(True),
+                            PlayerMatchStats.pts_diff > 0,
+                        ), 1
+                    )
+                ], else_=0)
+            ).label("double_down_wins"),
+            func.sum(
+                case([
+                    (
+                        and_(
+                            TeamSeedPlayer.is_double_down.is_(True),
+                            PlayerMatchStats.pts_diff < 0,
+                        ), 1
+                    )
+                ], else_=0)
+            ).label("double_down_losses"),
+            func.sum(
+                case([
+                    (
+                        and_(
+                            TeamSeedPlayer.is_double_down.is_(True),
+                            PlayerMatchStats.pts_diff > 0,
+                        ), 1
+                    ),
+                    (
+                        and_(
+                            TeamSeedPlayer.is_double_down.is_(True),
+                            PlayerMatchStats.pts_diff < 0,
+                        ), -1
+                    )
+                ], else_=0)
+            ).label("double_down_diff"),
+        )
+        .group_by(
+            SeasonStats.steam_id,
+            Player.nickname,
+        )
+        .order_by(order_by)
+        .limit(limit)
+    )
+    return query.all()
+
+
 @cache.cache_on_arguments("week")
 def get_all_season_records(season_id):
     longest_match = get_longest_match(season_id)
@@ -567,6 +665,8 @@ def get_all_season_records(season_id):
             "least_successful_drafters": get_most_successful_drafters(
                 season_id, is_desc=False
             ),
+            "double_down_masters": get_double_downs_stat(season_id, is_desc=True),
+            "double_down_losers": get_double_downs_stat(season_id, is_desc=False),
         }
     return {}
 

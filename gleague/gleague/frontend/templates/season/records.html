@@ -9,6 +9,158 @@
     {% include '/_blocks/season_header.html' %}
 {% endblock %}
 
+{% macro render_heroes(list_) %}
+<div class="card-body">
+    <div class="card-text">
+        <table class="table table-sm table-borderless table-hover">
+            <thead>
+                <tr>
+                    <th>Hero</th>
+                    <th>Total Picked</th>
+                    <th>Total Banned</th>
+                    <th>Winrate</th>
+                    <th>PTS Diff</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for hero in list_ %}
+                <tr>
+                    <td><img class="steam_img"
+                            src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ hero.hero_name }}_lg.png>
+                    </td>
+                    <td>{{ hero.pick_count }}</td>
+                    <td>{{ hero.ban_count }}</td>
+                    <td>{{ hero.winrate }}%</td>
+                    <td>{{ hero.pts_diff }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_drafters(list_) %}
+<div class="card-body">
+    <div class="card-text">
+        <table class="table table-sm table-borderless table-hover">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>Matches</th>
+                    <th>Winrate</th>
+                    <th>PTS diff</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for player in list_ %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
+                            {{ player.nickname }}
+                        </a>
+                    </td>
+                    <td>{{ player.played }}</td>
+                    <td>{{ player.winrate }}%</td>
+                    <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_match(match) %}
+<div class="card-body">
+    <div class="card-text">
+        <table class="table table-sm table-borderless table-hover in_match_records_table">
+            <thead>
+                <tr>
+                    <th>Match id</th>
+                    <th>Date</th>
+                    <th>Duration</th>
+                </tr>
+            </thead>
+            <tbody>
+                <tr match_id="{{ match.id }}" class="clickable">
+                    <td>{{ match.id }}</td>
+                    <td class="start_time">{{ match.start_time }}</td>
+                    <td>
+                        {{ format_duration(match.duration) }}
+                    </td>
+                </tr>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_most_powerful_role(role) %}
+<div class="card-body">
+    <div class="card-text">
+        <table class="table table-sm table-borderless table-hover">
+            <tbody>
+                <thead>
+                    <tr>
+                        <th>Player</th>
+                        <th>Matches</th>
+                        <th>Winrate</th>
+                        <th>PTS Diff</th>
+                    </tr>
+                </thead>
+                <tbody>
+                    {% for player in role %}
+                    <tr>
+                        <td>
+                            <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
+                                {{ player.nickname }}
+                            </a>
+                        </td>
+                        <td>{{ player.played }}</td>
+                        <td>{{ player.winrate }}%</td>
+                        <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
+                    </tr>
+                    {% endfor %}
+                </tbody>
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
+{% macro render_double_downs(dds) %}
+<div class="card-body">
+    <div class="card-text">
+        <table class="table table-sm table-borderless table-hover">
+            <thead>
+                <tr>
+                    <th>Player</th>
+                    <th>DDs</th>
+                    <th>DD Winrate</th>
+                    <th>DD per Match</th>
+                </tr>
+            </thead>
+            <tbody>
+                {% for dd in dds %}
+                {% set total_dd = dd.double_down_losses  + dd.double_down_wins %}
+                <tr>
+                    <td>
+                        <a href="{{ url_for('players.overview', steam_id=dd.steam_id) }}">
+                            {{ dd.nickname }}
+                        </a>
+                    </td>
+                    <td>{{ total_dd }}</td>
+                    <td>{{ '%0.0f' % (100 * dd.double_down_wins / (total_dd or 1)) }}%</td>
+                    <td>{{ '%0.0f' % (100 * (total_dd) / (dd.played or 1)) }}%</td>
+                </tr>
+                {% endfor %}
+            </tbody>
+        </table>
+    </div>
+</div>
+{% endmacro %}
+
 {% block content %}
 <div class="row">
     <div class="col-12">
@@ -41,34 +193,7 @@
         <div class="card">
             <div class="card-header">
                 <a href="{{ url_for('seasons.heroes', season_number=season_number, sort='pick_count', is_desc=True) }}">Most Picked Heroes</a></div>
-            <div class="card-body">
-                <div class="card-text">
-                    <table class="table table-sm table-borderless table-hover">
-                        <thead>
-                            <tr>
-                                <th>Hero</th>
-                                <th>Total Picked</th>
-                                <th>Total Banned</th>
-                                <th>Winrate</th>
-                                <th>PTS Diff</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for hero in most_picked_heroes %}
-                            <tr>
-                                <td><img class="steam_img"
-                                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ hero.hero_name }}_lg.png>
-                                </td>
-                                <td>{{ hero.pick_count }}</td>
-                                <td>{{ hero.ban_count }}</td>
-                                <td>{{ hero.winrate }}%</td>
-                                <td>{{ hero.pts_diff }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{ render_heroes(most_picked_heroes) }}
         </div>
     </div>
     {% endif %}
@@ -77,34 +202,7 @@
         <div class="card">
             <div class="card-header">
                 <a href="{{ url_for('seasons.heroes', season_number=season_number, sort='ban_count', is_desc=True) }}">Most Banned Heroes</a></div>
-            <div class="card-body">
-                <div class="card-text">
-                    <table class="table table-sm table-borderless table-hover">
-                        <thead>
-                            <tr>
-                                <th>Hero</th>
-                                <th>Total Picked</th>
-                                <th>Total Banned</th>
-                                <th>Winrate</th>
-                                <th>PTS Diff</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for hero in most_banned_heroes %}
-                            <tr>
-                                <td><img class="steam_img"
-                                        src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ hero.hero_name }}_lg.png>
-                                </td>
-                                <td>{{ hero.pick_count }}</td>
-                                <td>{{ hero.ban_count }}</td>
-                                <td>{{ hero.winrate }}%</td>
-                                <td>{{ hero.pts_diff }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{ render_heroes(most_picked_heroes) }}
         </div>
     </div>
     {% endif %}
@@ -226,180 +324,77 @@
             </div>
         </div>
     </div>
+
     {% if most_powerful_sups %}
     <div class="col-6">
         <div class="card">
             <div class="card-header">Most Powerful Supports</div>
-            <div class="card-body">
-                <div class="card-text">
-                    <table class="table table-sm table-borderless table-hover">
-                        <tbody>
-                            {% for player in most_powerful_sups %}
-                            <tr>
-                                <td>
-                                    <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
-                                        {{ player.nickname }}
-                                    </a>
-                                </td>
-                                <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{ render_most_powerful_role(most_powerful_sups)}}
         </div>
     </div>
     {% endif %}
+
     {% if most_powerful_midlaners %}
     <div class="col-6">
         <div class="card">
             <div class="card-header">Most Powerful Midlaners</div>
-            <div class="card-body">
-                <div class="card-text">
-                    <table class="table table-sm table-borderless table-hover">
-                        <tbody>
-                            {% for player in most_powerful_midlaners %}
-                            <tr>
-                                <td>
-                                    <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
-                                        {{ player.nickname }}
-                                    </a>
-                                </td>
-                                <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{ render_most_powerful_role(most_powerful_midlaners)}}
         </div>
     </div>
     {% endif %}
+
+    {% if double_down_masters %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Double Down Masters</div>
+            {{ render_double_downs(double_down_masters) }}
+        </div>
+    </div>
+    {% endif %}
+    {% if double_down_losers %}
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Double Down Losers</div>
+            {{ render_double_downs(double_down_losers) }}
+        </div>
+    </div>
+    {% endif %}
+
     {% if most_successful_drafters %}
     <div class="col-6">
         <div class="card">
             <div class="card-header">Best Drafters</div>
-            <div class="card-body">
-                <div class="card-text">
-                    <table class="table table-sm table-borderless table-hover">
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th>Matches</th>
-                                <th>PTS diff</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for player in most_successful_drafters %}
-                            <tr>
-                                <td>
-                                    <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
-                                        {{ player.nickname }}
-                                    </a>
-                                </td>
-                                <td>{{ player.played }}</td>
-                                <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{ render_drafters(most_successful_drafters) }}
         </div>
     </div>
     {% endif %}
+
     {% if least_successful_drafters %}
     <div class="col-6">
         <div class="card">
             <div class="card-header">Worst Drafters</div>
-            <div class="card-body">
-                <div class="card-text">
-                    <table class="table table-sm table-borderless table-hover">
-                        <thead>
-                            <tr>
-                                <th>Player</th>
-                                <th>Matches</th>
-                                <th>PTS diff</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            {% for player in least_successful_drafters %}
-                            <tr>
-                                <td>
-                                    <a href="{{ url_for('players.overview', steam_id=player.steam_id) }}">
-                                        {{ player.nickname }}
-                                    </a>
-                                </td>
-                                <td>{{ player.played }}</td>
-                                <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
-                            </tr>
-                            {% endfor %}
-                        </tbody>
-                    </table>
-                </div>
-            </div>
+            {{ render_drafters(least_successful_drafters) }}
         </div>
     </div>
     {% endif %}
+
+    {% if longest_match %}
     <div class="col-6">
         <div class="card">
             <div class="card-header">In-Season Longest Match</div>
-            <div class="card-body">
-                <div class="card-text">
-                    {% if longest_match %}
-                    <table class="table table-sm table-borderless table-hover in_match_records_table">
-                        <thead>
-                            <tr>
-                                <th>Match id</th>
-                                <th>Date</th>
-                                <th>Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr match_id="{{ longest_match.id }}" class="clickable">
-                                <td>{{ longest_match.id }}</td>
-                                <td class="start_time">{{ longest_match.start_time }}</td>
-                                <td>
-                                    {{ format_duration(longest_match.duration) }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    {% endif %}
-                </div>
-            </div>
+            {{ render_match(longest_match) }}
         </div>
     </div>
+    {% endif %}
+
+    {% if shortest_match %}
     <div class="col-6">
         <div class="card">
             <div class="card-header">In-Season Shortest Match</div>
-            <div class="card-body">
-                <div class="card-text">
-                    {% if shortest_match %}
-                    <table class="table table-sm table-borderless table-hover in_match_records_table">
-                        <thead>
-                            <tr>
-                                <th>Match id</th>
-                                <th>Date</th>
-                                <th>Duration</th>
-                            </tr>
-                        </thead>
-                        <tbody>
-                            <tr match_id="{{ shortest_match.id }}" class="clickable">
-                                <td>{{ shortest_match.id }}</td>
-                                <td class="start_time">{{ shortest_match.start_time }}</td>
-                                <td>
-                                    {{ format_duration(shortest_match.duration) }}
-                                </td>
-                            </tr>
-                        </tbody>
-                    </table>
-                    {% endif %}
-                </div>
-            </div>
+            {{ render_match(shortest_match) }}
         </div>
     </div>
+    {% endif %}
 </div>
 {% endblock %}
 
