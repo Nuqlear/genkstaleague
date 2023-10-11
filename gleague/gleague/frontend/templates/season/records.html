@@ -202,7 +202,7 @@
         <div class="card">
             <div class="card-header">
                 <a href="{{ url_for('seasons.heroes', season_number=season_number, sort='ban_count', is_desc=True) }}">Most Banned Heroes</a></div>
-            {{ render_heroes(most_picked_heroes) }}
+            {{ render_heroes(most_banned_heroes) }}
         </div>
     </div>
     {% endif %}
