@@ -1,4 +1,5 @@
 import logging
+import os
 
 from flask import Blueprint
 from flask import Response
@@ -25,6 +26,7 @@ matches_bp = Blueprint("matches", __name__)
 @admin_required
 def create_match():
     replay = request.files["file"]
+    filename, _ = os.path.splitext(replay.filename)
     if replay:
         base_pts_diff = current_app.config.get("MATCH_BASE_PTS_DIFF", 20)
         seed_id = request.form.get("seed_id")
@@ -36,7 +38,9 @@ def create_match():
                 base_pts_diff,
                 current_app.config.get("DOUBLE_DOWN_FROM_DOUBLE_DOWN", False),
             )
-            replay_processor.save_replay_data(replay_data, team_seed)
+            # in rare cases replay has 0 match id
+            match_id = replay_data["match_id"] or filename
+            replay_processor.save_replay_data(replay_data, team_seed, match_id=match_id)
         except Exception as exc:
             logging.error("Creating match from replay failed: %s", str(exc))
             abort(400)

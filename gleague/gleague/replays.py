@@ -24,14 +24,18 @@ class ReplayDataProcessor:
     double_down_from_double_down: bool
 
     def save_replay_data(
-        self, replay_data: dict, team_seed: Optional[TeamSeed] = None
+        self,
+        replay_data: dict,
+        team_seed: Optional[TeamSeed] = None,
+        *,
+        match_id: Optional[int] = None
     ) -> Match:
-        match_id = replay_data["match_id"]
+        match_id = match_id or replay_data["match_id"]
         match = Match.query.get(match_id)
         if match is None:
             match = Match(
                 season=Season.current(),
-                id=replay_data["match_id"],
+                id=match_id,
             )
         db.session.add(match)
         return self.update_match(match, replay_data, team_seed)
