@@ -1,3 +1,6 @@
+import os
+from io import BytesIO
+
 from flask import Blueprint
 from flask import abort
 from flask import current_app
@@ -6,14 +9,17 @@ from flask import request
 from flask import redirect
 from flask import url_for
 from flask import g
+from flask import send_file
 from sqlalchemy import desc
 
 from gleague.core import db
+from gleague.core import cache
 from gleague.models import Match
 from gleague.models import Season
 from gleague.models import TeamSeed
 from gleague.models.queries.match_analytic import get_teams_stats_history
 from gleague.team_builder import TeamBuilderService
+from gleague.team_builder import get_teams_image
 
 
 matches_bp = Blueprint("matches", __name__)
@@ -90,3 +96,20 @@ def team_builder(seed_id=None):
         selected_player_ids=player_ids,
         user_seed=user_seed,
     )
+
+
+@matches_bp.route("/team_builder/<seed_id>/preview.jpg", methods=["GET"])
+@cache.cache_on_arguments("day")
+def team_builder_preview(seed_id):
+    season = Season.current()
+    seed = TeamSeed.query.get(str(seed_id))
+    radiant, dire = TeamBuilderService(season).get_teams_from_seed(seed)
+    bg = os.path.join(
+        current_app.template_folder,
+        current_app.config["TEAM_BUILDER_PREVIEW_BACKGROUND"],
+    )
+    image = get_teams_image(bg, radiant, dire)
+    img_io = BytesIO()
+    image.save(img_io, 'JPEG', quality=100)
+    img_io.seek(0)
+    return send_file(img_io, mimetype='image/jpeg')

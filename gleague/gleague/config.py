@@ -16,7 +16,7 @@ class BaseConfig(object):
     REDIS_PORT = 6379
     DOGPILE_BACKEND = "dogpile.cache.redis"
     DOGPILE_BACKEND_URL = "redis://redis:6379"
-    DOGPILE_REGIONS = [("week", 3600 * 24 * 7)]
+    DOGPILE_REGIONS = [("week", 3600 * 24 * 7), ("day", 3600 * 24)]
     REPLAY_PARSER_HOST = environ.get("REPLAY_PARSER_HOST", "http://dem2json:5222")
     DOUBLE_DOWN_FROM_DOUBLE_DOWN = (
         environ.get("DOUBLE_DOWN_FROM_DOUBLE_DOWN", "0") == "1"
@@ -51,6 +51,7 @@ class gleague_frontend(BaseConfig):
     SITE_NAME = environ.get("SITE_NAME", "GENKSTAleague")
     SITE_ADDRESS = environ.get("SITE_ADDRESS", "localhost")
     SITE_PROTOCOL = environ.get("SITE_PROTOCOL", "HTTPS")
+    TEAM_BUILDER_PREVIEW_BACKGROUND = environ.get("TEAM_BUILDER_PREVIEW_BACKGROUND", "team_builder_preview_bg.jpg")
 
 
 class BaseTestingConfig(BaseConfig):

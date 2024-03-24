@@ -1,8 +1,10 @@
 import random
 import uuid
+import dataclasses as dc
 from typing import List, Tuple, Union, Optional
 
-import dataclasses as dc
+from matplotlib import font_manager
+from PIL import Image, ImageFont, ImageDraw
 
 from gleague.core import db
 from gleague.models import Season
@@ -70,9 +72,7 @@ class TeamBuilderService:
         teams = sort_by_pts(tuples)
         return teams
 
-    def save_seed(
-        self, teams: Tuple[List[PlayerTuple], List[PlayerTuple]]
-    ) -> TeamSeed:
+    def save_seed(self, teams: Tuple[List[PlayerTuple], List[PlayerTuple]]) -> TeamSeed:
         seed = TeamSeed(id=str(uuid.uuid4()), season=self.season)
         db.session.add(seed)
         for is_dire, team in enumerate(teams):
@@ -122,3 +122,48 @@ def sort_by_pts(players: List[PlayerTuple], t=50):
             best_attempt = attempt
 
     return best_attempt
+
+
+def _get_font(
+    size=25,
+    family="sans-serif",
+    weight="regular",
+) -> ImageFont.FreeTypeFont:
+    font = font_manager.FontProperties(family=family, weight=weight)
+    file_ = font_manager.findfont(font)
+    try:
+        return ImageFont.truetype(file_, size=size)
+    except OSError:
+        raise OSError("Could not load font")
+
+
+def _format_player_name(player: PlayerTuple, max_length=18) -> str:
+    name = player.player.nickname if player.player else "NOT REGISTERED"
+    dots = "..."
+    name = name.strip()
+
+    if len(name) < max_length:
+        return name
+
+    return name[: max_length - len(dots)] + dots
+
+
+def _team_to_text(team: List[PlayerTuple]) -> str:
+    return "\n".join(_format_player_name(player) for player in team)
+
+
+def get_teams_image(
+    background: str,
+    radiant_players: List[PlayerTuple],
+    dire_players: List[PlayerTuple],
+    *,
+    font: Optional[ImageFont.FreeTypeFont] = None,
+) -> Image.Image:
+    font = font or _get_font()
+    with Image.open(background) as i:
+        draw = ImageDraw.Draw(i)
+
+        draw.text((32, 74), _team_to_text(radiant_players), font=font, spacing=6)
+        draw.text((332, 74), _team_to_text(dire_players), font=font, spacing=6)
+
+    return i

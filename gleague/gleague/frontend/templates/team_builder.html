@@ -1,14 +1,16 @@
 {% extends '/base.html' %}
 
-{% block head %}
-    <meta name="description" content="{{ SITE_NAME }}, Dota2 Team Builder">
-    {{ macro.render_site_title('TEAMBUILDER') }}
-{% endblock %}
-
 {% set double_down_btn_text = 'Double Down' %}
 {% set un_double_down_btn_text = 'Un-Double Down' %}
 {% set non_registered_player = 'NOT REGISTERED' %}
 {% set base_url = config.SITE_PROTOCOL.lower() ~ '://' ~ config.SITE_ADDRESS %}
+
+{% block head %}
+    <meta name="description" content="{{ SITE_NAME }}, Dota2 Team Builder">
+    <meta property="og:image"
+    content="{{ base_url }}{{ url_for('matches.team_builder_preview', seed_id=seed.id) }}"/>
+    {{ macro.render_site_title('TEAMBUILDER') }}
+{% endblock %}
 
 {% macro render_seed_team(seed, is_radiant) -%}
     <table class="table table-sm table-borderless table-hover">
