@@ -7,6 +7,7 @@
 
 {% block head %}
     <meta name="description" content="{{ SITE_NAME }}, Dota2 Team Builder">
+    <meta name="twitter:card" content="{{ base_url }}{{ url_for('matches.team_builder_preview', seed_id=seed.id) }}"/>
     <meta property="og:image"
     content="{{ base_url }}{{ url_for('matches.team_builder_preview', seed_id=seed.id) }}"/>
     <meta property="og:image:type" content="image/jpg">
