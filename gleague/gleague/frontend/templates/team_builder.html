@@ -7,12 +7,9 @@
 
 {% block head %}
     <meta name="description" content="{{ SITE_NAME }}, Dota2 Team Builder">
-    <meta name="twitter:card" content="{{ base_url }}{{ url_for('matches.team_builder_preview', seed_id=seed.id) }}"/>
+    <meta name="twitter:card" content="summary_large_image"/>
     <meta property="og:image"
     content="{{ base_url }}{{ url_for('matches.team_builder_preview', seed_id=seed.id) }}"/>
-    <meta property="og:image:type" content="image/jpg">
-    <meta property="og:image:width" content="600">
-    <meta property="og:image:height" content="300">
     {{ macro.render_site_title('TEAMBUILDER') }}
 {% endblock %}
 
