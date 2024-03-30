@@ -14,6 +14,8 @@ from gleague.models import SeasonStats
 from gleague.models.queries import player_analytic
 from gleague.models.queries.season_analytic import get_most_powerful_duos
 from gleague.models.queries.season_analytic import get_most_powerless_duos
+from gleague.models.queries.season_analytic import get_signature_opponents
+from gleague.models.queries.season_analytic import get_playstyle
 
 
 players_bp = Blueprint("players", __name__)
@@ -56,6 +58,9 @@ def overview(steam_id):
         current_season_id,
         steam_id,
     )
+    losses_to = get_signature_opponents(current_season_id, steam_id)
+    wins_against = get_signature_opponents(current_season_id, steam_id, is_asc=False)
+    playstyle = get_playstyle(current_season_id, steam_id)
     return render_template(
         "/player/overview.html",
         player=player,
@@ -66,6 +71,9 @@ def overview(steam_id):
         matches_stats=matches_stats,
         best_team_mates=best_team_mates,
         worst_team_mates=worst_team_mates,
+        losses_to=losses_to,
+        wins_against=wins_against,
+        playstyle=playstyle,
         pts_history=json.dumps(
             player_analytic.get_pts_history(steam_id, current_season_id)
         ),

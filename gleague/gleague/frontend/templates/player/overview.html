@@ -15,8 +15,10 @@
     <tr>
         <th></th>
         <th>Player</th>
+        <th>Winrate</th>
         <th>W-L</th>
         <th>PTS diff</th>
+        <th>Games</th>
     </tr>
     </thead>
     <tbody>
@@ -37,13 +39,49 @@
                     {{ mate.nickname }}
                 </a>
             </td>
+            <td>{{ '%i' % tm.winrate }}%</td>
             <td>{{ macro.render_win_loss(tm.win_loss) }}</td>
             <td>{{ macro.render_pts_diff(mate_diff) }}</td>
+            <td>{{ tm.games_played }}</td>
         </tr>
     {% endfor %}
     </tbody>
 </table>
 {% endmacro %}
+
+{% macro render_opponents_table(opponenets) %}
+<table class="table table-sm table-borderless table-hover">
+    <thead>
+    <tr>
+        <th></th>
+        <th>Player</th>
+        <th>Winrate</th>
+        <th>W-L</th>
+        <th>PTS diff</th>
+        <th>Games</th>
+    </tr>
+    </thead>
+    <tbody>
+    {% for op in opponenets %}
+        <tr>
+            <td>
+                <img class="steam_img" src={{ op.player.avatar_medium }}>
+            </td>
+            <td>
+                <a href="{{ url_for('players.overview', steam_id=op.player.steam_id) }}">
+                    {{ op.player.nickname }}
+                </a>
+            </td>
+            <td>{{ '%i' % op.winrate }}%</td>
+            <td>{{ macro.render_win_loss(op.win_loss) }}</td>
+            <td>{{ macro.render_pts_diff(op.pts_diff) }}</td>
+            <td>{{ op.games_played }}</td>
+        </tr>
+    {% endfor %}
+    </tbody>
+</table>
+{% endmacro %}
+
 
 {% block content %}
     {% include '/_blocks/player_card.html' with context %}
@@ -83,6 +121,76 @@
                 </div>
             </div>
 
+        </div>
+        <div class="col-6">
+
+            {% macro render_playstyle(name, ps) %}
+                {% if ps %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>{{ ps.played }}</td>
+                        <td>{{ '%i' % ps.winrate }}%</td>
+                        <td>{{ macro.render_win_loss(ps.win_loss) }}</td>
+                        <td>{{ macro.render_pts_diff(ps.pts_diff) }}</td>
+                    </tr>
+                {% else %}
+                    <tr>
+                        <td>{{ name }}</td>
+                        <td>0</td>
+                        <td>0%</td>
+                        <td>{{ macro.render_win_loss(0) }}</td>
+                        <td>{{ macro.render_pts_diff(0) }}</td>
+                    </tr>
+                {% endif %}
+            {% endmacro %}
+
+            <div class="card profile-row-1">
+                <div class="card-header">
+                    Playstyle
+                </div>
+                <div class="card-body">
+                    <table class="table table-sm table-borderless table-hover">
+                        <tbody id="signature_heroes">
+                            <thead>
+                                <tr>
+                                    <th></th>
+                                    <th>Matches</th>
+                                    <th>Winrate</th>
+                                    <th>W-L</th>
+                                    <th>PTS diff</th>
+                                </tr>
+                            </thead>
+                            {{ render_playstyle("Core", playstyle.core) }}
+                            {{ render_playstyle("Midlane", playstyle.midlane) }}
+                            {{ render_playstyle("Support", playstyle.support) }}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+
+    <div class="row">
+        <div class="col-6">
+
+            <div class="card profile-row-1">
+                <div class="card-header">
+                    Best Teammates
+                </div>
+                <div class="card-body">
+                    {{ render_team_mates_table(best_team_mates) }}
+                </div>
+            </div>
+
+            <div class="card ">
+                <div class="card-header">
+                    Free Pts (Often Wins against)
+                </div>
+                <div class="card-body">
+                    {{ render_opponents_table(wins_against) }}
+                </div>
+            </div>
+
             <div class="card">
                 <div class="card-header">
                     Pts trends
@@ -93,21 +201,24 @@
             </div>
 
         </div>
+
         <div class="col-6">
-            <div class="card profile-row-1">
-                <div class="card-header">
-                    Best Teammates
-                </div>
-                <div class="card-body">
-                    {{ render_team_mates_table(best_team_mates) }}
-                </div>
-            </div>
+
             <div class="card ">
                 <div class="card-header">
                     Worst Teammates
                 </div>
                 <div class="card-body">
                     {{ render_team_mates_table(worst_team_mates) }}
+                </div>
+            </div>
+
+            <div class="card ">
+                <div class="card-header">
+                    Personal Nightmare (Often Losses to)
+                </div>
+                <div class="card-body">
+                    {{ render_opponents_table(losses_to) }}
                 </div>
             </div>
 
@@ -136,7 +247,6 @@
                     </table>
                 </div>
             </div>
-
         </div>
     </div>
 
