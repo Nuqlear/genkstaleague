@@ -37,6 +37,10 @@ def get_heroes(steam_id, season_id=None):
                 * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
                 / func.count(PlayerMatchStats.id)
             ).label("winrate"),
+            func.sum(case([
+                (PlayerMatchStats.pts_diff > 0, 1),
+                (PlayerMatchStats.pts_diff < 0, -1),
+            ], else_=0)).label("win_loss"),
             func.sum(PlayerMatchStats.pts_diff).label("pts_diff"),
             (
                 (func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists))

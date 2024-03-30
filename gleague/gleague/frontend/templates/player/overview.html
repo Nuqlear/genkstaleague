@@ -15,6 +15,7 @@
     <tr>
         <th></th>
         <th>Player</th>
+        <th>W-L</th>
         <th>PTS diff</th>
     </tr>
     </thead>
@@ -36,6 +37,7 @@
                     {{ mate.nickname }}
                 </a>
             </td>
+            <td>{{ macro.render_win_loss(tm.win_loss) }}</td>
             <td>{{ macro.render_pts_diff(mate_diff) }}</td>
         </tr>
     {% endfor %}
@@ -59,6 +61,7 @@
                             <th>Hero</th>
                             <th>Matches</th>
                             <th>Winrate</th>
+                            <th>W-L</th>
                             <th>PTS diff</th>
                             <th>KDA</th>
                         </tr>
@@ -70,6 +73,7 @@
                                          src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png></td>
                                 <td>{{ s.played }}</td>
                                 <td>{{ '%i' % s.winrate }}%</td>
+                                <td>{{ macro.render_win_loss(s.win_loss) }}</td>
                                 <td>{{ macro.render_pts_diff(s.pts_diff) }}</td>
                                 <td>{{ '%0.2f' % s.kda }}</td>
                             </tr>

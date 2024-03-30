@@ -53,6 +53,14 @@
                             </a>
                         </th>
                         <th>
+                            <a class="link_alt" href="{{ url_for('seasons.heroes', sort='win_loss',
+                            desc='yes', season_number=season_number) }}">W-L
+                            {% if sort == 'win_loss' %}
+                                &nbsp;<i class="fas fa-sort-amount-down"></i>
+                            {% endif %}
+                            </a>
+                        </th>
+                        <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff',
                             desc='yes', season_number=season_number) }}">PTS diff
                             {% if sort == 'pts_diff' %}
@@ -83,7 +91,8 @@
                         <td>{{ h.pick_count }}</td>
                         <td>{{ h.ban_count }}</td>
                         <td>{{ '%i' % h.winrate }}%</td>
-                        <td>{{ h.pts_diff }}</td>
+                        <td>{{ macro.render_win_loss(h.win_loss) }}</td>
+                        <td>{{ macro.render_pts_diff(h.pts_diff) }}</td>
                         <td>{{ '%0.2f' % h.kda }}</td>
                     </tr>
                     {% endfor %}

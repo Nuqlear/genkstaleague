@@ -76,3 +76,7 @@
 {% macro render_pts_diff(pts_diff) %}
     {% if pts_diff > 0 %}+{% endif %}{{ pts_diff }}
 {% endmacro %}
+
+{% macro render_win_loss(win_loss) %}
+    {% if win_loss >= 0 %}&nbsp;&nbsp;{% endif %}{{ win_loss }}
+{% endmacro %}

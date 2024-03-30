@@ -19,6 +19,7 @@
                     <th>Total Picked</th>
                     <th>Total Banned</th>
                     <th>Winrate</th>
+                    <th>W-L</th>
                     <th>PTS Diff</th>
                 </tr>
             </thead>
@@ -31,7 +32,8 @@
                     <td>{{ hero.pick_count }}</td>
                     <td>{{ hero.ban_count }}</td>
                     <td>{{ hero.winrate }}%</td>
-                    <td>{{ hero.pts_diff }}</td>
+                    <td>{{ macro.render_win_loss(hero.win_loss) }}</td>
+                    <td>{{ macro.render_pts_diff(hero.pts_diff) }}</td>
                 </tr>
                 {% endfor %}
             </tbody>
@@ -49,6 +51,7 @@
                     <th>Player</th>
                     <th>Matches</th>
                     <th>Winrate</th>
+                    <th>W-L</th>
                     <th>PTS diff</th>
                 </tr>
             </thead>
@@ -62,6 +65,7 @@
                     </td>
                     <td>{{ player.played }}</td>
                     <td>{{ player.winrate }}%</td>
+                    <td>{{ macro.render_win_loss(player.win_loss) }}</td>
                     <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
                 </tr>
                 {% endfor %}
@@ -106,6 +110,7 @@
                         <th>Player</th>
                         <th>Matches</th>
                         <th>Winrate</th>
+                        <th>W-L</th>
                         <th>PTS Diff</th>
                     </tr>
                 </thead>
@@ -119,6 +124,7 @@
                         </td>
                         <td>{{ player.played }}</td>
                         <td>{{ player.winrate }}%</td>
+                        <td>{{ macro.render_win_loss(player.win_loss) }}</td>
                         <td>{{ macro.render_pts_diff(player.pts_diff) }}</td>
                     </tr>
                     {% endfor %}
@@ -272,6 +278,15 @@
             <div class="card-body">
                 <div class="card-text">
                     <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th>Players</th>
+                                <th></th>
+                                <th>W-L</th>
+                                <th>PTS Diff</th>
+                                <th></th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {% for duo in powerful_duos %}
                             <tr>
@@ -285,6 +300,7 @@
                                         {{ duo.player2.nickname }}
                                     </a>
                                 </td>
+                                <td>{{ macro.render_win_loss(duo.win_loss) }}</td>
                                 <td>{{ macro.render_pts_diff(duo.player_1_pts_diff) }}</td>
                                 <td>{{ macro.render_pts_diff(duo.player_2_pts_diff) }}</td>
                             </tr>
@@ -301,6 +317,15 @@
             <div class="card-body">
                 <div class="card-text">
                     <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th>Players</th>
+                                <th></th>
+                                <th>W-L</th>
+                                <th>PTS Diff</th>
+                                <th></th>
+                            </tr>
+                        </thead>
                         <tbody>
                             {% for duo in powerless_duos %}
                             <tr>
@@ -314,6 +339,7 @@
                                         {{ duo.player2.nickname }}
                                     </a>
                                 </td>
+                                <td>{{ macro.render_win_loss(duo.win_loss) }}</td>
                                 <td>{{ macro.render_pts_diff(duo.player_1_pts_diff) }}</td>
                                 <td>{{ macro.render_pts_diff(duo.player_2_pts_diff) }}</td>
                             </tr>

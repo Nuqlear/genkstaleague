@@ -212,6 +212,12 @@ def get_most_powerful_midlaners(season_id):
         * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
         / played
     ).label("winrate")
+    win_loss = (
+        func.sum(case([
+            (PlayerMatchStats.pts_diff > 0, 1),
+            (PlayerMatchStats.pts_diff < 0, -1),
+        ], else_=0))
+    ).label("win_loss")
     return (
         PlayerMatchStats.query.join(SeasonStats)
         .join(Player)
@@ -223,6 +229,7 @@ def get_most_powerful_midlaners(season_id):
         .with_entities(
             Player.nickname,
             Player.steam_id,
+            win_loss,
             pts_diff,
             played,
             winrate,
@@ -241,6 +248,12 @@ def get_most_powerful_supports(season_id):
         * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
         / played
     ).label("winrate")
+    win_loss = (
+        func.sum(case([
+            (PlayerMatchStats.pts_diff > 0, 1),
+            (PlayerMatchStats.pts_diff < 0, -1),
+        ], else_=0))
+    ).label("win_loss")
     return (
         PlayerMatchStats.query.join(SeasonStats)
         .join(Player)
@@ -250,6 +263,7 @@ def get_most_powerful_supports(season_id):
         .with_entities(
             Player.nickname,
             Player.steam_id,
+            win_loss,
             pts_diff,
             winrate,
             played,
@@ -300,6 +314,10 @@ def _get_most_iconic_duos(
             [
                 ss1.c.steam_id.label("steam_id_1"),
                 ss2.c.steam_id.label("steam_id_2"),
+                func.sum(case([
+                    (pms1.c.pts_diff > 0, 1),
+                    (pms1.c.pts_diff < 0, -1),
+                ], else_=0)).label("win_loss"),
                 func.sum(pms1.c.pts_diff).label("pts_diff_1"),
                 func.sum(pms2.c.pts_diff).label("pts_diff_2"),
             ]
@@ -346,6 +364,7 @@ def _get_most_iconic_duos(
     query = db.session.query(
         p1,
         p2,
+        pts_gain_cte.c.win_loss,
         pts_gain_cte.c.pts_diff_1,
         pts_gain_cte.c.pts_diff_2,
     ).select_from(
@@ -354,7 +373,11 @@ def _get_most_iconic_duos(
         ),
     )
 
-    if player_id is not None:
+    order_by_pts = False
+    if order_by_pts is False:
+        order_column = pts_gain_cte.c.win_loss
+
+    elif player_id is not None:
         order_column = case(
             [
                 (pts_gain_cte.c.steam_id_1 == player_id, pts_gain_cte.c.pts_diff_1),
@@ -363,14 +386,14 @@ def _get_most_iconic_duos(
         )
 
     if most_powerful:
-        if player_id is None:
+        if order_by_pts and player_id is None:
             order_column = func.greatest(
                 pts_gain_cte.c.pts_diff_1,
                 pts_gain_cte.c.pts_diff_2,
             )
         query = query.order_by(order_column.desc())
     else:
-        if player_id is None:
+        if order_by_pts and player_id is None:
             order_column = func.least(
                 pts_gain_cte.c.pts_diff_1,
                 pts_gain_cte.c.pts_diff_2,
@@ -382,7 +405,8 @@ def _get_most_iconic_duos(
 
 
 duo_nt = namedtuple(
-    "duo_nt", ["player1", "player2", "player_1_pts_diff", "player_2_pts_diff"]
+    "duo_nt",
+    ["player1", "player2", "win_loss", "player_1_pts_diff", "player_2_pts_diff"]
 )
 
 
@@ -403,6 +427,7 @@ class SeasonHero:
     winrate: float
     kda: float
     pts_diff: int
+    win_loss: int
 
 
 def get_heroes(
@@ -440,7 +465,7 @@ def get_heroes(
         "pts_diff": played_cte.c.pts_diff,
         "pick_count": played_cte.c.played,
         "winrate": played_cte.c.winrate,
-        "pts_diff": played_cte.c.pts_diff,
+        "win_loss": played_cte.c.win_loss,
         "kda": played_cte.c.kda,
         "ban_count": banned_cte.c.cnt,
     }[order_by]
@@ -476,6 +501,7 @@ def get_heroes(
             banned_cte.c.cnt.label("ban_count"),
             played_cte.c.kda,
             played_cte.c.winrate,
+            played_cte.c.win_loss,
             played_cte.c.pts_diff,
         )
         .order_by(order)
@@ -493,6 +519,7 @@ def get_heroes(
                 pick_count=row.pick_count or 0,
                 ban_count=row.ban_count or 0,
                 winrate=row.winrate,
+                win_loss=row.win_loss,
                 kda=row.kda,
                 pts_diff=row.pts_diff,
             )
@@ -512,6 +539,10 @@ def query_played_heroes(season_id):
                 * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
                 / func.count(PlayerMatchStats.id)
             ).label("winrate"),
+            func.sum(case([
+                (PlayerMatchStats.pts_diff > 0, 1),
+                (PlayerMatchStats.pts_diff < 0, -1),
+            ], else_=0)).label("win_loss"),
             func.sum(PlayerMatchStats.pts_diff).label("pts_diff"),
             (
                 (func.avg(PlayerMatchStats.kills) + func.avg(PlayerMatchStats.assists))
@@ -524,7 +555,8 @@ def query_played_heroes(season_id):
 
 
 def get_most_successful_drafters(season_id, is_desc=True):
-    order_by = "pts_diff"
+    # order_by = "pts_diff"
+    order_by = "win_loss"
     if is_desc:
         order_by = desc(order_by)
     query = (
@@ -555,6 +587,10 @@ def get_most_successful_drafters(season_id, is_desc=True):
                 * func.sum(case([(PlayerMatchStats.pts_diff > 0, 1)], else_=0))
                 / func.count(PlayerMatchStats.id)
             ).label("winrate"),
+            func.sum(case([
+                (PlayerMatchStats.pts_diff > 0, 1),
+                (PlayerMatchStats.pts_diff < 0, -1),
+            ], else_=0)).label("win_loss"),
         )
         .group_by(
             Player.steam_id,
