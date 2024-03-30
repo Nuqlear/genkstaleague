@@ -12,7 +12,7 @@ from sqlalchemy import select
 from sqlalchemy.orm import aliased
 from sqlalchemy.sql.expression import nullslast
 
-from gleague.core import db
+from gleague.core import db, cache
 from gleague.models import Match
 from gleague.models import PlayerMatchStats
 from gleague.models import Season
