@@ -46,6 +46,28 @@
     {% endif %}
 {%- endmacro %}
 
+{%- macro render_desc(sort, desc, target_sort, default) -%}
+    {%- if sort == target_sort -%}
+        {%- if desc == 'yes' -%}
+            no
+        {%- else -%}
+            yes
+        {%- endif -%}
+    {%- else -%}
+        {{ default or 'yes' }}
+    {%- endif -%}
+{%- endmacro -%}
+
+{% macro render_sort_icon(sort, desc, target_sort) %}
+    {% if sort == target_sort %}
+        {% if desc == 'yes' %}
+            &nbsp;<i class="fas fa-sort-amount-down"></i>
+        {% else %}
+            &nbsp;<i class="fas fa-sort-amount-up"></i>
+        {% endif %}
+    {% endif %}
+{% endmacro %}
+
 {% macro render_pagination(pagination, url) %}
     {% set view_args = kwargs %}
     <div id="pagination">

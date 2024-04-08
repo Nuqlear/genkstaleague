@@ -1,0 +1,90 @@
+{% extends '/base.html' %}
+
+{% block head %}
+    <meta name="description" content="{{ SITE_NAME }}, Dota2 list of {{ player.nickname }} teammates">
+    {{ macro.render_site_title(player.nickname ~ " TEAMMATES") }}
+{% endblock %}
+
+{% block header %}
+    {% include '/_blocks/player_header.html' %}
+{% endblock %}
+
+{% block content %}
+    {% include '/_blocks/player_card.html' with context %}
+
+    <div class="card">
+        <div class="card-header">Teammates</div>
+        <div class="card-body">
+            <table class="table table-sm table-hover text-center">
+                <thead>
+                <tr>
+                    <th>
+                    </th>
+                    <th>
+                        <a class="link_alt"href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='nickname',
+                                desc=macro.render_desc(sort, desc, 'nickname', 'no')) }}">Player
+                            {{ macro.render_sort_icon(sort, desc, 'nickname') }}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='winrate',
+                                desc=macro.render_desc(sort, desc, 'winrate')) }}">Winrate
+                            {{ macro.render_sort_icon(sort, desc, 'winrate') }}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='win_loss',
+                                desc=macro.render_desc(sort, desc, 'win_loss')) }}">W-L
+                            {{ macro.render_sort_icon(sort, desc, 'win_loss') }}
+                        </a>
+                    </th>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='pts_diff',
+                                desc=macro.render_desc(sort, desc, 'pts_diff')) }}">PTS Diff
+                            {{ macro.render_sort_icon(sort, desc, 'pts_diff') }}
+                        </a>
+                    </th>
+                    <th></th>
+                    <th>
+                        <a class="link_alt" href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='games_played',
+                                desc=macro.render_desc(sort, desc, 'games_played')) }}">Games Together
+                            {{ macro.render_sort_icon(sort, desc, 'games_played') }}
+                        </a>
+                    </th>
+                </tr>
+                </thead>
+                <tbody id="heroes_stats">
+                {% for mate in teammates %}
+                    <tr>
+                        <td>
+                            <img class="steam_img" src={{ mate.player_2.avatar_medium }}>
+                        </td>
+                        <td>
+                            <a href="{{ url_for('players.overview', steam_id=mate.player_2.steam_id) }}">
+                                {{ mate.player_2.nickname }}
+                            </a>
+                        </td>
+                        <td>{{ '%i' % mate.winrate }}%</td>
+                        <td>{{ macro.render_win_loss(mate.win_loss) }}</td>
+                        <td>{{ macro.render_pts_diff(mate.pts_diff) }}</td>
+                        <td>{{ macro.render_pts_diff(mate.pts_diff_2) }}</td>
+                        <td>{{ mate.games_played }}</td>
+                    </tr>
+                {% endfor %}
+                </tbody>
+            </table>
+        </div>
+    </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(function () {
+            $('#avg_rating').raty({
+                readOnly: true,
+                path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
+                score: parseFloat("{{ avg_rating }}")
+            });
+        });
+    </script>
+{% endblock %}

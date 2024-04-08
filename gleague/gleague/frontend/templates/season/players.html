@@ -26,39 +26,31 @@
                             <thead>
                             <tr>
                                 <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
-                sort='nickname', season_number=season_number) }}">
+                sort='nickname', season_number=season_number, desc=macro.render_desc(sort, desc, 'nickname')) }}">
                                 {% else %}"{{ url_for('seasons.players', page=stats.page,
-                    sort='nickname', season_number=season_number) }}"{% endif %}>Nickname</a>
-                                    {% if sort == 'nickname' %}
-                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
-                                    {% endif %}
+                    sort='nickname', season_number=season_number, desc=macro.render_desc(sort, desc, 'nickname')) }}"{% endif %}>Nickname</a>
+                                    {{ macro.render_sort_icon(sort, desc, 'nickname') }}
                                 </th>
                                 <th>
                                     <a class="order"
-                                       href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,sort='pts', season_number=season_number) }}"
+                                       href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,sort='pts', season_number=season_number, desc=macro.render_desc(sort, desc, 'pts')) }}"
                                            >
                                        {% else %}"
-                                           {{ url_for('seasons.players', page=stats.page, sort='pts', season_number=season_number) }}
+                                           {{ url_for('seasons.players', page=stats.page, sort='pts', season_number=season_number, desc=macro.render_desc(sort, desc, 'pts')) }}
                                            "{% endif %}>PTS</a>
-                                    {% if sort == 'pts' %}
-                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
-                                    {% endif %}
+                                    {{ macro.render_sort_icon(sort, desc, 'pts') }}
                                 </th>
                                 <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
-                sort='wins', season_number=season_number) }}">
+                sort='wins', season_number=season_number, desc=macro.render_desc(sort, desc, 'wins')) }}">
                                 {% else %}"{{ url_for('seasons.players', page=stats.page,
-                    sort='wins', season_number=season_number) }}"{% endif %}>Wins</a>
-                                    {% if sort == 'wins' %}
-                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
-                                    {% endif %}
+                    sort='wins', season_number=season_number, desc=macro.render_desc(sort, desc, 'wins')) }}"{% endif %}>Wins</a>
+                                    {{ macro.render_sort_icon(sort, desc, 'wins') }}
                                 </th>
                                 <th><a class="order" href={% if q %}"{{ url_for('seasons.players', page=stats.page, q=q,
-                sort='losses', season_number=season_number) }}">
+                sort='losses', season_number=season_number, desc=macro.render_desc(sort, desc, 'losses')) }}">
                                 {% else %}"{{ url_for('seasons.players', page=stats.page,
-                    sort='losses', season_number=season_number) }}"{% endif %}>Losses</a>
-                                    {% if sort == 'losses' %}
-                                        &nbsp;<i class="fas fa-sort-amount-down"></i>
-                                    {% endif %}
+                    sort='losses', season_number=season_number, desc=macro.render_desc(sort, desc, 'losses')) }}"{% endif %}>Losses</a>
+                                    {{ macro.render_sort_icon(sort, desc, 'losses') }}
                                 </th>
                             </tr>
                             </thead>

@@ -21,59 +21,45 @@
                         </th>
                         <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='hero',
-                            desc='no', season_number=season_number) }}">
+                            season_number=season_number, desc=macro.render_desc(sort, desc, 'hero', 'no')) }}">
                                 Hero
-                                {% if sort == 'hero' %}
-                                    &nbsp;<i class="fas fa-sort-amount-down"></i>
-                                {% endif %}
+                                {{ macro.render_sort_icon(sort, desc, 'hero') }}
                             </a>
                         </th>
                         <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pick_count',
-                            desc='yes', season_number=season_number) }}">Picked
-                            {% if not sort or sort == 'pick_count' %}
-                                &nbsp;<i class="fas fa-sort-amount-down"></i>
-                            {% endif %}
+                            season_number=season_number, desc=macro.render_desc(sort, desc, 'pick_count')) }}">Picked
+                                {{ macro.render_sort_icon(sort, desc, 'pick_count') }}
                             </a>
                         </th>
                         <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='ban_count',
-                            desc='yes', season_number=season_number) }}">Banned
-                            {% if not sort or sort == 'ban_count' %}
-                                &nbsp;<i class="fas fa-sort-amount-down"></i>
-                            {% endif %}
+                            season_number=season_number, desc=macro.render_desc(sort, desc, 'ban_count')) }}">Banned
+                                {{ macro.render_sort_icon(sort, desc, 'ban_count') }}
                             </a>
                         </th>
                         <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='winrate',
-                            desc='yes', season_number=season_number) }}">Winrate
-                            {% if sort == 'winrate' %}
-                                &nbsp;<i class="fas fa-sort-amount-down"></i>
-                            {% endif %}
+                            season_number=season_number, desc=macro.render_desc(sort, desc, 'winrate')) }}">Winrate
+                                {{ macro.render_sort_icon(sort, desc, 'winrate') }}
                             </a>
                         </th>
                         <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='win_loss',
-                            desc='yes', season_number=season_number) }}">W-L
-                            {% if sort == 'win_loss' %}
-                                &nbsp;<i class="fas fa-sort-amount-down"></i>
-                            {% endif %}
+                            season_number=season_number, desc=macro.render_desc(sort, desc, 'win_loss')) }}">W-L
+                                {{ macro.render_sort_icon(sort, desc, 'win_loss') }}
                             </a>
                         </th>
                         <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='pts_diff',
-                            desc='yes', season_number=season_number) }}">PTS diff
-                            {% if sort == 'pts_diff' %}
-                                &nbsp;<i class="fas fa-sort-amount-down"></i>
-                            {% endif %}
+                            season_number=season_number, desc=macro.render_desc(sort, desc, 'pts_diff')) }}">PTS diff
+                                {{ macro.render_sort_icon(sort, desc, 'pts_diff') }}
                             </a>
                         </th>
                         <th>
                             <a class="link_alt" href="{{ url_for('seasons.heroes', sort='kda',
-                            desc='yes', season_number=season_number) }}">KDA
-                            {% if sort == 'kda' %}
-                                &nbsp;<i class="fas fa-sort-amount-down"></i>
-                            {% endif %}
+                            season_number=season_number, desc=macro.render_desc(sort, desc, 'kda')) }}">KDA
+                                {{ macro.render_sort_icon(sort, desc, 'kda') }}
                             </a>
                         </th>
                     </tr>

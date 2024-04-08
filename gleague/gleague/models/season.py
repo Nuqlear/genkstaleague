@@ -141,23 +141,31 @@ class SeasonStats(db.Model):
         return season
 
     @staticmethod
-    def get_stats(season_number=-1, nickname_filter=None, sort="pts"):
+    def get_stats(
+        season_number=-1,
+        nickname_filter=None,
+        sort="pts",
+        is_asc: bool = True,
+    ):
         from gleague.models import Player
         from gleague.models import PlayerMatchStats
         from gleague.frontend.seasons import get_season_number_and_id
 
         season_number, s_id = get_season_number_and_id(season_number)
         sort_dict = {
-            "pts": desc(SeasonStats.pts),
+            "pts": SeasonStats.pts,
             "nickname": func.lower(Player.nickname),
-            "wins": desc(SeasonStats.wins),
-            "losses": desc(SeasonStats.losses),
+            "wins": SeasonStats.wins,
+            "losses": SeasonStats.losses,
         }
+        order = sort_dict.get(sort, SeasonStats.pts)
+        if is_asc is False:
+            order = desc(order)
         result = (
             SeasonStats.query.join(Player)
             .group_by(Player.steam_id)
             .filter(SeasonStats.season_id == s_id)
-            .order_by(sort_dict.get(sort, desc(SeasonStats.pts)))
+            .order_by(order)
             .join(PlayerMatchStats)
             .group_by(SeasonStats.id)
         )

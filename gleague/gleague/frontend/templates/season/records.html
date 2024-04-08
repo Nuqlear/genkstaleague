@@ -291,18 +291,18 @@
                             {% for duo in powerful_duos %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('players.overview', steam_id=duo.player1.steam_id) }}">
-                                        {{ duo.player1.nickname }}
+                                    <a href="{{ url_for('players.overview', steam_id=duo.player.steam_id) }}">
+                                        {{ duo.player.nickname }}
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('players.overview', steam_id=duo.player2.steam_id) }}">
-                                        {{ duo.player2.nickname }}
+                                    <a href="{{ url_for('players.overview', steam_id=duo.player_2.steam_id) }}">
+                                        {{ duo.player_2.nickname }}
                                     </a>
                                 </td>
                                 <td>{{ macro.render_win_loss(duo.win_loss) }}</td>
-                                <td>{{ macro.render_pts_diff(duo.player_1_pts_diff) }}</td>
-                                <td>{{ macro.render_pts_diff(duo.player_2_pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(duo.pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(duo.pts_diff_2) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>
@@ -330,18 +330,18 @@
                             {% for duo in powerless_duos %}
                             <tr>
                                 <td>
-                                    <a href="{{ url_for('players.overview', steam_id=duo.player1.steam_id) }}">
-                                        {{ duo.player1.nickname }}
+                                    <a href="{{ url_for('players.overview', steam_id=duo.player.steam_id) }}">
+                                        {{ duo.player.nickname }}
                                     </a>
                                 </td>
                                 <td>
-                                    <a href="{{ url_for('players.overview', steam_id=duo.player2.steam_id) }}">
-                                        {{ duo.player2.nickname }}
+                                    <a href="{{ url_for('players.overview', steam_id=duo.player_2.steam_id) }}">
+                                        {{ duo.player_2.nickname }}
                                     </a>
                                 </td>
                                 <td>{{ macro.render_win_loss(duo.win_loss) }}</td>
-                                <td>{{ macro.render_pts_diff(duo.player_1_pts_diff) }}</td>
-                                <td>{{ macro.render_pts_diff(duo.player_2_pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(duo.pts_diff) }}</td>
+                                <td>{{ macro.render_pts_diff(duo.pts_diff_2) }}</td>
                             </tr>
                             {% endfor %}
                         </tbody>

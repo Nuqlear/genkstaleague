@@ -11,4 +11,12 @@
         <a class="nav-link {{ 'active' if endpoint[1] == 'matches' else None }}"
            href="{{ url_for('players.matches', steam_id=player.steam_id) }}">Matches</a>
     </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if endpoint[1] == 'teammates' else None }}"
+           href="{{ url_for('players.teammates', steam_id=player.steam_id) }}">Teammates</a>
+    </li>
+    <li class="nav-item">
+        <a class="nav-link {{ 'active' if endpoint[1] == 'opponents' else None }}"
+           href="{{ url_for('players.opponents', steam_id=player.steam_id) }}">Opponents</a>
+    </li>
 </ul>

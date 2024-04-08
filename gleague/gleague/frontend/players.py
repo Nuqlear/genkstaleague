@@ -12,9 +12,10 @@ from gleague.models import PlayerMatchStats
 from gleague.models import Season
 from gleague.models import SeasonStats
 from gleague.models.queries import player_analytic
-from gleague.models.queries.season_analytic import get_most_powerful_duos
-from gleague.models.queries.season_analytic import get_most_powerless_duos
+from gleague.models.queries.season_analytic import get_signature_teammates
 from gleague.models.queries.season_analytic import get_signature_opponents
+from gleague.models.queries.season_analytic import SignatureTeammatesOrder
+from gleague.models.queries.season_analytic import SignatureOpponentOrder
 from gleague.models.queries.season_analytic import get_playstyle
 
 
@@ -50,16 +51,32 @@ def overview(steam_id):
         .all()
     )
     avg_rating, rating_amount = player_analytic.get_rating_info(player.steam_id)
-    best_team_mates = get_most_powerful_duos(
+    best_team_mates = get_signature_teammates(
+        current_season_id,
+        SignatureTeammatesOrder.win_loss,
+        is_asc=False,
+        player_id=steam_id,
+        limit=3,
+    )
+    worst_team_mates = get_signature_teammates(
+        current_season_id,
+        SignatureTeammatesOrder.win_loss,
+        player_id=steam_id,
+        limit=3,
+    )
+    losses_to = get_signature_opponents(
         current_season_id,
         steam_id,
+        SignatureOpponentOrder.win_loss,
+        limit=3
     )
-    worst_team_mates = get_most_powerless_duos(
+    wins_against = get_signature_opponents(
         current_season_id,
         steam_id,
+        SignatureOpponentOrder.win_loss,
+        is_asc=False,
+        limit=3,
     )
-    losses_to = get_signature_opponents(current_season_id, steam_id)
-    wins_against = get_signature_opponents(current_season_id, steam_id, is_asc=False)
     playstyle = get_playstyle(current_season_id, steam_id)
     return render_template(
         "/player/overview.html",
@@ -103,9 +120,10 @@ def matches(steam_id):
     template_context["matches_stats"] = matches_stats.paginate(
         page, current_app.config["PLAYER_HISTORY_MATCHES_PER_PAGE"], True
     )
-    template_context["avg_rating"], template_context[
-        "rating_amount"
-    ] = player.get_rating_info()
+    (
+        template_context["avg_rating"],
+        template_context["rating_amount"],
+    ) = player.get_rating_info()
     template_context["season_stats"] = get_season_stats(current_season_id, player)
     return render_template("/player/matches.html", **template_context)
 
@@ -139,3 +157,59 @@ def heroes(steam_id):
     rating_info = player_analytic.get_rating_info(player.steam_id)
     template_context["avg_rating"], template_context["rating_amount"] = rating_info
     return render_template("/player/heroes.html", **template_context)
+
+
+@players_bp.route("/<int:steam_id>/opponents", methods=["GET"])
+def opponents(steam_id):
+    player = Player.query.get(steam_id)
+    if not player:
+        return abort(404)
+    sort = request.args.get("sort", "games_played")
+    is_desc = request.args.get("desc", "yes")
+    is_asc = is_desc != "yes"
+    current_season_id = Season.current().id
+    order_by = getattr(SignatureOpponentOrder, sort)
+    opponents = get_signature_opponents(
+        current_season_id,
+        steam_id,
+        order_by,
+        is_asc=is_asc,
+    )
+    template_context = {
+        "player": player,
+        "sort": sort,
+        "desc": is_desc,
+        "opponents": opponents,
+        "season_stats": get_season_stats(current_season_id, player),
+    }
+    rating_info = player_analytic.get_rating_info(player.steam_id)
+    template_context["avg_rating"], template_context["rating_amount"] = rating_info
+    return render_template("/player/opponents.html", **template_context)
+
+
+@players_bp.route("/<int:steam_id>/teammates", methods=["GET"])
+def teammates(steam_id):
+    player = Player.query.get(steam_id)
+    if not player:
+        return abort(404)
+    sort = request.args.get("sort", "games_played")
+    is_desc = request.args.get("desc", "yes")
+    is_asc = is_desc != "yes"
+    current_season_id = Season.current().id
+    order_by = getattr(SignatureTeammatesOrder, sort)
+    teammates = get_signature_teammates(
+        current_season_id,
+        order_by,
+        player_id=steam_id,
+        is_asc=is_asc,
+    )
+    template_context = {
+        "player": player,
+        "sort": sort,
+        "desc": is_desc,
+        "teammates": teammates,
+        "season_stats": get_season_stats(current_season_id, player),
+    }
+    rating_info = player_analytic.get_rating_info(player.steam_id)
+    template_context["avg_rating"], template_context["rating_amount"] = rating_info
+    return render_template("/player/teammates.html", **template_context)

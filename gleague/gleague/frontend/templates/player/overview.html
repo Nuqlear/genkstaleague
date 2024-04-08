@@ -23,25 +23,18 @@
     </thead>
     <tbody>
     {% for tm in team_mates %}
-        {% if tm.player1 == player %}
-            {% set mate = tm.player2 %}
-            {% set mate_diff = tm.player_1_pts_diff %}
-        {% else %}
-            {% set mate = tm.player1 %}
-            {% set mate_diff = tm.player_2_pts_diff %}
-        {% endif %}
         <tr>
             <td>
-                <img class="steam_img" src={{ mate.avatar_medium }}>
+                <img class="steam_img" src={{ tm.player_2.avatar_medium }}>
             </td>
             <td>
-                <a href="{{ url_for('players.overview', steam_id=mate.steam_id) }}">
-                    {{ mate.nickname }}
+                <a href="{{ url_for('players.overview', steam_id=tm.player_2.steam_id) }}">
+                    {{ tm.player_2.nickname }}
                 </a>
             </td>
             <td>{{ '%i' % tm.winrate }}%</td>
             <td>{{ macro.render_win_loss(tm.win_loss) }}</td>
-            <td>{{ macro.render_pts_diff(mate_diff) }}</td>
+            <td>{{ macro.render_pts_diff(tm.pts_diff) }}</td>
             <td>{{ tm.games_played }}</td>
         </tr>
     {% endfor %}
@@ -175,7 +168,9 @@
 
             <div class="card profile-row-1">
                 <div class="card-header">
-                    Best Teammates
+                    <a href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='win_loss') }}" target="_blank">
+                        Best Teammates&nbsp;<i class="fas fa-link"></i>
+                    </a>
                 </div>
                 <div class="card-body">
                     {{ render_team_mates_table(best_team_mates) }}
@@ -184,7 +179,9 @@
 
             <div class="card ">
                 <div class="card-header">
-                    Free Pts (Often Wins against)
+                    <a href="{{ url_for('players.opponents', steam_id=player.steam_id, sort='win_loss') }}" target="_blank">
+                        Free Pts (Often Wins against)&nbsp;<i class="fas fa-link"></i>
+                    </a>
                 </div>
                 <div class="card-body">
                     {{ render_opponents_table(wins_against) }}
@@ -206,7 +203,9 @@
 
             <div class="card ">
                 <div class="card-header">
-                    Worst Teammates
+                    <a href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='win_loss', desc='no') }}" target="_blank">
+                        Worst Teammates&nbsp;<i class="fas fa-link"></i>
+                    </a>
                 </div>
                 <div class="card-body">
                     {{ render_team_mates_table(worst_team_mates) }}
@@ -215,7 +214,9 @@
 
             <div class="card ">
                 <div class="card-header">
-                    Personal Nightmare (Often Losses to)
+                    <a href="{{ url_for('players.opponents', steam_id=player.steam_id, sort='win_loss', desc='no') }}" target="_blank">
+                        Personal Nightmare (Often Losses to)&nbsp;<i class="fas fa-link"></i>
+                    </a>
                 </div>
                 <div class="card-body">
                     {{ render_opponents_table(losses_to) }}

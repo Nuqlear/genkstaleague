@@ -32,13 +32,16 @@ def players(season_number=-1):
     q = request.args.get("q")
     sort = request.args.get("sort", "pts")
     page = int(request.args.get("page", 1))
-    stats = SeasonStats.get_stats(season_number, q, sort)
+    desc = request.args.get("desc", "yes")
+    is_asc = desc == 'no'
+    stats = SeasonStats.get_stats(season_number, q, sort, is_asc)
     stats = stats.paginate(page, current_app.config["TOP_PLAYERS_PER_PAGE"], True)
     seasons = [season[0] for season in db.session.query(Season.number).all()]
     return render_template(
         "/season/players.html",
         stats=stats,
         sort=sort,
+        desc=desc,
         seasons=seasons,
         season_number=season_number,
         is_current=is_current,
@@ -71,7 +74,7 @@ def heroes(season_number=-1):
         season_number=season_number,
         seasons=[season[0] for season in db.session.query(Season.number).all()],
         sort=sort,
-        is_desc=desc,
+        desc=request.args.get("desc", "yes"),
         in_season_heroes=season_analytic.get_heroes(
             s_id,
             order_by=sort,

@@ -1,4 +1,5 @@
 import dataclasses as dc
+import enum
 from collections import namedtuple
 from typing import List, Optional
 
@@ -304,12 +305,37 @@ def get_side_winrates(season_id):
     )
 
 
-def _get_most_iconic_duos(
+@dc.dataclass
+class SignatureTeammate:
+    player: Player
+    games_played: int
+    winrate: float
+    win_loss: int
+    pts_diff: int
+    pts_diff_2: int
+
+
+@dc.dataclass
+class SignatureTeammates(SignatureTeammate):
+    player_2: Player
+
+
+class SignatureTeammatesOrder(enum.Enum):
+    nickname = "nickname"
+    games_played = "games_played"
+    winrate = "winrate"
+    win_loss = "win_loss"
+    pts_diff = "pts_diff"
+
+
+def get_signature_teammates(
     season_id,
-    most_powerful=True,
-    player_id=None,
-    limit=3,
-):
+    order: SignatureTeammatesOrder,
+    *,
+    player_id: Optional[int] = None,
+    is_asc: bool = True,
+    limit: Optional[int] = None,
+) -> List[SignatureTeammates]:
     ss1 = SeasonStats.__table__.alias()
     ss2 = SeasonStats.__table__.alias()
     pms1 = PlayerMatchStats.__table__.alias()
@@ -391,63 +417,64 @@ def _get_most_iconic_duos(
         ),
     )
 
-    order_by_pts = False
-    if order_by_pts is False:
-        order_column = (pts_gain_cte.c.win_loss, pts_gain_cte.c.winrate)
-
-    elif player_id is not None:
-        order_column = case(
-            [
-                (pts_gain_cte.c.steam_id_1 == player_id, pts_gain_cte.c.pts_diff_1),
-                (pts_gain_cte.c.steam_id_2 == player_id, pts_gain_cte.c.pts_diff_2),
+    order_columns = [pts_gain_cte.c.win_loss, pts_gain_cte.c.winrate]
+    if order == SignatureTeammatesOrder.pts_diff:
+        if player_id is not None:
+            order_columns = [
+                case(
+                    [
+                        (
+                            pts_gain_cte.c.steam_id_1 == player_id,
+                            pts_gain_cte.c.pts_diff_1,
+                        ),
+                        (
+                            pts_gain_cte.c.steam_id_2 == player_id,
+                            pts_gain_cte.c.pts_diff_2,
+                        ),
+                    ]
+                )
             ]
-        )
-
-    if most_powerful:
-        if order_by_pts and player_id is None:
-            order_column = func.greatest(
-                pts_gain_cte.c.pts_diff_1,
-                pts_gain_cte.c.pts_diff_2,
-            )
-        if isinstance(order_column, tuple):
-            query = query.order_by(*[desc(col) for col in order_column])
         else:
-            query = query.order_by(order_column.desc())
+            order_columns = [
+                func.greatest(
+                    pts_gain_cte.c.pts_diff_1,
+                    pts_gain_cte.c.pts_diff_2,
+                )
+            ]
+    elif order == SignatureTeammatesOrder.games_played:
+        order_columns = [pts_gain_cte.c.games_played, pts_gain_cte.c.winrate]
+    elif order == SignatureTeammatesOrder.winrate:
+        order_columns = [pts_gain_cte.c.winrate, pts_gain_cte.c.games_played]
+    elif order == SignatureTeammatesOrder.nickname and player_id is not None:
+        order_columns = [
+            case(
+                [
+                    (pts_gain_cte.c.steam_id_1 == player_id, p1.nickname),
+                    (pts_gain_cte.c.steam_id_2 == player_id, p2.nickname),
+                ]
+            )
+        ]
+
+    if is_asc:
+        query = query.order_by(*order_columns)
     else:
-        if order_by_pts and player_id is None:
-            order_column = func.least(
-                pts_gain_cte.c.pts_diff_1,
-                pts_gain_cte.c.pts_diff_2,
-            )
-        if isinstance(order_column, tuple):
-            query = query.order_by(*order_column)
-        else:
-            query = query.order_by(order_column)
+        query = query.order_by(*[desc(col) for col in order_columns])
 
-    query = query.limit(limit)
-    return query.all()
+    if limit is not None:
+        query = query.limit(limit)
 
-
-duo_nt = namedtuple(
-    "duo_nt",
-    [
-        "player1",
-        "player2",
-        "games_played",
-        "winrate",
-        "win_loss",
-        "player_1_pts_diff",
-        "player_2_pts_diff",
-    ],
-)
-
-
-def get_most_powerful_duos(season_id, player_id=None):
-    return [duo_nt(*row) for row in _get_most_iconic_duos(season_id, True, player_id)]
-
-
-def get_most_powerless_duos(season_id, player_id=None):
-    return [duo_nt(*row) for row in _get_most_iconic_duos(season_id, False, player_id)]
+    return [
+        SignatureTeammates(
+            player=r[0] if r[0].steam_id == player_id else r[1],
+            player_2=r[0] if r[1].steam_id == player_id else r[1],
+            games_played=r[2],
+            winrate=r[3],
+            win_loss=r[4],
+            pts_diff=(r[5] if r[0].steam_id == player_id else r[6]),
+            pts_diff_2=(r[5] if r[1].steam_id == player_id else r[6]),
+        )
+        for r in query
+    ]
 
 
 @dc.dataclass
@@ -459,12 +486,22 @@ class SignatureOpponent:
     pts_diff: int
 
 
+class SignatureOpponentOrder(enum.Enum):
+    win_loss = "win_loss"
+    winrate = "winrate"
+    games_played = "games_played"
+    pts_diff = "pts_diff"
+    nickname = "nickname"
+
+
 def get_signature_opponents(
-    season_id,
-    player_id,
-    limit=3,
-    is_asc=True,
-):
+    season_id: int,
+    player_id: int,
+    order_by: SignatureOpponentOrder,
+    *,
+    is_asc: bool = True,
+    limit: Optional[int] = None,
+) -> List[SignatureOpponent]:
     ss1 = SeasonStats.__table__.alias()
     ss2 = SeasonStats.__table__.alias()
     pms1 = PlayerMatchStats.__table__.alias()
@@ -582,13 +619,24 @@ def get_signature_opponents(
         pts_gain_cte.c.pts_diff,
     ).select_from(pts_gain_cte.join(player, pts_gain_cte.c.steam_id == player.steam_id))
 
-    order_columns = (pts_gain_cte.c.win_loss, pts_gain_cte.c.winrate)
+    if order_by == SignatureOpponentOrder.win_loss:
+        order_columns = (pts_gain_cte.c.win_loss, pts_gain_cte.c.winrate)
+    elif order_by == SignatureOpponentOrder.winrate:
+        order_columns = (pts_gain_cte.c.winrate, pts_gain_cte.c.win_loss)
+    elif order_by == SignatureOpponentOrder.games_played:
+        order_columns = (pts_gain_cte.c.games_played, pts_gain_cte.c.winrate)
+    elif order_by == SignatureOpponentOrder.nickname:
+        order_columns = (player.nickname, pts_gain_cte.c.win_loss)
+    elif order_by == SignatureOpponentOrder.pts_diff:
+        order_columns = (pts_gain_cte.c.pts_diff, pts_gain_cte.c.win_loss)
+
     if is_asc:
         query = query.order_by(*order_columns)
     else:
         query = query.order_by(*[desc(col) for col in order_columns])
 
-    query = query.limit(limit)
+    if limit is not None:
+        query = query.limit(limit)
     return [SignatureOpponent(*row) for row in query]
 
 
@@ -950,19 +998,25 @@ def get_playstyle(season_id, player_id) -> Playstyle:
             played=support.played,
             win_loss=support.win_loss,
             pts_diff=support.pts_diff,
-        ) if support.played else None,
+        )
+        if support.played
+        else None,
         core=PlaystyleStats(
             winrate=core.winrate,
             played=core.played,
             win_loss=core.win_loss,
             pts_diff=core.pts_diff,
-        ) if core.played else None,
+        )
+        if core.played
+        else None,
         midlane=PlaystyleStats(
             winrate=midlane.winrate,
             played=midlane.played,
             win_loss=midlane.win_loss,
             pts_diff=midlane.pts_diff,
-        ) if midlane.played else None
+        )
+        if midlane.played
+        else None,
     )
 
 
@@ -979,8 +1033,12 @@ def get_all_season_records(season_id):
             "most_powerful_sups": get_most_powerful_supports(season_id),
             "most_powerful_midlaners": get_most_powerful_midlaners(season_id),
             "side_winrates": get_side_winrates(season_id),
-            "powerful_duos": get_most_powerful_duos(season_id),
-            "powerless_duos": get_most_powerless_duos(season_id),
+            "powerful_duos": get_signature_teammates(
+                season_id, SignatureTeammatesOrder.win_loss, is_asc=False, limit=3
+            ),
+            "powerless_duos": get_signature_teammates(
+                season_id, SignatureTeammatesOrder.win_loss, limit=3
+            ),
             "most_picked_heroes": get_heroes(
                 season_id, order_by="pick_count", is_desc=True
             ),
