@@ -16,7 +16,7 @@ from gleague.models.queries.season_analytic import get_signature_teammates
 from gleague.models.queries.season_analytic import get_signature_opponents
 from gleague.models.queries.season_analytic import SignatureTeammatesOrder
 from gleague.models.queries.season_analytic import SignatureOpponentOrder
-from gleague.models.queries.season_analytic import get_playstyle
+from gleague.models.queries.season_analytic import get_playstyles
 
 
 players_bp = Blueprint("players", __name__)
@@ -77,7 +77,7 @@ def overview(steam_id):
         is_asc=False,
         limit=3,
     )
-    playstyle = get_playstyle(current_season_id, steam_id)
+    playstyles = get_playstyles(current_season_id, steam_id)
     return render_template(
         "/player/overview.html",
         player=player,
@@ -90,7 +90,7 @@ def overview(steam_id):
         worst_team_mates=worst_team_mates,
         losses_to=losses_to,
         wins_against=wins_against,
-        playstyle=playstyle,
+        playstyles=playstyles,
         pts_history=json.dumps(
             player_analytic.get_pts_history(steam_id, current_season_id)
         ),

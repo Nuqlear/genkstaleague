@@ -117,10 +117,10 @@
         </div>
         <div class="col-6">
 
-            {% macro render_playstyle(name, ps) %}
+            {% macro render_playstyle(ps) %}
                 {% if ps %}
                     <tr>
-                        <td>{{ name }}</td>
+                        <td>{{ ps.name }}</td>
                         <td>{{ ps.played }}</td>
                         <td>{{ '%i' % ps.winrate }}%</td>
                         <td>{{ macro.render_win_loss(ps.win_loss) }}</td>
@@ -153,9 +153,9 @@
                                     <th>PTS diff</th>
                                 </tr>
                             </thead>
-                            {{ render_playstyle("Core", playstyle.core) }}
-                            {{ render_playstyle("Midlane", playstyle.midlane) }}
-                            {{ render_playstyle("Support", playstyle.support) }}
+                            {% for ps in playstyles %}
+                                {{ render_playstyle(ps) }}
+                            {% endfor %}
                         </tbody>
                     </table>
                 </div>

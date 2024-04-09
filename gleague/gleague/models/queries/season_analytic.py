@@ -463,15 +463,16 @@ def get_signature_teammates(
     if limit is not None:
         query = query.limit(limit)
 
+    is_player_first = lambda r: not player_id or r[0].steam_id == player_id
     return [
         SignatureTeammates(
-            player=r[0] if r[0].steam_id == player_id else r[1],
-            player_2=r[0] if r[1].steam_id == player_id else r[1],
+            player=r[0] if is_player_first(r) else r[1],
+            player_2=r[1] if is_player_first(r) else r[0],
             games_played=r[2],
             winrate=r[3],
             win_loss=r[4],
-            pts_diff=(r[5] if r[0].steam_id == player_id else r[6]),
-            pts_diff_2=(r[5] if r[1].steam_id == player_id else r[6]),
+            pts_diff=(r[5] if is_player_first(r) else r[6]),
+            pts_diff_2=(r[5] if is_player_first(r) else r[6]),
         )
         for r in query
     ]
@@ -926,18 +927,12 @@ def get_double_downs_stat(season_id: int, is_desc: bool, limit: int = 3):
 
 
 @dc.dataclass
-class PlaystyleStats:
+class Playstyle:
+    name: str
     winrate: float
     played: int
     win_loss: int
     pts_diff: int
-
-
-@dc.dataclass
-class Playstyle:
-    support: Optional[PlaystyleStats]
-    core: Optional[PlaystyleStats]
-    midlane: Optional[PlaystyleStats]
 
 
 def _get_role_query(season_id, player_id, role):
@@ -985,39 +980,80 @@ def _get_role_query(season_id, player_id, role):
     return query
 
 
-def get_playstyle(season_id, player_id) -> Playstyle:
+def get_playstyles(season_id, player_id) -> List[Playstyle]:
+    playstyles = []
     support_query = _get_role_query(season_id, player_id, Role.support)
     core_query = _get_role_query(season_id, player_id, Role.core)
     midlane_query = core_query.filter(PlayerMatchStats.position == Position.middle)
-    support = support_query.first()
-    core = core_query.first()
-    midlane = midlane_query.first()
-    return Playstyle(
-        support=PlaystyleStats(
-            winrate=support.winrate,
-            played=support.played,
-            win_loss=support.win_loss,
-            pts_diff=support.pts_diff,
+    carry_query = core_query.filter(
+        or_(
+            and_(
+                PlayerMatchStats.position == Position.bottom,
+                PlayerMatchStats.player_slot < 5,
+            ),
+            and_(
+                PlayerMatchStats.position == Position.top,
+                PlayerMatchStats.player_slot > 5,
+            ),
         )
-        if support.played
-        else None,
-        core=PlaystyleStats(
-            winrate=core.winrate,
-            played=core.played,
-            win_loss=core.win_loss,
-            pts_diff=core.pts_diff,
-        )
-        if core.played
-        else None,
-        midlane=PlaystyleStats(
-            winrate=midlane.winrate,
-            played=midlane.played,
-            win_loss=midlane.win_loss,
-            pts_diff=midlane.pts_diff,
-        )
-        if midlane.played
-        else None,
     )
+    offlane_query = core_query.filter(
+        or_(
+            and_(
+                PlayerMatchStats.position == Position.bottom,
+                PlayerMatchStats.player_slot > 5,
+            ),
+            and_(
+                PlayerMatchStats.position == Position.top,
+                PlayerMatchStats.player_slot < 5,
+            ),
+        )
+    )
+    support = support_query.first()
+    carry = carry_query.first()
+    offlane = offlane_query.first()
+    midlane = midlane_query.first()
+    if carry.played:
+        playstyles.append(
+            Playstyle(
+                name="Safelane",
+                winrate=carry.winrate,
+                played=carry.played,
+                win_loss=carry.win_loss,
+                pts_diff=carry.pts_diff,
+            )
+        )
+    if offlane.played:
+        playstyles.append(
+            Playstyle(
+                name="Offlane",
+                winrate=offlane.winrate,
+                played=offlane.played,
+                win_loss=offlane.win_loss,
+                pts_diff=offlane.pts_diff,
+            )
+        )
+    if midlane.played:
+        playstyles.append(
+            Playstyle(
+                name="Midlane",
+                winrate=midlane.winrate,
+                played=midlane.played,
+                win_loss=midlane.win_loss,
+                pts_diff=midlane.pts_diff,
+            )
+        )
+    if support.played:
+        playstyles.append(
+            Playstyle(
+                name="Support",
+                winrate=support.winrate,
+                played=support.played,
+                win_loss=support.win_loss,
+                pts_diff=support.pts_diff,
+            )
+        )
+    return playstyles
 
 
 @cache.cache_on_arguments("week")
