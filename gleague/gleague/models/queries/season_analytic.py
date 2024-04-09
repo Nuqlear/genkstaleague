@@ -20,7 +20,9 @@ from gleague.models import Season
 from gleague.models import SeasonStats
 from gleague.models import Player
 from gleague.models import Role
-from gleague.models import CMPicksBans, TeamSeedPlayer
+from gleague.models import PlayerMatchRating
+from gleague.models import CMPicksBans
+from gleague.models import TeamSeedPlayer
 from gleague.heroes import get_human_readable_hero_name
 from gleague.utils.position import Position
 
@@ -1056,6 +1058,45 @@ def get_playstyles(season_id, player_id) -> List[Playstyle]:
     return playstyles
 
 
+@dc.dataclass
+class RatePlayer:
+    player: Player
+    avg_rating: float
+    rated_count: int
+
+
+def get_rated_players(season_id: int, limit: Optional[int]):
+    avg_rating = func.avg(PlayerMatchRating.rating)
+    rated_count = func.count(PlayerMatchRating.id)
+    query = (
+        PlayerMatchStats.query.join(
+            SeasonStats,
+            and_(
+                SeasonStats.id == PlayerMatchStats.season_stats_id,
+                SeasonStats.season_id == season_id,
+            ),
+        )
+        .join(
+            Player,
+            Player.steam_id == SeasonStats.steam_id,
+        )
+        .join(
+            PlayerMatchRating,
+            PlayerMatchRating.player_match_stats_id == PlayerMatchStats.id,
+        )
+        .with_entities(
+            Player,
+            avg_rating.label("avg_rating"),
+            rated_count.label("rated_count"),
+        )
+        .group_by(Player.steam_id)
+        .order_by(desc(rated_count), desc(avg_rating))
+    )
+    if limit is not None:
+        query = query.limit(limit)
+    return [RatePlayer(*row) for row in query]
+
+
 @cache.cache_on_arguments("week")
 def get_all_season_records(season_id):
     longest_match = get_longest_match(season_id)
@@ -1087,6 +1128,7 @@ def get_all_season_records(season_id):
             ),
             "double_down_masters": get_double_downs_stat(season_id, is_desc=True),
             "double_down_losers": get_double_downs_stat(season_id, is_desc=False),
+            "most_rated_players": get_rated_players(season_id, limit=6),
         }
     return {}
 

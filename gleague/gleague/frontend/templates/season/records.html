@@ -421,6 +421,41 @@
         </div>
     </div>
     {% endif %}
+
+    <div class="col-6">
+        <div class="card">
+            <div class="card-header">Most Rated Players</div>
+            <div class="card-body">
+                <div class="card-text">
+                    <table class="table table-sm table-borderless table-hover">
+                        <thead>
+                            <tr>
+                                <th>Player</th>
+                                <th>Average Rating</th>
+                                <th>Votes</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                            {% for most_rated in most_rated_players %}
+                            <tr>
+                                <td>
+                                    <a href="{{ url_for('players.overview', steam_id=most_rated.player.steam_id) }}">
+                                        {{ most_rated.player.nickname }}
+                                    </a>
+                                </td>
+                                <td data-rating="{{ most_rated.avg_rating }}"></td>
+                                <td>{{ most_rated.rated_count }}</td>
+                            </tr>
+                            {% endfor %}
+                        </tbody>
+                    </table>
+                </div>
+            </div>
+        </div>
+    </div>
+    <div class="col-6">
+    </div>
+
 </div>
 {% endblock %}
 
@@ -436,6 +471,17 @@
             $(this).html(
                 moment(moment.unix($(this).html())).format('MMMM Do YYYY, H:mm')
             );
+        });
+
+        console.log("wtf");
+
+        $('[data-rating]').each(function() {
+            const score = parseFloat($(this).attr("data-rating"));
+            $(this).raty({
+                readOnly: true,
+                path: 'https://cdnjs.cloudflare.com/ajax/libs/raty/2.8.0/images',
+                score: score,
+            })
         });
     });
 </script>
