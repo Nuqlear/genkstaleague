@@ -12,7 +12,7 @@ from gleague import admin
 from gleague import core
 from gleague.models import *
 
-oid = OpenID()
+oid = OpenID(store_factory=lambda: None)
 
 
 def format_duration(duration):
