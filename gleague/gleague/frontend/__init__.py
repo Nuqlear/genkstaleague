@@ -6,13 +6,10 @@ from flask import render_template
 from flask import request
 from flask import send_from_directory
 from flask import url_for
-from flask_openid import OpenID
 
 from gleague import admin
 from gleague import core
 from gleague.models import *
-
-oid = OpenID(store_factory=lambda: None)
 
 
 def format_duration(duration):
@@ -21,7 +18,6 @@ def format_duration(duration):
 
 def create_app(name=__name__):
     app = core.create_app(name)
-    oid.init_app(app)
     admin.init_admin(app)
 
     from gleague.frontend.matches import matches_bp

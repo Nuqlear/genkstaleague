@@ -9,7 +9,7 @@ class BaseConfig(object):
     PRESERVE_CONTEXT_ON_EXCEPTION = False
     LOGFILE = None
     SQLALCHEMY_DATABASE_URI = environ.get("SQLALCHEMY_DATABASE_URI", "sqlite:///")
-    SECRET_KEY = environ.get("STEAM_API_KEY", "YOUR SECRET KEY")
+    SECRET_KEY = environ.get("SECRET_KEY", "YOUR SECRET KEY")
     STEAM_API_KEY = environ.get("STEAM_API_KEY", None)
     MATCH_BASE_PTS_DIFF = 10
     REDIS_HOST = "redis"

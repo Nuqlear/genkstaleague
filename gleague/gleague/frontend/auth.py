@@ -1,36 +1,34 @@
-import re
-
+from flask import request
 from flask import redirect
 from flask import Blueprint
 from flask import g
 from flask import session
+from pysteamsignin.steamsignin import SteamSignIn
 
-from gleague.frontend import oid
 from gleague.models import Player
 
 
-_steam_id_re = re.compile('steamcommunity.com/openid/id/(.*?)$')
-auth_bp = Blueprint('auth', __name__)
+auth_bp = Blueprint("auth", __name__)
 
 
-@auth_bp.route('/logout')
+@auth_bp.route("/logout")
 def logout():
-    session.pop('steam_id', None)
+    session.pop("steam_id", None)
     g.user = None
-    return redirect(oid.get_next_url())
+    return redirect("/")
 
 
-@auth_bp.route('/login')
-@oid.loginhandler
+@auth_bp.route("/login", methods=["GET"])
 def login():
     if g.user is not None:
-        return redirect(oid.get_next_url())
-    return oid.try_login('http://steamcommunity.com/openid')
-
-
-@oid.after_login
-def create_or_login(resp):
-    match = _steam_id_re.search(resp.identity_url)
-    g.user = Player.get_or_create(match.group(1))
-    session['steam_id'] = g.user.steam_id
-    return redirect('/')
+        return redirect("/")
+    if request.args.get("openid.ns"):
+        returnData = request.values
+        steamLogin = SteamSignIn()
+        steam_id = steamLogin.ValidateResults(returnData)
+        g.user = Player.get_or_create(steam_id)
+        session["steam_id"] = steam_id
+        return redirect("/")
+    else:
+        sl = SteamSignIn()
+        return sl.RedirectUser(sl.ConstructURL(request.base_url))

@@ -1,18 +1,13 @@
 from flask import jsonify
 
-from flask_openid import OpenID
-
 from gleague import core
 from gleague import admin
-
-oid = OpenID()
 
 
 def create_app(name=__name__):
     app = core.create_app(name)
     for e in [401, 403, 404, 500]:
         app.errorhandler(e)(handle_error)
-    oid.init_app(app)
     admin.init_admin(app)
     from gleague.api.matches import matches_bp
     from gleague.api.team_seeds import team_seeds_bp
