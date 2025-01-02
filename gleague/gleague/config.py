@@ -50,7 +50,7 @@ class gleague_frontend(BaseConfig):
     )
     SITE_NAME = environ.get("SITE_NAME", "GENKSTAleague")
     SITE_ADDRESS = environ.get("SITE_ADDRESS", "localhost")
-    SITE_PROTOCOL = environ.get("SITE_PROTOCOL", "HTTPS")
+    SITE_PROTOCOL = environ.get("SITE_PROTOCOL", "https")
     TEAM_BUILDER_PREVIEW_BACKGROUND = environ.get("TEAM_BUILDER_PREVIEW_BACKGROUND", "team_builder_preview_bg.jpg")
 
 

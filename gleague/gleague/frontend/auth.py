@@ -3,6 +3,7 @@ from flask import redirect
 from flask import Blueprint
 from flask import g
 from flask import session
+from flask import current_app
 from pysteamsignin.steamsignin import SteamSignIn
 
 from gleague.models import Player
@@ -22,13 +23,14 @@ def logout():
 def login():
     if g.user is not None:
         return redirect("/")
+    sl = SteamSignIn()
     if request.args.get("openid.ns"):
         returnData = request.values
-        steamLogin = SteamSignIn()
-        steam_id = steamLogin.ValidateResults(returnData)
-        g.user = Player.get_or_create(steam_id)
-        session["steam_id"] = steam_id
-        return redirect("/")
-    else:
-        sl = SteamSignIn()
-        return sl.RedirectUser(sl.ConstructURL(request.base_url))
+        steam_id = sl.ValidateResults(returnData)
+        if steam_id:
+            g.user = Player.get_or_create(steam_id)
+            session["steam_id"] = steam_id
+            return redirect("/")
+    url = request.base_url
+    url = url.replace('http://', current_app.config.get("SITE_PROTOCOL") + "://")
+    return sl.RedirectUser(sl.ConstructURL(url))
