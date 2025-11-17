@@ -17,6 +17,7 @@ from sqlalchemy.schema import CheckConstraint
 from sqlalchemy.schema import UniqueConstraint
 from sqlalchemy_utils.types import ChoiceType
 from werkzeug.utils import cached_property
+from flask import current_app
 
 from gleague.core import db
 from gleague.utils.position import Position
@@ -42,9 +43,10 @@ class PlayerMatchItem(db.Model):
 
     @cached_property
     def image_url(self):
+        protocol = current_app.config["SITE_PROTOCOL"]
         return (
-            "http://cdn.dota2.com/apps/dota2/images/items/%s_lg.png"
-            % self.name.replace("item_", "")
+            "%s://cdn.dota2.com/apps/dota2/images/items/%s_lg.png"
+            % (protocol, self.name.replace("item_", ""))
         )
 
 

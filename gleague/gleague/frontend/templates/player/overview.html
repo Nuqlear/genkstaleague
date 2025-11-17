@@ -101,7 +101,7 @@
                         {% for s in signature_heroes %}
                             <tr hero={{ s.hero }} class="clickable">
                                 <td><img class="steam_img"
-                                         src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png></td>
+                                         src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png></td>
                                 <td>{{ s.played }}</td>
                                 <td>{{ '%i' % s.winrate }}%</td>
                                 <td>{{ macro.render_win_loss(s.win_loss) }}</td>
@@ -299,7 +299,7 @@
                         <td>{{ s.match.season.number }}</td>
                         <td class="avatar_table">
                             <img class="steam_img"
-                                 src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
+                                 src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png>
                         </td>
                         <td class="start_time">{{ s.match.start_time }}</td>
                         <td>{{ format_duration(s.match.duration) }}</td>

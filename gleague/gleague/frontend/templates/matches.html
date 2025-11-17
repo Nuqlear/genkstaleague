@@ -43,7 +43,7 @@
                                     </td>
                                     <td>
                                         <img class="steam_img"
-                                             src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_lg.png>
+                                             src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_lg.png>
                                     </td>
                                 </tr>
                             {% endfor %}
@@ -104,7 +104,7 @@
                                 <tr>
                                     <td>
                                         <img class="steam_img"
-                                             src=http://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_lg.png>
+                                             src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ p.hero }}_lg.png>
                                     </td>
                                     <td>
                                         {% if p.season_stats.player.avatar_medium %}
