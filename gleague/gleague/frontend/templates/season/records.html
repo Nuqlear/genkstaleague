@@ -27,7 +27,7 @@
                 {% for hero in list_ %}
                 <tr>
                     <td><img class="steam_img"
-                            src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ hero.hero_name }}_lg.png>
+                            src={{ config.SITE_PROTOCOL }}://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/{{ hero.hero_name }}.png>
                     </td>
                     <td>{{ hero.pick_count }}</td>
                     <td>{{ hero.ban_count }}</td>
@@ -182,7 +182,7 @@
                                 <td><a href="{{ url_for('players.overview', steam_id=record.player.steam_id) }}"
                                         class="link_alt">{{ record.player.nickname }}</a></td>
                                 <td><img class="steam_img"
-                                        src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ record.hero }}_lg.png>
+                                        src={{ config.SITE_PROTOCOL }}://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/{{ record.hero }}.png>
                                         </td> <td>{{ record.value }}</td>
                             </tr>
                             {% endfor %}

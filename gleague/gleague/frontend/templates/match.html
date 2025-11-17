@@ -40,7 +40,7 @@
                     {% endif %}
                 </td>
                 <td style="text-align:left" class="avatar_table">
-                    <img class="steam_img" src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png> </td>
+                    <img class="steam_img" src={{ config.SITE_PROTOCOL }}://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/{{ s.hero }}.png> </td>
                         <td>{{ s.position.value }}, {{ s.role.value }}</td>
                 <td>{{ s.early_last_hits }}</td>
                 <td>{{ s.early_denies }}</td>
@@ -111,7 +111,7 @@
                         </td>
                         <td style="text-align:left" class="avatar_table">
                             <img class="steam_img"
-                                src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png> </td>
+                                src={{ config.SITE_PROTOCOL }}://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/{{ s.hero }}.png> </td>
                                 <td>{{ s.level }}</td>
                         <td>{{ s.kills }}</td>
                         <td>{{ s.deaths }}</td>
@@ -165,7 +165,7 @@
                     {% if is_radiant and ban_pick.is_radiant or not is_radiant and not ban_pick.is_radiant %}
                     <td class="text-center">
                         <img class="steam_img"
-                            src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ ban_pick.hero_img }}_lg.png> </td>
+                            src={{ config.SITE_PROTOCOL }}://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/{{ ban_pick.hero_img }}.png> </td>
                             {% endif %} {% endfor %} </tr> <tr
                             class="{% if is_radiant %}radiant{% else %}dire{% endif %}_table">
                         {% for ban_pick in match.cm_picks_bans %}

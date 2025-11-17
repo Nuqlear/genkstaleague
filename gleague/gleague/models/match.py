@@ -45,7 +45,7 @@ class PlayerMatchItem(db.Model):
     def image_url(self):
         protocol = current_app.config["SITE_PROTOCOL"]
         return (
-            "%s://cdn.dota2.com/apps/dota2/images/items/%s_lg.png"
+            "%s://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/%s.png"
             % (protocol, self.name.replace("item_", ""))
         )
 

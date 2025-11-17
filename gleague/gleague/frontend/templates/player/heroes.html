@@ -54,7 +54,7 @@
                 {% for s in heroes_stats %}
                     <tr hero={{ s.hero }}>
                         <td><img class="steam_img"
-                                 src={{ config.SITE_PROTOCOL }}://cdn.dota2.com/apps/dota2/images/heroes/{{ s.hero }}_lg.png></td>
+                                 src={{ config.SITE_PROTOCOL }}://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/{{ s.hero }}.png></td>
                         <td>{{ s.played }}</td>
                         <td>{{ '%i' % s.winrate }}%</td>
                         <td>{{ s.pts_diff }}</td>
