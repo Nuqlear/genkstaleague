@@ -121,7 +121,9 @@ var heroesMap = map[int32]string{
 	126: "npc_dota_hero_void_spirit",
 	128: "npc_dota_hero_snapfire",
 	129: "npc_dota_hero_mars",
+	131: "npc_dota_hero_ringmaster",
 	135: "npc_dota_hero_dawnbreaker",
 	136: "npc_dota_hero_marci",
 	137: "npc_dota_hero_primal_beast",
-	138: "npc_dota_hero_muerta"}
+	138: "npc_dota_hero_muerta",
+	145: "npc_dota_hero_kez"}
