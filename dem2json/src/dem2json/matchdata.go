@@ -184,9 +184,7 @@ func (matchParser *MatchParser) pull_CDOTA_PlayerResource(entity *manta.Entity) 
 				matchPlayerData.AccountId -= 61197960265728
 			}
 			fetchFrom = "m_vecPlayerTeamData.000" + strconv.Itoa(count)
-			if result, ok := entity.GetInt32(fetchFrom + ".m_nSelectedHeroID"); ok {
-				matchPlayerData.HeroId = result
-			}
+			matchPlayerData.HeroId = getHeroId(entity, fetchFrom)
 			if result, ok := entity.GetInt32(fetchFrom + ".m_iKills"); ok {
 				matchPlayerData.Kills = result
 			}
@@ -280,6 +278,17 @@ func getRealCords(entity *manta.Entity) (realX uint64, realY uint64) {
 	realX = (cellX-DefaultOffsetX)*CellSize + uint64(offsetX)
 	realY = (cellY-DefaultOffsetY)*CellSize + uint64(offsetY)
 	return
+}
+
+func getHeroId(entity *manta.Entity, fetchFrom string) int32 {
+	if heroId, ok := entity.GetUint32(fetchFrom + ".m_nSelectedHeroID"); ok {
+		heroId = heroId / 2
+		return int32(heroId)
+	} else {
+		// fallback for older replays
+		heroId, _ := entity.GetInt32("m_iPlayerID")
+		return heroId
+	}
 }
 
 func getPlayerId(entity *manta.Entity) uint32 {
