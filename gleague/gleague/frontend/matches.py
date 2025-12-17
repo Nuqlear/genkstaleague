@@ -17,6 +17,7 @@ from gleague.core import cache
 from gleague.models import Match
 from gleague.models import Season
 from gleague.models import TeamSeed
+from gleague.models import PlayerMatchStats
 from gleague.models.queries.match_analytic import get_teams_stats_history
 from gleague.team_builder import TeamBuilderService
 from gleague.team_builder import get_teams_image
@@ -46,10 +47,37 @@ def matches_preview():
     if not page.isdigit():
         abort(400)
     page = int(page)
-    matches = Match.query.order_by(desc(Match.id)).paginate(
+
+    # Optional filters: by season number and hero name
+    matches_query = Match.query
+
+    season_number = request.args.get("season")
+    season = None
+    if season_number:
+        if not season_number.isdigit():
+            abort(400)
+        season = Season.query.filter(Season.number == int(season_number)).first()
+        if not season:
+            abort(404)
+        matches_query = matches_query.filter(Match.season_id == season.id)
+
+    hero = request.args.get("hero")
+    if hero:
+        matches_query = (
+            matches_query.join(PlayerMatchStats).filter(
+                PlayerMatchStats.hero == hero
+            )
+        ).distinct()
+
+    matches = matches_query.order_by(desc(Match.id)).paginate(
         page, current_app.config["HISTORY_MATCHES_PER_PAGE"], True
     )
-    return render_template("/matches.html", matches=matches)
+    return render_template(
+        "/matches.html",
+        matches=matches,
+        season=season_number,
+        hero=hero,
+    )
 
 
 @matches_bp.route("/team_builder", methods=["GET", "POST"])

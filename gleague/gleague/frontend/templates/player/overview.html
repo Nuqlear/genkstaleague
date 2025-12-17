@@ -23,12 +23,12 @@
     </thead>
     <tbody>
     {% for tm in team_mates %}
-        <tr>
+        <tr class="team-mate-row clickable" data-player="{{ tm.player_2.steam_id }}">
             <td>
                 <img class="steam_img" src={{ tm.player_2.avatar_medium }}>
             </td>
             <td>
-                <a href="{{ url_for('players.overview', steam_id=tm.player_2.steam_id) }}">
+                <a href="{{ url_for('players.overview', steam_id=tm.player_2.steam_id, season=selected_season_param) }}">
                     {{ tm.player_2.nickname }}
                 </a>
             </td>
@@ -56,12 +56,12 @@
     </thead>
     <tbody>
     {% for op in opponenets %}
-        <tr>
+        <tr class="opponent-row clickable" data-player="{{ op.player.steam_id }}">
             <td>
                 <img class="steam_img" src={{ op.player.avatar_medium }}>
             </td>
             <td>
-                <a href="{{ url_for('players.overview', steam_id=op.player.steam_id) }}">
+                <a href="{{ url_for('players.overview', steam_id=op.player.steam_id, season=selected_season_param) }}">
                     {{ op.player.nickname }}
                 </a>
             </td>
@@ -83,7 +83,7 @@
         <div class="col-6">
             <div class="card profile-row-1">
                 <div class="card-header">
-                    <a href="{{ url_for('players.heroes', steam_id=player.steam_id) }}" target="_blank">Signature Heroes&nbsp;<i class="fas fa-link"></i></a>
+                    <a href="{{ url_for('players.heroes', steam_id=player.steam_id, season=selected_season_param) }}" target="_blank">Signature Heroes&nbsp;<i class="fas fa-link"></i></a>
                 </div>
                 <div class="card-body">
                     <table class="table table-sm table-borderless table-hover">
@@ -99,7 +99,8 @@
                         </thead>
                         <tbody id="signature_heroes">
                         {% for s in signature_heroes %}
-                            <tr hero={{ s.hero }} class="clickable">
+                            <tr class="clickable signature-hero-row"
+                                data-hero="{{ s.hero }}">
                                 <td><img class="steam_img"
                                          src={{ config.SITE_PROTOCOL }}://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/{{ s.hero }}.png></td>
                                 <td>{{ s.played }}</td>
@@ -119,7 +120,7 @@
 
             {% macro render_playstyle(ps) %}
                 {% if ps %}
-                    <tr>
+                    <tr class="playstyle-row clickable" data-role="{{ ps.name }}">
                         <td>{{ ps.name }}</td>
                         <td>{{ ps.played }}</td>
                         <td>{{ '%i' % ps.winrate }}%</td>
@@ -168,7 +169,7 @@
 
             <div class="card profile-row-1">
                 <div class="card-header">
-                    <a href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='win_loss') }}" target="_blank">
+                    <a href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='win_loss', season=selected_season_param) }}" target="_blank">
                         Best Teammates&nbsp;<i class="fas fa-link"></i>
                     </a>
                 </div>
@@ -179,7 +180,7 @@
 
             <div class="card ">
                 <div class="card-header">
-                    <a href="{{ url_for('players.opponents', steam_id=player.steam_id, sort='win_loss') }}" target="_blank">
+                    <a href="{{ url_for('players.opponents', steam_id=player.steam_id, sort='win_loss', season=selected_season_param) }}" target="_blank">
                         Free Pts (Often Wins against)&nbsp;<i class="fas fa-link"></i>
                     </a>
                 </div>
@@ -203,7 +204,7 @@
 
             <div class="card ">
                 <div class="card-header">
-                    <a href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='win_loss', desc='no') }}" target="_blank">
+                    <a href="{{ url_for('players.teammates', steam_id=player.steam_id, sort='win_loss', desc='no', season=selected_season_param) }}" target="_blank">
                         Worst Teammates&nbsp;<i class="fas fa-link"></i>
                     </a>
                 </div>
@@ -214,7 +215,7 @@
 
             <div class="card ">
                 <div class="card-header">
-                    <a href="{{ url_for('players.opponents', steam_id=player.steam_id, sort='win_loss', desc='no') }}" target="_blank">
+                    <a href="{{ url_for('players.opponents', steam_id=player.steam_id, sort='win_loss', desc='no', season=selected_season_param) }}" target="_blank">
                         Personal Nightmare (Often Losses to)&nbsp;<i class="fas fa-link"></i>
                     </a>
                 </div>
@@ -238,8 +239,10 @@
                         </thead>
                         <tbody>
                         {% for ss in player.season_stats %}
-                            <tr>
-                                <td>{{ ss.season.number }}</td>
+                            <tr class="season-row clickable" data-season="{{ ss.season.number }}">
+                                <td>
+                                    {{ ss.season.number }}
+                                </td>
                                 <td>{{ ss.wins }} / {{ ss.losses }}</td>
                                 <td>{{ ss.pts }}</td>
                             </tr>
@@ -255,7 +258,7 @@
         <div class="col-12">
             <div class="card">
                 <div class="card-header">
-                    <a href="{{ url_for('players.matches', steam_id=player.steam_id) }}" target="_blank">Matches&nbsp;<i class="fas fa-link"></i></a>
+                    <a href="{{ url_for('players.matches', steam_id=player.steam_id, season=selected_season_param) }}" target="_blank">Matches&nbsp;<i class="fas fa-link"></i></a>
                 </div>
                 <div class="card-body">
                     <table id="player_matches" class="table table-sm">
@@ -361,9 +364,70 @@
         $('.start_time').each(function() {
             $(this).html(moment(moment.unix($(this).html())).format('MMMM Do YYYY, h:mm:ss a'));
         });
-        $('#signature_heroes tr').each(function() {
+        // Signature heroes -> matches with this hero (respect season filter)
+        $('#signature_heroes tr.signature-hero-row').each(function() {
             $(this).click(function() {
-                window.location.href = '/players/{{ player.steam_id }}/matches?hero=' + $(this).attr('hero');
+                var url = "{{ url_for('players.matches', steam_id=player.steam_id) }}";
+                var params = [];
+                {% if selected_season_param %}
+                params.push("season={{ selected_season_param }}");
+                {% endif %}
+                params.push("hero=" + $(this).data('hero'));
+                window.location.href = url + "?" + params.join("&");
+            });
+        });
+
+        // Playstyle rows -> matches with this role
+        $('tr.playstyle-row').each(function() {
+            $(this).click(function() {
+                var url = "{{ url_for('players.matches', steam_id=player.steam_id) }}";
+                var params = [];
+                {% if selected_season_param %}
+                params.push("season={{ selected_season_param }}");
+                {% endif %}
+                params.push("role=" + encodeURIComponent($(this).data('role')));
+                window.location.href = url + "?" + params.join("&");
+            });
+        });
+
+        // Best / worst teammates -> matches with this teammate
+        $('tr.team-mate-row').each(function() {
+            $(this).click(function(e) {
+                if ($(e.target).closest('a').length) {
+                    return;
+                }
+                var url = "{{ url_for('players.matches', steam_id=player.steam_id) }}";
+                var params = [];
+                {% if selected_season_param %}
+                params.push("season={{ selected_season_param }}");
+                {% endif %}
+                params.push("teammate=" + $(this).data('player'));
+                window.location.href = url + "?" + params.join("&");
+            });
+        });
+
+        // Free Pts / Personal Nightmare -> matches vs this opponent
+        $('tr.opponent-row').each(function() {
+            $(this).click(function(e) {
+                if ($(e.target).closest('a').length) {
+                    return;
+                }
+                var url = "{{ url_for('players.matches', steam_id=player.steam_id) }}";
+                var params = [];
+                {% if selected_season_param %}
+                params.push("season={{ selected_season_param }}");
+                {% endif %}
+                params.push("opponent=" + $(this).data('player'));
+                window.location.href = url + "?" + params.join("&");
+            });
+        });
+
+        // Seasons played -> matches from this season
+        $('tr.season-row').each(function() {
+            $(this).click(function() {
+                var url = "{{ url_for('players.matches', steam_id=player.steam_id) }}";
+                var params = ["season=" + $(this).data('season')];
+                window.location.href = url + "?" + params.join("&");
             });
         });
         $('#player_matches tbody > tr').each(function() {

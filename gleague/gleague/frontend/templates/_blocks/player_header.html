@@ -1,22 +1,68 @@
-<ul class="nav nav-tabs bg-white">
-    <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'overview' else None }}"
-           href="{{ url_for('players.overview', steam_id=player.steam_id) }}">Overview</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'heroes' else None }}"
-           href="{{ url_for('players.heroes', steam_id=player.steam_id) }}">Heroes</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'matches' else None }}"
-           href="{{ url_for('players.matches', steam_id=player.steam_id) }}">Matches</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'teammates' else None }}"
-           href="{{ url_for('players.teammates', steam_id=player.steam_id) }}">Teammates</a>
-    </li>
-    <li class="nav-item">
-        <a class="nav-link {{ 'active' if endpoint[1] == 'opponents' else None }}"
-           href="{{ url_for('players.opponents', steam_id=player.steam_id) }}">Opponents</a>
-    </li>
-</ul>
+<div class="d-flex justify-content-between align-items-center bg-white">
+    <ul class="nav nav-tabs">
+        {% set season_arg = selected_season_param %}
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if endpoint[1] == 'overview' else None }}"
+               href="{{ url_for('players.overview', steam_id=player.steam_id, season=season_arg) }}">Overview</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if endpoint[1] == 'heroes' else None }}"
+               href="{{ url_for('players.heroes', steam_id=player.steam_id, season=season_arg) }}">Heroes</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if endpoint[1] == 'matches' else None }}"
+               href="{{ url_for('players.matches', steam_id=player.steam_id, season=season_arg) }}">Matches</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if endpoint[1] == 'teammates' else None }}"
+               href="{{ url_for('players.teammates', steam_id=player.steam_id, season=season_arg) }}">Teammates</a>
+        </li>
+        <li class="nav-item">
+            <a class="nav-link {{ 'active' if endpoint[1] == 'opponents' else None }}"
+               href="{{ url_for('players.opponents', steam_id=player.steam_id, season=season_arg) }}">Opponents</a>
+        </li>
+    </ul>
+    <div class="form-inline mr-3">
+        <label for="season-select" class="mr-2 mb-0">Season:</label>
+        <select id="season-select" class="form-control form-control-sm">
+            <option value=""
+                {% if not selected_season_param and not is_overall %}selected{% endif %}>
+                Current
+            </option>
+            <option value="overall"
+                {% if is_overall %}selected{% endif %}>
+                Overall
+            </option>
+            {% for s in seasons %}
+                <option value="{{ s.number }}"
+                    {% if selected_season_number == s.number %}selected{% endif %}>
+                    Season #{{ s.number }}
+                </option>
+            {% endfor %}
+        </select>
+    </div>
+</div>
+<script>
+    (function() {
+        var select = document.getElementById('season-select');
+        if (!select) return;
+        select.addEventListener('change', function() {
+            var season = this.value;
+            var urls = {
+                overview: "{{ url_for('players.overview', steam_id=player.steam_id) }}",
+                heroes: "{{ url_for('players.heroes', steam_id=player.steam_id) }}",
+                matches: "{{ url_for('players.matches', steam_id=player.steam_id) }}",
+                teammates: "{{ url_for('players.teammates', steam_id=player.steam_id) }}",
+                opponents: "{{ url_for('players.opponents', steam_id=player.steam_id) }}"
+            };
+            var current = "{{ endpoint[1] }}";
+            var baseUrl = urls[current] || urls.overview;
+            var newUrl = baseUrl;
+            if (season) {
+                var sep = baseUrl.indexOf('?') === -1 ? '?' : '&';
+                newUrl = baseUrl + sep + 'season=' + encodeURIComponent(season);
+            }
+            window.location.href = newUrl;
+        });
+    })();
+</script>

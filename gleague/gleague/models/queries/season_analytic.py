@@ -342,28 +342,60 @@ def get_signature_teammates(
     ss2 = SeasonStats.__table__.alias()
     pms1 = PlayerMatchStats.__table__.alias()
     pms2 = PlayerMatchStats.__table__.alias()
+    match_join_condition = Match.id == pms1.c.match_id
+    if season_id is not None:
+        match_join_condition = and_(
+            match_join_condition,
+            Match.season_id == season_id,
+        )
+
+    steam_id_1_expr = func.least(ss1.c.steam_id, ss2.c.steam_id)
+    steam_id_2_expr = func.greatest(ss1.c.steam_id, ss2.c.steam_id)
+
+    games_played_expr = func.count(pms1.c.id).label("games_played")
+    winrate_expr = (
+        100
+        * func.sum(case([(pms1.c.pts_diff > 0, 1)], else_=0))
+        / func.count(pms1.c.id)
+    ).label("winrate")
+    win_loss_expr = func.sum(
+        case(
+            [
+                (pms1.c.pts_diff > 0, 1),
+                (pms1.c.pts_diff < 0, -1),
+            ],
+            else_=0,
+        )
+    ).label("win_loss")
+
+    pts_diff_1_expr = func.sum(
+        case(
+            [
+                (ss1.c.steam_id <= ss2.c.steam_id, pms1.c.pts_diff),
+            ],
+            else_=pms2.c.pts_diff,
+        )
+    ).label("pts_diff_1")
+
+    pts_diff_2_expr = func.sum(
+        case(
+            [
+                (ss1.c.steam_id <= ss2.c.steam_id, pms2.c.pts_diff),
+            ],
+            else_=pms1.c.pts_diff,
+        )
+    ).label("pts_diff_2")
+
     query = (
         select(
             [
-                ss1.c.steam_id.label("steam_id_1"),
-                ss2.c.steam_id.label("steam_id_2"),
-                func.count(pms1.c.id).label("games_played"),
-                (
-                    100
-                    * func.sum(case([(pms1.c.pts_diff > 0, 1)], else_=0))
-                    / func.count(pms1.c.id)
-                ).label("winrate"),
-                func.sum(
-                    case(
-                        [
-                            (pms1.c.pts_diff > 0, 1),
-                            (pms1.c.pts_diff < 0, -1),
-                        ],
-                        else_=0,
-                    )
-                ).label("win_loss"),
-                func.sum(pms1.c.pts_diff).label("pts_diff_1"),
-                func.sum(pms2.c.pts_diff).label("pts_diff_2"),
+                steam_id_1_expr.label("steam_id_1"),
+                steam_id_2_expr.label("steam_id_2"),
+                games_played_expr,
+                winrate_expr,
+                win_loss_expr,
+                pts_diff_1_expr,
+                pts_diff_2_expr,
             ]
         )
         .select_from(
@@ -377,10 +409,7 @@ def get_signature_teammates(
             )
             .join(
                 Match,
-                and_(
-                    Match.id == pms1.c.match_id,
-                    Match.season_id == season_id,
-                ),
+                match_join_condition,
             )
             .join(
                 ss1,
@@ -391,15 +420,9 @@ def get_signature_teammates(
                 ss2.c.id == pms2.c.season_stats_id,
             )
         )
-        .group_by(ss1.c.steam_id, ss2.c.steam_id)
+        .group_by(steam_id_1_expr, steam_id_2_expr)
     )
-    if player_id is not None:
-        query = query.where(
-            or_(
-                ss1.c.steam_id == player_id,
-                ss2.c.steam_id == player_id,
-            )
-        )
+
     pts_gain_cte = query.cte()
 
     p1 = aliased(Player)
@@ -418,6 +441,14 @@ def get_signature_teammates(
             p2, pts_gain_cte.c.steam_id_2 == p2.steam_id
         ),
     )
+
+    if player_id is not None:
+        query = query.filter(
+            or_(
+                pts_gain_cte.c.steam_id_1 == player_id,
+                pts_gain_cte.c.steam_id_2 == player_id,
+            )
+        )
 
     order_columns = [pts_gain_cte.c.win_loss, pts_gain_cte.c.winrate]
     if order == SignatureTeammatesOrder.pts_diff:
@@ -474,7 +505,7 @@ def get_signature_teammates(
             winrate=r[3],
             win_loss=r[4],
             pts_diff=(r[5] if is_player_first(r) else r[6]),
-            pts_diff_2=(r[5] if is_player_first(r) else r[6]),
+            pts_diff_2=(r[6] if is_player_first(r) else r[5]),
         )
         for r in query
     ]
@@ -509,6 +540,12 @@ def get_signature_opponents(
     ss2 = SeasonStats.__table__.alias()
     pms1 = PlayerMatchStats.__table__.alias()
     pms2 = PlayerMatchStats.__table__.alias()
+    match_join_condition = Match.id == pms1.c.match_id
+    if season_id is not None:
+        match_join_condition = and_(
+            match_join_condition,
+            Match.season_id == season_id,
+        )
     query = (
         select(
             [
@@ -588,10 +625,7 @@ def get_signature_opponents(
             )
             .join(
                 Match,
-                and_(
-                    Match.id == pms1.c.match_id,
-                    Match.season_id == season_id,
-                ),
+                match_join_condition,
             )
             .join(
                 ss1,
@@ -662,6 +696,13 @@ def get_heroes(
     is_desc: bool = True,
     limit: int = 3,
 ) -> List[SeasonHero]:
+    """
+    Return hero stats for a season.
+
+    Uses played heroes (PlayerMatchStats) as the primary source so that
+    seasons without parsed draft data (CMPicksBans) still have statistics.
+    Ban information is joined from CMPicksBans when available.
+    """
     played_cte = query_played_heroes(season_id=season_id).cte()
 
     banned_cte = (
@@ -685,7 +726,7 @@ def get_heroes(
         )
     ).cte()
 
-    order = {
+    order_columns = {
         "hero": played_cte.c.hero,
         "pts_diff": played_cte.c.pts_diff,
         "pick_count": played_cte.c.played,
@@ -693,7 +734,9 @@ def get_heroes(
         "win_loss": played_cte.c.win_loss,
         "kda": played_cte.c.kda,
         "ban_count": banned_cte.c.cnt,
-    }[order_by]
+    }
+
+    order = order_columns[order_by]
 
     if is_desc:
         order = desc(order)
@@ -702,26 +745,8 @@ def get_heroes(
         order = nullslast(order)
 
     query = (
-        CMPicksBans.query.join(
-            Match,
-            and_(
-                Match.id == CMPicksBans.match_id,
-                Match.season_id == season_id,
-            ),
-        )
-        .outerjoin(
-            banned_cte,
-            and_(
-                banned_cte.c.hero == CMPicksBans.hero,
-                banned_cte.c.is_pick.is_(False),
-            ),
-        )
-        .join(
-            played_cte,
-            func.concat("npc_dota_hero_", played_cte.c.hero) == CMPicksBans.hero,
-        )
-        .with_entities(
-            CMPicksBans.hero,
+        db.session.query(
+            played_cte.c.hero.label("hero"),
             played_cte.c.played.label("pick_count"),
             banned_cte.c.cnt.label("ban_count"),
             played_cte.c.kda,
@@ -729,14 +754,24 @@ def get_heroes(
             played_cte.c.win_loss,
             played_cte.c.pts_diff,
         )
+        .select_from(played_cte)
+        .outerjoin(
+            banned_cte,
+            and_(
+                banned_cte.c.hero
+                == func.concat("npc_dota_hero_", played_cte.c.hero),
+                banned_cte.c.is_pick.is_(False),
+            ),
+        )
         .order_by(order)
-        .distinct()
-        .limit(limit)
     )
+
+    if limit is not None:
+        query = query.limit(limit)
 
     items = []
     for row in query:
-        hero_name = row.hero.replace("npc_dota_hero_", "")
+        hero_name = row.hero
         items.append(
             SeasonHero(
                 hero_name=hero_name,
@@ -938,6 +973,12 @@ class Playstyle:
 
 
 def _get_role_query(season_id, player_id, role):
+    season_filters = [
+        SeasonStats.id == PlayerMatchStats.season_stats_id,
+        SeasonStats.steam_id == player_id,
+    ]
+    if season_id is not None:
+        season_filters.append(SeasonStats.season_id == season_id)
     query = (
         PlayerMatchStats.query.join(
             Match,
@@ -948,11 +989,7 @@ def _get_role_query(season_id, player_id, role):
         )
         .join(
             SeasonStats,
-            and_(
-                SeasonStats.id == PlayerMatchStats.season_stats_id,
-                SeasonStats.season_id == season_id,
-                SeasonStats.steam_id == player_id,
-            ),
+            and_(*season_filters),
         )
         .join(
             Player,

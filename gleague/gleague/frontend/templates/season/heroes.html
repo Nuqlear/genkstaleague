@@ -66,13 +66,17 @@
                     </thead>
                     <tbody>
                     {% for h in in_season_heroes %}
-                    <tr>
+                    <tr class="season-hero-row"
+                        data-url="{{ url_for('matches.matches_preview', season=season_number, hero=h.hero_name) }}">
                         <td>
                             <img class="steam_img"
                         src={{ config.SITE_PROTOCOL }}://cdn.steamstatic.com/apps/dota2/images/dota_react/heroes/{{ h.hero_name }}.png>&nbsp;
                         </td>
                         <td>
-                            {{ h.hero_human_readable }}
+                            <a class="link_alt"
+                               href="{{ url_for('matches.matches_preview', season=season_number, hero=h.hero_name) }}">
+                                {{ h.hero_human_readable }}
+                            </a>
                         </td>
                         <td>{{ h.pick_count }}</td>
                         <td>{{ h.ban_count }}</td>
@@ -87,4 +91,17 @@
             </div>
         </div>
     </div>
+{% endblock %}
+
+{% block script %}
+    <script>
+        $(function () {
+            $('.season-hero-row').css('cursor', 'pointer').on('click', function (e) {
+                if (e.target.tagName.toLowerCase() === 'a') {
+                    return;
+                }
+                window.location = $(this).data('url');
+            });
+        });
+    </script>
 {% endblock %}

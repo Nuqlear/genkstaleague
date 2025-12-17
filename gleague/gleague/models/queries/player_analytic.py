@@ -7,12 +7,13 @@ from gleague.models import PlayerMatchStats
 from gleague.models import SeasonStats
 
 
-def get_pts_history(steam_id, season_id):
+def get_pts_history(steam_id, season_id=None):
+    filters = SeasonStats.steam_id == steam_id
+    if season_id is not None:
+        filters = and_(filters, SeasonStats.season_id == season_id)
     pts_seq = (
         PlayerMatchStats.query.join(SeasonStats)
-        .filter(
-            and_(SeasonStats.season_id == season_id, SeasonStats.steam_id == steam_id)
-        )
+        .filter(filters)
         .order_by(PlayerMatchStats.match_id)
         .values(PlayerMatchStats.old_pts + PlayerMatchStats.pts_diff)
     )
@@ -52,11 +53,14 @@ def get_heroes(steam_id, season_id=None):
     return query
 
 
-def get_rating_info(steam_id):
+def get_rating_info(steam_id, season_id=None):
+    filters = SeasonStats.steam_id == steam_id
+    if season_id is not None:
+        filters = and_(filters, SeasonStats.season_id == season_id)
     rating_info = (
         PlayerMatchRating.query.join(PlayerMatchStats)
         .join(SeasonStats)
-        .filter(SeasonStats.steam_id == steam_id)
+        .filter(filters)
         .with_entities(
             func.avg(PlayerMatchRating.rating), func.count(PlayerMatchRating.id)
         )

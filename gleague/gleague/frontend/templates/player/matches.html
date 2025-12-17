@@ -77,9 +77,9 @@
             </table>
 
             {% if hero_filter %}
-                {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id, hero=hero_filter) }}
+                {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id, hero=hero_filter, season=selected_season_param) }}
             {% else %}
-                {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id) }}
+                {{ macro.render_pagination(matches_stats, 'players.matches', steam_id=player.steam_id, season=selected_season_param) }}
             {% endif %}
         </div>
     </div>
