@@ -127,7 +127,7 @@
         </div>
     {% endfor %}
 
-    {{ macro.render_pagination(matches, 'matches.matches_preview')}}
+    {{ macro.render_pagination(matches, 'matches.matches_preview', season=season, hero=hero)}}
 
 {% endblock %}
 
